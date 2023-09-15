@@ -1,0 +1,29 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install libraries
+      run: sudo add-apt-repository universe && sudo apt update && sudo apt upgrade && sudo apt install curl && sudo apt-get install libcurl4-openssl-dev libjsoncpp-dev libfmt-dev libsqlite3-dev libgtest-dev googletest google-mock libgmock-dev libtbb-dev
+    - name: Building project
+      run: g++ -o ./build/Linux/InstallerDeepForge_Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -L ../../lib/  -lcurl -Wreturn-type -lsqlite3 -std=c++2a
+  # tests:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - name: Install libraries
+  #     run: sudo add-apt-repository universe && sudo apt update && sudo apt upgrade && sudo apt install curl && sudo apt-get install libcurl4-openssl-dev libjsoncpp-dev libfmt-dev libsqlite3-dev libgtest-dev googletest google-mock libgmock-dev libtbb-dev
+  #   - name: Make directory tests
+  #     run: mkdir tests
+  #   - name: Building tests
+  #     run: g++ ./src/tests/MainTest.cpp -o ./tests/MainTest -lsqlite3 -lcurl -lgtest -lgmock -pthread -std=c++2a
+  #   - name: Run tests
+  #     run: cd tests && sudo ./MainTest
