@@ -36,10 +36,12 @@
 #include <curl/curl.h>
 #include "../DatabaseConnect.cpp"
 #include <map>
+#include "zipper/unzipper.h"
 
 using namespace std;
 using namespace DB;
 using namespace Bar;
+using namespace zipper;
 
 namespace Linux
 {
@@ -154,6 +156,13 @@ namespace Linux
             {
                 filesystem::create_directory(fullPath);
             }
+        }
+        /* The `UnpackArchive` function takes two parameters: `path_from` and `path_to`. It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`. After extracting the contents, the function closes the `Unzipper` object.*/
+        int UnpackArchive(string path_from, string path_to)
+        {
+            Unzipper unzipper(path_from);
+            unzipper.extract(path_to);
+            unzipper.close();
         }
         void RebootSystem()
         {
