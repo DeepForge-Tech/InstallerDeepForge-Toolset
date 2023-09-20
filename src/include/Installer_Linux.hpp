@@ -103,13 +103,13 @@ namespace Linux
         {
             GetArchitectureOS();
             // Create temp folder
-            // MakeDirectory(NewTempFolder);
+            MakeDirectory(NewTempFolder);
             // system("mkdir /usr/bin/DeepForge");
             // system("mkdir /usr/bin/DeepForge/DeepForge-Toolset");
             // string Command = "mkdir /" + NewTempFolder;
             // system(Command.c_str());
             // Download database Versions.db
-            // Download(DB_URL, NewTempFolder);
+            Download(DB_URL, NewTempFolder);
             database.open(&DB_PATH);
         }
         void CommandManager();
