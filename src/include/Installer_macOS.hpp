@@ -49,6 +49,7 @@ namespace macOS
     string Architecture;
     float LastSize;
     float LastTotalSize;
+    double DownloadSpeed;
     string Answer;
     string NewApplicationFolder = "";
     const string NewTempFolder = NewApplicationFolder + "/Temp";
