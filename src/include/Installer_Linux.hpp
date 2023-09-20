@@ -125,6 +125,7 @@ namespace Linux
             // cout << symlinkPath << endl;
             // CreateHardLinkA(symlinkPath.c_str(), filePath.c_str(), NULL);
         }
+        /*The `MakeDirectory` function is responsible for creating a directory (folder) in the file system.*/
         void MakeDirectory(string dir)
         {
             string currentDir;

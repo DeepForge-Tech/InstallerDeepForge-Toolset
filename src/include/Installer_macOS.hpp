@@ -50,8 +50,8 @@ namespace macOS
     float LastSize;
     float LastTotalSize;
     string Answer;
-    const string NewApplicationFolder = "/usr/bin/DeepForge/DeepForge-Toolset";
-    const string NewTempFolder = NewApplicationFolder + "\\Temp";
+    const string NewApplicationFolder = "/Library/Containers/DeepForge/DeepForge-Toolset";
+    const string NewTempFolder = NewApplicationFolder + "/Temp";
     ProgressBar_v1 progressbar;
     const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
@@ -106,8 +106,8 @@ namespace macOS
     private:
         void CreateSymlink(string nameSymlink, string filePath)
         {
-            char *UserFolder = getenv("USER");
-            string symlinkPath = string(UserFolder) + "\\Desktop\\" + nameSymlink;
+//            char *UserFolder = getenv("USER");
+            string symlinkPath = "/Applications/Desktop/" + nameSymlink;
             string Command = "sudo ln -s " + filePath + " " + nameSymlink;
             system(Command.c_str());
             // cout << symlinkPath << endl;
