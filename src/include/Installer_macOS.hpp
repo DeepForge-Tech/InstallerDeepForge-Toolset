@@ -50,7 +50,7 @@ namespace macOS
     float LastSize;
     float LastTotalSize;
     string Answer;
-    const string NewApplicationFolder = "/Library/Containers/DeepForge/DeepForge-Toolset";
+    string NewApplicationFolder = "";
     const string NewTempFolder = NewApplicationFolder + "/Temp";
     ProgressBar_v1 progressbar;
     const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
@@ -99,6 +99,8 @@ namespace macOS
         Installer()
         {
             GetArchitectureOS();
+            char* UserFolder = getenv("HOME");
+            NewApplicationFolder = UserFolder + "/Library/Containers/DeepForge/DeepForge-Toolset";
         }
         void CommandManager();
         void InstallDeepForgeToolset(string channel);
@@ -106,7 +108,7 @@ namespace macOS
     private:
         void CreateSymlink(string nameSymlink, string filePath)
         {
-//            char *UserFolder = getenv("USER");
+            char *UserFolder = getenv("HOME");
             string symlinkPath = "/Applications/Desktop/" + nameSymlink;
             string Command = "sudo ln -s " + filePath + " " + nameSymlink;
             system(Command.c_str());
