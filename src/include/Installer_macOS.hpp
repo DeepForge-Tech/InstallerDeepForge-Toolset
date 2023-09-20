@@ -57,7 +57,7 @@ namespace macOS
     ProgressBar_v1 progressbar;
     const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
-    string DB_PATH = NewTempFolder + "/Versions.db";
+    string DB_PATH;
     string NameVersionTable = "macOSVersions";
     const string TrueVarious[3] = {"yes", "y", "1"};
     string InstallDelimiter = "========================================================";
@@ -107,6 +107,9 @@ namespace macOS
             char *UserFolder = getenv("HOME");
             NewApplicationFolder = string(UserFolder) + "/Library/Containers/DeepForge/DeepForge-Toolset";
             NewTempFolder = NewApplicationFolder + "/Temp";
+            DB_PATH = NewTempFolder + "/Versions.db";
+            string SetRulesCommand = "sudo -s chmod 777 " + string(UserFolder) + "/Library/Containers/";
+            system(SetRulesCommand.c_str());
             // Create temp folder
             MakeDirectory(NewTempFolder);
             // system("mkdir /usr/bin/DeepForge");
@@ -194,6 +197,7 @@ namespace macOS
                 string name = (url.substr(url.find_last_of("/")));
                 string filename = dir + "/" + name.replace(name.find("/"), 1, "");
                 FILE *file = fopen(filename.c_str(), "wb");
+                CURL *curl = curl_easy_init();
                 curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
                 curl_easy_setopt(curl, CURLOPT_NOPROGRESS, false);
                 curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, &CallbackProgress);
@@ -216,7 +220,7 @@ namespace macOS
                 cout << "" << endl;
                 return 200;
             }
-            catch (exception &error)
+            catch (exception& error)
             {
                 return 502;
             }
