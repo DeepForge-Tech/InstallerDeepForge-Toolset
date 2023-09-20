@@ -100,7 +100,7 @@ namespace macOS
         {
             GetArchitectureOS();
             char* UserFolder = getenv("HOME");
-            NewApplicationFolder = UserFolder + "/Library/Containers/DeepForge/DeepForge-Toolset";
+            NewApplicationFolder = string(UserFolder) + "/Library/Containers/DeepForge/DeepForge-Toolset";
         }
         void CommandManager();
         void InstallDeepForgeToolset(string channel);
