@@ -53,7 +53,7 @@ namespace macOS
     float LastTotalSize;
     string Answer;
     string NewApplicationFolder = "";
-    const string NewTempFolder = NewApplicationFolder + "/Temp";
+    string NewTempFolder;
     ProgressBar_v1 progressbar;
     const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
@@ -106,6 +106,7 @@ namespace macOS
             GetArchitectureOS();
             char *UserFolder = getenv("HOME");
             NewApplicationFolder = string(UserFolder) + "/Library/Containers/DeepForge/DeepForge-Toolset";
+            NewTempFolder = NewApplicationFolder + "/Temp";
             // Create temp folder
             MakeDirectory(NewTempFolder);
             // system("mkdir /usr/bin/DeepForge");
