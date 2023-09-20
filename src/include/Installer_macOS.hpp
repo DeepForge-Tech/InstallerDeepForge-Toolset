@@ -36,7 +36,7 @@
 #include <curl/curl.h>
 #include "../DatabaseConnect.cpp"
 #include <map>
-#include "zipper/zipper.h"
+#include "zipper/unzipper.h"
 
 using namespace std;
 using namespace DB;
@@ -51,22 +51,23 @@ namespace macOS
     string Architecture;
     float LastSize;
     float LastTotalSize;
-    double DownloadSpeed;
     string Answer;
     string NewApplicationFolder = "";
     const string NewTempFolder = NewApplicationFolder + "/Temp";
     ProgressBar_v1 progressbar;
-    Database database;
     const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
     string DB_PATH = NewTempFolder + "/Versions.db";
     string NameVersionTable = "macOSVersions";
     const string TrueVarious[3] = {"yes", "y", "1"};
     string InstallDelimiter = "========================================================";
+    string OS_NAME = "macOS";
     CURL *curl = curl_easy_init();
     CURLcode res;
+    float DownloadSpeed;
+    Database database;
 
-    // Function for calc percentage of download progresss 
+    // Function for calc percentage of download progresss
     int CallbackProgress(void *ptr, double TotalToDownload, double NowDownloaded, double TotalToUpload, double NowUploaded)
     {
         if (TotalToDownload <= 0.0)
@@ -96,14 +97,14 @@ namespace macOS
         size_t WriteProcess = fwrite(ptr, size, nmemb, stream);
         return WriteProcess;
     }
-    // Main class 
+    // Main class
     class Installer
     {
     public:
         Installer()
         {
             GetArchitectureOS();
-            char* UserFolder = getenv("HOME");
+            char *UserFolder = getenv("HOME");
             NewApplicationFolder = string(UserFolder) + "/Library/Containers/DeepForge/DeepForge-Toolset";
             // Create temp folder
             MakeDirectory(NewTempFolder);
@@ -113,7 +114,7 @@ namespace macOS
             // system(Command.c_str());
             // Download database Versions.db
             Download(DB_URL, NewTempFolder);
-            database.open();
+            database.open(&DB_PATH);
         }
         void CommandManager();
         void InstallDeepForgeToolset(string channel);
@@ -121,13 +122,14 @@ namespace macOS
     private:
         void CreateSymlink(string nameSymlink, string filePath)
         {
-            char *UserFolder = getenv("HOME");
-            string symlinkPath = "/Applications/Desktop/" + nameSymlink;
+            // char *UserFolder = getenv("USER");
+            string symlinkPath = "/Applications/" + nameSymlink;
             string Command = "sudo ln -s " + filePath + " " + nameSymlink;
             system(Command.c_str());
             // cout << symlinkPath << endl;
             // CreateHardLinkA(symlinkPath.c_str(), filePath.c_str(), NULL);
         }
+        /*The `MakeDirectory` function is responsible for creating a directory (folder) in the file system.*/
         void MakeDirectory(string dir)
         {
             string currentDir;
@@ -147,7 +149,7 @@ namespace macOS
                 }
                 else
                 {
-                    fullPath = "/" + currentDir + "/";
+                    fullPath = "/" + currentDir;
                 }
                 dir.erase(0, pos + delimiter.length());
             }
@@ -183,7 +185,8 @@ namespace macOS
             }
             return status;
         }
-        int Download(string url,string dir)
+
+        int Download(string url, string dir)
         {
             try
             {
@@ -209,8 +212,7 @@ namespace macOS
                         progressbar.Update(0.0, LastSize, LastTotalSize);
                     }
                 }
-                // Reset all variables and preferences
-                progressbar.ResetAll();
+                cout << "" << endl;
                 return 200;
             }
             catch (exception &error)
