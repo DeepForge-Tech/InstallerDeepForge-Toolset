@@ -114,15 +114,6 @@ namespace macOS
             system(Command.c_str());
             // Create temp folder
             MakeDirectory(NewTempFolder);
-            Download(ShellScript_URL,NewTempFolder);
-            string name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
-            string ShellScriptPath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
-            Command = "bash " + ShellScriptPath;
-            system(Command.c_str());
-            // system("mkdir /usr/bin/DeepForge");
-            // system("mkdir /usr/bin/DeepForge/DeepForge-Toolset");
-            // string Command = "mkdir /" + NewTempFolder;
-            // system(Command.c_str());
             // Download database Versions.db
             Download(DB_URL, NewTempFolder);
             database.open(&DB_PATH);
@@ -176,6 +167,17 @@ namespace macOS
             Unzipper unzipper(path_from);
             unzipper.extract(path_to);
             unzipper.close();
+        }
+        void InstallLibraries()
+        {
+            string name;
+            string ShellScriptPath;
+            string Command;
+            Download(ShellScript_URL,NewTempFolder);
+            name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
+            ShellScriptPath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
+            Command = "bash " + ShellScriptPath;
+            system(Command.c_str());
         }
         void RebootSystem()
         {

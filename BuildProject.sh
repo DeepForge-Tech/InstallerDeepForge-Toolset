@@ -106,7 +106,6 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
    cmake ../
    make
    find . -name "*.a" -exec mv "{}" ../../src/lib \;
-   find . -name "*.dylib" -exec mv "{}" ../../src/lib \;
    cd .. && cd ..
    sudo rm -rf ./zipper
    echo "==> Build of Zipper finished"
@@ -125,7 +124,7 @@ cd build
 mkdir $os
 cd ..
 echo "==> Building project"
-sudo g++ -o ./build/$os/InstallerDeepForge-Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -L ../../lib/ -L ./src/lib -lZipper  -lcurl -lsqlite3 -std=c++2a -Bstatic
+sudo clang++ -o ./build/$os/InstallerDeepForge-Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -L ./src/lib -lZipper  -lcurl -lsqlite3 -std=c++2a -Bstatic
 echo "==> Build of project finished"
 cd build
 cd $os

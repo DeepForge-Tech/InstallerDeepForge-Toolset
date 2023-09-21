@@ -52,6 +52,7 @@ namespace Linux
     float LastSize;
     float LastTotalSize;
     string Answer;
+    const string ShellScript_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries.sh";
     const string NewApplicationFolder = "/usr/bin/DeepForge/DeepForge-Toolset";
     const string NewTempFolder = NewApplicationFolder + "/Temp";
     ProgressBar_v1 progressbar;
@@ -163,6 +164,17 @@ namespace Linux
             Unzipper unzipper(path_from);
             unzipper.extract(path_to);
             unzipper.close();
+        }
+        void InstallLibraries()
+        {
+            string name;
+            string ShellScriptPath;
+            string Command;
+            Download(ShellScript_URL,NewTempFolder);
+            name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
+            ShellScriptPath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
+            Command = "bash " + ShellScriptPath;
+            system(Command.c_str());
         }
         void RebootSystem()
         {

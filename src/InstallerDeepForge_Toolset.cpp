@@ -27,14 +27,14 @@
 */
 // Checking the name of the operating system and importing the necessary libraries for this system
 #if defined(__linux__)
-    #include "include/Installer_Linux.hpp"
-    using namespace Linux;
+#include "include/Installer_Linux.hpp"
+using namespace Linux;
 #elif __APPLE__
-    #include "include/Installer_macOS.hpp"
-    using namespace macOS;
+#include "include/Installer_macOS.hpp"
+using namespace macOS;
 #elif _WIN32
-    #include "include/Installer_Windows.hpp"
-    using namespace Windows;
+#include "include/Installer_Windows.hpp"
+using namespace Windows;
 #endif
 
 Installer installer;
@@ -56,27 +56,33 @@ void Installer::InstallDeepForgeToolset(string channel)
     ApplicationURL = database.GetApplicationURL(NameVersionTable, channel, "Url", Architecture, version);
     result = Download(ApplicationURL, NewTempFolder);
     // result = 200;
-    if (result == 200)
+    switch (result)
     {
-        name = (ApplicationURL.substr(ApplicationURL.find_last_of("/")));
-        ArchivePath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
-        UnpackArchive(ArchivePath,NewApplicationFolder);
-        file_path = NewApplicationFolder + "/DeepForgeToolset";
-        CreateSymlink("DeepForgeToolset", file_path);
-        filesystem::remove(ArchivePath);
-        cout << "✅ DeepForge Toolset " << version << " successfully installed" << endl;
-        cout << InstallDelimiter << endl;
+        case 200:
+            name = (ApplicationURL.substr(ApplicationURL.find_last_of("/")));
+            ArchivePath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
+            UnpackArchive(ArchivePath, NewApplicationFolder);
+            #if defined(__linux__)
+                InstallLibraries();
+            #elif __APPLE__
+                InstallLibraries();
+            #endif
+            file_path = NewApplicationFolder + "/DeepForgeToolset";
+            CreateSymlink("DeepForgeToolset", file_path);
+            filesystem::remove(ArchivePath);
+            cout << "✅ DeepForge Toolset " << version << " successfully installed" << endl;
+            cout << InstallDelimiter << endl;
     }
     // CommandManager();
 }
 
 void Installer::CommandManager()
 {
-    try 
+    try
     {
-        map<int,string> EnumerateChannels;
-        map<string,string> Channels = database.GetAllVersionsFromDB(NameVersionTable, "Channel", Architecture);
-        int size = (sizeof(AllChannels)/sizeof(AllChannels[0]));
+        map<int, string> EnumerateChannels;
+        map<string, string> Channels = database.GetAllVersionsFromDB(NameVersionTable, "Channel", Architecture);
+        int size = (sizeof(AllChannels) / sizeof(AllChannels[0]));
         int n = 1;
         int defaultChannel = 1;
         for (int i = 0; i < size; i++)
@@ -85,7 +91,7 @@ void Installer::CommandManager()
             if (Channels.find(AllChannels[i]) != Channels.end())
             {
                 cout << n << ". " << AllChannels[i] << endl;
-                EnumerateChannels.insert(pair<int,string>(n,AllChannels[i]));
+                EnumerateChannels.insert(pair<int, string>(n, AllChannels[i]));
                 if (AllChannels[i] == "stable\\latest")
                 {
                     defaultChannel = n;
@@ -108,7 +114,7 @@ void Installer::CommandManager()
             }
         }
     }
-    catch (exception& error)
+    catch (exception &error)
     {
         CommandManager();
     }
