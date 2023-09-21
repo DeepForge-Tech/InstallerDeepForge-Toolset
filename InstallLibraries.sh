@@ -112,27 +112,3 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
    echo "==> Build of Zipper finished"
 fi
 echo "==> Libraries successfully installed"
-unameOut=$(uname -a)
-case "${unameOut}" in
-	Darwin*) 	os="macOS";;
-	Linux*)		os="Linux";;
-esac
-# Building
-echo "==> Building"
-sudo rm -rf ./build/Linux
-mkdir build
-cd build
-mkdir $os
-cd ..
-echo "==> Building project"
-sudo g++ -o ./build/$os/InstallerDeepForge-Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -L ../../lib/ -L ./src/lib -lZipper  -lcurl -lsqlite3 -std=c++2a -Bstatic
-echo "==> Build of project finished"
-cd build
-cd $os
-case "${unameOut}" in
-	Darwin*) 	./InstallerDeepForge-Toolset;;
-	Linux*)		sudo ./InstallerDeepForge-Toolset;;
-esac
-
-#echo "=================================="
-exit 0

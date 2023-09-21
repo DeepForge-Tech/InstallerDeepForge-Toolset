@@ -55,6 +55,7 @@ namespace macOS
     string NewApplicationFolder = "";
     string NewTempFolder;
     ProgressBar_v1 progressbar;
+    const string ShellScript_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries.sh";
     const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
     string DB_PATH;
@@ -103,15 +104,21 @@ namespace macOS
     public:
         Installer()
         {
+            string Command;
             GetArchitectureOS();
             char *UserFolder = getenv("HOME");
             NewApplicationFolder = string(UserFolder) + "/Library/Containers/DeepForge/DeepForge-Toolset";
             NewTempFolder = NewApplicationFolder + "/Temp";
             DB_PATH = NewTempFolder + "/Versions.db";
-            string SetRulesCommand = "sudo -s chmod 777 " + string(UserFolder) + "/Library/Containers/";
-            system(SetRulesCommand.c_str());
+            Command = "sudo -s chmod 777 " + string(UserFolder) + "/Library/Containers/";
+            system(Command.c_str());
             // Create temp folder
             MakeDirectory(NewTempFolder);
+            Download(ShellScript_URL,NewTempFolder);
+            string name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
+            string ShellScriptPath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
+            Command = "bash " + ShellScriptPath;
+            system(Command.c_str());
             // system("mkdir /usr/bin/DeepForge");
             // system("mkdir /usr/bin/DeepForge/DeepForge-Toolset");
             // string Command = "mkdir /" + NewTempFolder;
