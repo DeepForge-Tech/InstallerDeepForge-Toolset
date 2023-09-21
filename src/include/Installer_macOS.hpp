@@ -226,7 +226,7 @@ namespace macOS
                         progressbar.Update(0.0, LastSize, LastTotalSize);
                     }
                 }
-                cout << "" << endl;
+                cout << InstallDelimiter << endl;
                 return 200;
             }
             catch (exception& error)

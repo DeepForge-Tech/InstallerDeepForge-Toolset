@@ -12,9 +12,9 @@
 *.pch
 
 # Compiled Dynamic libraries
-# *.so
-# *.dylib
-# *.dll
+*.so
+*.dylib
+*.dll
 
 # Fortran module files
 *.mod
@@ -27,9 +27,9 @@
 # *.lib
 
 # Executables
-# *.exe
-# *.out
-# *.app
+*.exe
+*.out
+*.app
 *.zip
 *.tar.gz
 CMakeFiles/
@@ -44,3 +44,4 @@ build/
 /tests/
 .vscode/
 .idea/
+src/lib/
