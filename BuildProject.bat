@@ -1,5 +1,16 @@
 @echo off
 set arg_1 = %1
+echo -- Building library Zipper
+git clone --recursive https://github.com/sebastiandev/zipper.git
+cd zipper
+mkdir build
+cd build
+cmake  ../
+cmake --build .
+Xcopy .\*.a  .\src\lib\  /Y
+cd .. && cd ..
+del ./zipper
+echo - Zipper successfully builded
 echo -- Building project
 if exist .\build\Windows (
     if ERRORLEVEL 0 (

@@ -53,8 +53,8 @@ namespace Linux
     float LastTotalSize;
     string Answer;
     const string ShellScript_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries.sh";
-    const string NewApplicationFolder = "/usr/bin/DeepForge/DeepForge-Toolset";
-    const string NewTempFolder = NewApplicationFolder + "/Temp";
+    string NewApplicationFolder = "/usr/bin/DeepForge/DeepForge-Toolset";
+    string NewTempFolder = NewApplicationFolder + "/Temp";
     ProgressBar_v1 progressbar;
     const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
@@ -104,13 +104,17 @@ namespace Linux
     public:
         Installer()
         {
+            string Command;
+            system(Command.c_str());
             GetArchitectureOS();
+            char *UserFolder = getenv("HOME");
+            NewApplicationFolder = string(UserFolder) + "/Library/Containers/DeepForge/DeepForge-Toolset";
+            NewTempFolder = NewApplicationFolder + "/Temp";
+            DB_PATH = NewTempFolder + "/Versions.db";
+            Command = "sudo -s chmod 777 " + string(UserFolder) + "/Library/Containers/";
+            system(Command.c_str());
             // Create temp folder
             MakeDirectory(NewTempFolder);
-            // system("mkdir /usr/bin/DeepForge");
-            // system("mkdir /usr/bin/DeepForge/DeepForge-Toolset");
-            // string Command = "mkdir /" + NewTempFolder;
-            // system(Command.c_str());
             // Download database Versions.db
             Download(DB_URL, NewTempFolder);
             database.open(&DB_PATH);

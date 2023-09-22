@@ -122,6 +122,7 @@ namespace macOS
         void InstallDeepForgeToolset(string channel);
 
     private:
+        /* The `CreateSymlink` function is creating a symbolic link (symlink) in the `/Applications` directory. It takes two parameters: `nameSymlink` which is the name of the symlink, and `filePath` which is the path to the file or directory that the symlink will point to.*/
         void CreateSymlink(string nameSymlink, string filePath)
         {
             // char *UserFolder = getenv("USER");
@@ -168,6 +169,7 @@ namespace macOS
             unzipper.extract(path_to);
             unzipper.close();
         }
+        /* The `InstallLibraries()` function is responsible for downloading and executing a shell script that installs additional libraries or dependencies required by the DeepForge Toolset. */
         void InstallLibraries()
         {
             string name;
@@ -179,6 +181,7 @@ namespace macOS
             Command = "bash " + ShellScriptPath;
             system(Command.c_str());
         }
+        /* The `RebootSystem()` function is responsible for rebooting the system. It uses the `system()` function to execute the command `sudo shutdown -r now`, which instructs the system to restart immediately. */
         void RebootSystem()
         {
             system("sudo shutdown -r now");

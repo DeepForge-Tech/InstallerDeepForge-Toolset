@@ -118,13 +118,16 @@ case "${unameOut}" in
 esac
 # Building
 echo "==> Building"
-sudo rm -rf ./build/Linux
+sudo rm -rf ./build/$os
 mkdir build
 cd build
 mkdir $os
 cd ..
 echo "==> Building project"
-sudo clang++ -o ./build/$os/InstallerDeepForge-Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -L ./src/lib -lZipper  -lcurl -lsqlite3 -std=c++2a -Bstatic
+case "${unameOut}" in
+	Darwin*) 	sudo clang++ -o ./build/$os/InstallerDeepForge-Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -L ./src/lib -lZipper -lz -lcurl -lsqlite3 -std=c++2a -Bstatic;;
+	Linux*)		sudo g++ -o ./build/$os/InstallerDeepForge-Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -L ./src/lib -lZipper -lz -lcurl -lsqlite3 -std=c++2a -Bstatic;;
+esac
 echo "==> Build of project finished"
 cd build
 cd $os
