@@ -2,7 +2,8 @@
 
   
 
-<h3 align="center">DeepForge Toolset - installer of necessary tools for programming.</h3>
+<h3 align="center">DeepForge Toolset - cross-platform installer of necessary tools for programming.
+</h3>
 
   
 
