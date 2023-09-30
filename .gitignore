@@ -21,12 +21,27 @@
 *.smod
 
 # Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+# *.lai
+# *.la
+# *.a
+# *.lib
 
 # Executables
 *.exe
 *.out
 *.app
+*.zip
+*.tar.gz
+CMakeFiles/
+*.cmake
+CMakeCache.txt
+/Makefile
+/.ninja_log
+/.ninja_deps
+/build.ninja
+build/
+*.ninja
+/tests/
+.vscode/
+.idea/
+src/lib/
