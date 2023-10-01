@@ -125,7 +125,7 @@ namespace Linux
             switch(result)
             {
                 case 200:
-                    cout << "Database successfully downloaded."
+                    cout << "Database successfully downloaded." << endl;
                     database.open(&DB_PATH);
                     break;
                 case 502:
