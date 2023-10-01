@@ -73,7 +73,6 @@ void Installer::InstallDeepForgeToolset(string channel)
             cout << "✅ DeepForge Toolset " << version << " successfully installed" << endl;
             cout << InstallDelimiter << endl;
     }
-    // CommandManager();
 }
 
 void Installer::CommandManager()
@@ -114,7 +113,7 @@ void Installer::CommandManager()
             }
         }
     }
-    catch (exception &error)
+    catch (exception& error)
     {
         CommandManager();
     }

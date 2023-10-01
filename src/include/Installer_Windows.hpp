@@ -51,25 +51,28 @@ using namespace zipper;
 
 namespace Windows
 {
+    // int type
     int result;
     int Percentage;
     int TempPercentage = 0;
-    string Architecture;
+    // float type
     float LastSize;
     float LastTotalSize;
+    // string type
     string Answer;
     const string NewApplicationFolder = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset";
     const string NewTempFolder = NewApplicationFolder + "\\Temp";
-    ProgressBar_v1 progressbar;
     const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
     string DB_PATH = NewTempFolder + "\\Versions.db";
     string NameVersionTable = "WindowsVersions";
     const string TrueVarious[3] = {"yes", "y", "1"};
+    string Architecture;
     string InstallDelimiter = "========================================================";
     string OS_NAME = "Windows";
+    // init classes
+    ProgressBar_v1 progressbar;
     Database database;
-    int archiver_err = 0;
 
     class WriteData : public IBindStatusCallback
     {
@@ -141,8 +144,18 @@ namespace Windows
             // Create temp folder
             MakeDirectory(NewTempFolder);
             // Download database Versions.db
-            Download(DB_URL, NewTempFolder);
-            database.open(&DB_PATH);
+            result = Download(DB_URL, NewTempFolder);
+            switch(result)
+            {
+                case 200:
+                    cout << "Database successfully downloaded." << endl;
+                    database.open(&DB_PATH);
+                    break;
+                case 502:
+                cout << "Error in downloading database." << endl;
+                    // throw domain_error("Error in downloading database.");
+                    break;
+            }
         }
         void CommandManager();
         void InstallDeepForgeToolset(string channel);
@@ -171,7 +184,7 @@ namespace Windows
                 progressbar.ResetAll();
                 return 200;
             }
-            catch (exception error)
+            catch (exception& error)
             {
                 return 502;
             }
@@ -227,9 +240,11 @@ namespace Windows
             {
                 filesystem::create_directory(fullPath);
             }
-            // free(&currentDir);
         }
-
+        /*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`. 
+            It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`. 
+            After extracting the contents, the function closes the `Unzipper` object.
+        */
         int UnpackArchive(string path_from, string path_to)
         {
             Unzipper unzipper(path_from);
