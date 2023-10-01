@@ -66,9 +66,10 @@ namespace DB
         }
         
         string GetValueFromDB(string NameTable, string NameApp, string NameColumn);
-        string GetVersionFromDB(string NameTable,string Status,string NameColumn,string Architecture);
+        string GetVersionFromDB(string NameTable,string Channel,string NameColumn,string Architecture);
         map<string,string>  GetAllVersionsFromDB(string NameTable,string NameColumn,string Architecture);
-        string GetApplicationURL(string NameTable,string Status,string NameColumn,string Architecture,string Version);
+        string GetLatestVersion(string NameTable,string Channel,string NameColumn,string Architecture);
+        string GetApplicationURL(string NameTable,string Channel,string NameColumn,string Architecture,string Version);
         map<string, string> GetAllValuesFromDB(string NameTable, string NameColumn);
         map<string, string> GetDevPackFromDB(string NameTable, string NameColumn);
         int InsertApplicationsToTable(string NameTable, string NameApp, string WindowsCommand, string macOSCommand, string LinuxCommand);

@@ -45,27 +45,31 @@ using namespace zipper;
 
 namespace Linux
 {
+    // int type
     int result;
     int Percentage;
     int TempPercentage = 0;
-    string Architecture;
+    // float type
     float LastSize;
     float LastTotalSize;
-    string Answer;
+    float DownloadSpeed;
+    // string type
     const string ShellScript_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries.sh";
     string NewApplicationFolder = "/usr/bin/DeepForge/DeepForge-Toolset";
     string NewTempFolder = NewApplicationFolder + "/Temp";
-    ProgressBar_v1 progressbar;
     const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
     string DB_PATH = NewTempFolder + "/Versions.db";
     string NameVersionTable = "LinuxVersions";
     const string TrueVarious[3] = {"yes", "y", "1"};
+    string Answer;
     string InstallDelimiter = "========================================================";
     string OS_NAME = "Linux";
-    CURL *curl = curl_easy_init();
+    string Architecture;
+    CURL* curl = curl_easy_init();
+    // init classes
     CURLcode res;
-    float DownloadSpeed;
+    ProgressBar_v1 progressbar;
     Database database;
 
     // Function for calc percentage of download progresss
@@ -108,16 +112,28 @@ namespace Linux
             system(Command.c_str());
             GetArchitectureOS();
             char *UserFolder = getenv("HOME");
-            NewApplicationFolder = string(UserFolder) + "/Library/Containers/DeepForge/DeepForge-Toolset";
+            NewApplicationFolder = string(UserFolder) + "/DeepForge/DeepForge-Toolset";
             NewTempFolder = NewApplicationFolder + "/Temp";
             DB_PATH = NewTempFolder + "/Versions.db";
-            Command = "sudo -s chmod 777 " + string(UserFolder) + "/Library/Containers/";
+            Command = "sudo -s chmod 777 /usr/bin/";
             system(Command.c_str());
             // Create temp folder
             MakeDirectory(NewTempFolder);
+            cout << "Downloading database..." << endl;
             // Download database Versions.db
-            Download(DB_URL, NewTempFolder);
-            database.open(&DB_PATH);
+            result = Download(DB_URL, NewTempFolder);
+            switch(result)
+            {
+                case 200:
+                    cout << "Database successfully downloaded."
+                    database.open(&DB_PATH);
+                    break;
+                case 502:
+                    cout << "Error in downloading database." << endl;
+                    // throw domain_error("Error in downloading database.");
+                    break;
+            }
+            
         }
         void CommandManager();
         void InstallDeepForgeToolset(string channel);
@@ -125,7 +141,7 @@ namespace Linux
     private:
         void CreateSymlink(string nameSymlink, string filePath)
         {
-            char *UserFolder = getenv("USER");
+            char *UserFolder = getenv("HOME");
             string symlinkPath = string(UserFolder) + "/Desktop/" + nameSymlink;
             string Command = "sudo ln -s " + filePath + " " + nameSymlink;
             system(Command.c_str());
@@ -162,13 +178,17 @@ namespace Linux
                 filesystem::create_directory(fullPath);
             }
         }
-        /* The `UnpackArchive` function takes two parameters: `path_from` and `path_to`. It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`. After extracting the contents, the function closes the `Unzipper` object.*/
+        /*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`. 
+            It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`. 
+            After extracting the contents, the function closes the `Unzipper` object.
+        */
         int UnpackArchive(string path_from, string path_to)
         {
             Unzipper unzipper(path_from);
             unzipper.extract(path_to);
             unzipper.close();
         }
+        /* The `InstallLibraries()` function is responsible for downloading and executing a shell script that installs additional libraries or dependencies required by the DeepForge Toolset. */
         void InstallLibraries()
         {
             string name;
@@ -177,9 +197,10 @@ namespace Linux
             Download(ShellScript_URL,NewTempFolder);
             name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
             ShellScriptPath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
-            Command = "bash " + ShellScriptPath;
+            Command = "sudo bash " + ShellScriptPath;
             system(Command.c_str());
         }
+        /* The `RebootSystem()` function is responsible for rebooting the system. It uses the `system()` function to execute the command `sudo shutdown -r now`, which instructs the system to restart immediately. */
         void RebootSystem()
         {
             system("sudo shutdown -r now");
@@ -206,7 +227,8 @@ namespace Linux
             {
                 string name = (url.substr(url.find_last_of("/")));
                 string filename = dir + "/" + name.replace(name.find("/"), 1, "");
-                FILE *file = fopen(filename.c_str(), "wb");
+                FILE* file = fopen(filename.c_str(), "wb");
+                CURL* curl = curl_easy_init();
                 curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
                 curl_easy_setopt(curl, CURLOPT_NOPROGRESS, false);
                 curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, &CallbackProgress);
@@ -226,10 +248,10 @@ namespace Linux
                         progressbar.Update(0.0, LastSize, LastTotalSize);
                     }
                 }
-                cout << "" << endl;
+                cout << InstallDelimiter << endl;
                 return 200;
             }
-            catch (exception &error)
+            catch (exception& error)
             {
                 return 502;
             }

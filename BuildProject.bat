@@ -2,15 +2,19 @@
 set arg_1 = %1
 echo -- Building library Zipper
 git clone --recursive https://github.com/sebastiandev/zipper.git
+cd src
+mkdir lib
+cd ..
 cd zipper
 mkdir build
-cd build
-cmake  ../
+cmake  .
 cmake --build .
-Xcopy .\*.a  .\src\lib\  /Y
-cd .. && cd ..
-del ./zipper
+rename "libstaticZipper.a" "libZipper.a"
+Xcopy *.a  ..\src\lib\  /Y
+cd ..
+rmdir .\zipper /s /q
 echo - Zipper successfully builded
+echo ==================================
 echo -- Building project
 if exist .\build\Windows (
     if ERRORLEVEL 0 (

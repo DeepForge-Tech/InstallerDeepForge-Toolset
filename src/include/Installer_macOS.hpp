@@ -45,16 +45,24 @@ using namespace zipper;
 
 namespace macOS
 {
+    // int type
     int result;
     int Percentage;
     int TempPercentage = 0;
-    string Architecture;
+    // float type
     float LastSize;
     float LastTotalSize;
+    float DownloadSpeed;
+    // init classes
+    ProgressBar_v1 progressbar;
+    CURL *curl = curl_easy_init();
+    CURLcode res;
+    Database database;
+    // string type
+    string Architecture;
     string Answer;
     string NewApplicationFolder = "";
     string NewTempFolder;
-    ProgressBar_v1 progressbar;
     const string ShellScript_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries.sh";
     const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
@@ -63,10 +71,6 @@ namespace macOS
     const string TrueVarious[3] = {"yes", "y", "1"};
     string InstallDelimiter = "========================================================";
     string OS_NAME = "macOS";
-    CURL *curl = curl_easy_init();
-    CURLcode res;
-    float DownloadSpeed;
-    Database database;
 
     // Function for calc percentage of download progresss
     int CallbackProgress(void *ptr, double TotalToDownload, double NowDownloaded, double TotalToUpload, double NowUploaded)
@@ -114,9 +118,21 @@ namespace macOS
             system(Command.c_str());
             // Create temp folder
             MakeDirectory(NewTempFolder);
+            cout << "Downloading database..." << endl;
             // Download database Versions.db
-            Download(DB_URL, NewTempFolder);
-            database.open(&DB_PATH);
+            result = Download(DB_URL, NewTempFolder);
+            switch(result)
+            {
+                case 200:
+                    cout << "Database successfully downloaded." << endl;
+                    database.open(&DB_PATH);
+                    break;
+                case 502:
+                    // throw domain_error("Error in downloading database.");
+                    cout << "Error in downloading database." << endl;
+                    break;
+            }
+            
         }
         void CommandManager();
         void InstallDeepForgeToolset(string channel);
@@ -162,7 +178,10 @@ namespace macOS
                 filesystem::create_directory(fullPath);
             }
         }
-        /* The `UnpackArchive` function takes two parameters: `path_from` and `path_to`. It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`. After extracting the contents, the function closes the `Unzipper` object.*/
+        /*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`. 
+            It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`. 
+            After extracting the contents, the function closes the `Unzipper` object.
+        */
         int UnpackArchive(string path_from, string path_to)
         {
             Unzipper unzipper(path_from);
@@ -208,8 +227,8 @@ namespace macOS
             {
                 string name = (url.substr(url.find_last_of("/")));
                 string filename = dir + "/" + name.replace(name.find("/"), 1, "");
-                FILE *file = fopen(filename.c_str(), "wb");
-                CURL *curl = curl_easy_init();
+                FILE* file = fopen(filename.c_str(), "wb");
+                CURL* curl = curl_easy_init();
                 curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
                 curl_easy_setopt(curl, CURLOPT_NOPROGRESS, false);
                 curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, &CallbackProgress);

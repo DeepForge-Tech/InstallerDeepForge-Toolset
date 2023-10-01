@@ -57,11 +57,11 @@ string Database::GetValueFromDB(string NameTable, string NameApp, string NameCol
     return AnswerDB;
 }
 
-string Database::GetVersionFromDB(string NameTable,string Status,string NameColumn,string Architecture) 
+string Database::GetVersionFromDB(string NameTable,string Channel,string NameColumn,string Architecture) 
 {
     string AnswerDB;
     // Create SQL statement
-    SQL_COMMAND = "SELECT " + NameColumn + " FROM " + NameTable + " WHERE Channel='" + Status + "' AND Architecture='" + Architecture + "'";
+    SQL_COMMAND = "SELECT " + NameColumn + " FROM " + NameTable + " WHERE Channel='" + Channel + "' AND Architecture='" + Architecture + "'";
     // Execute SQL statement
     int RESULT_SQL = sqlite3_prepare_v2(db, SQL_COMMAND.c_str(), SQL_COMMAND.length(), &statement, nullptr);
     // if result of execute sql statement != SQLITE_OK, that send error
@@ -81,11 +81,11 @@ string Database::GetVersionFromDB(string NameTable,string Status,string NameColu
     return AnswerDB;
 }
 
-string Database::GetApplicationURL(string NameTable,string Status,string NameColumn,string Architecture,string Version)
+string Database::GetApplicationURL(string NameTable,string Channel,string NameColumn,string Architecture,string Version)
 {
     string AnswerDB;
     // Create SQL statement
-    SQL_COMMAND = "SELECT " + NameColumn + " FROM " + NameTable + " WHERE Channel='" + Status + "' AND Architecture='" + Architecture + "' AND Version='" + Version + "'";
+    SQL_COMMAND = "SELECT " + NameColumn + " FROM " + NameTable + " WHERE Channel='" + Channel + "' AND Architecture='" + Architecture + "' AND Version='" + Version + "'";
     // Execute SQL statement
     int RESULT_SQL = sqlite3_prepare_v2(db, SQL_COMMAND.c_str(), SQL_COMMAND.length(), &statement, nullptr);
     // if result of execute sql statement != SQLITE_OK, that send error
@@ -160,6 +160,31 @@ map<string,string> Database::GetAllVersionsFromDB(string NameTable,string NameCo
     sqlite3_finalize(statement);
     // return Names,Commands;
     return WriteMap;
+}
+
+string Database::GetLatestVersion(string NameTable,string Channel,string NameColumn,string Architecture)
+{
+    string AnswerDB;
+    // cout << "fffef" <<endl;
+    // Create SQL statement
+    SQL_COMMAND = "SELECT max(" + NameColumn + ") FROM " + NameTable + " WHERE Channel='" + Channel + "' AND Architecture='" + Architecture + "'";
+    // Execute SQL statement
+    int RESULT_SQL = sqlite3_prepare_v2(db, SQL_COMMAND.c_str(), SQL_COMMAND.length(), &statement, nullptr);
+    // if result of execute sql statement != SQLITE_OK, that send error
+    if (RESULT_SQL != SQLITE_OK)
+    {
+        throw runtime_error("Not Found");
+    }
+    // Loop through the results, a row at a time.
+    while ((RESULT_SQL = sqlite3_step(statement)) == SQLITE_ROW)
+    {
+        AnswerDB = (string(reinterpret_cast<const char*>(
+            sqlite3_column_text(statement, 0))));
+    }
+    // Free the statement when done.
+    sqlite3_finalize(statement);
+    // return Names,Commands;
+    return AnswerDB;
 }
 
 map<string, string> Database::GetDevPackFromDB(string NameTable, string NameColumn)
