@@ -136,6 +136,7 @@ namespace Linux
             
         }
         void CommandManager();
+        void InstallUpdateManager();
         void InstallDeepForgeToolset(string channel);
 
     private:
