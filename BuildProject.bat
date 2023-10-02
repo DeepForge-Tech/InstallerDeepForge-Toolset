@@ -12,7 +12,7 @@ cmake --build .
 rename "libstaticZipper.a" "libZipper.a"
 Xcopy *.a  ..\src\lib\  /Y
 cd ..
-rmdir .\zipper /s /q
+@REM rmdir .\zipper /s /q
 echo - Zipper successfully builded
 echo ==================================
 echo -- Building project

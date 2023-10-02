@@ -114,7 +114,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
    cmake ../
    make
    find . -name "*.a" -exec mv "{}" ../../src/lib \;
-   find . -name "*.so" -exec mv "{}" ../../src/lib \;
+   # find . -name "*.so" -exec mv "{}" ../../src/lib \;
    cd .. && cd ..
    sudo rm -rf ./zipper
    echo "==> Zipper successfully builded"

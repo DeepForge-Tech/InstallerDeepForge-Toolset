@@ -60,12 +60,15 @@ namespace Windows
     float LastTotalSize;
     // string type
     string Answer;
+    const string NewOrganizationFolder = "C:\\ProgramData\\DeepForge";
     const string NewApplicationFolder = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset";
+    const string NewUpdateManagerFolder = NewOrganizationFolder + "\\UpdateManager";
     const string NewTempFolder = NewApplicationFolder + "\\Temp";
     const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
     string DB_PATH = NewTempFolder + "\\Versions.db";
-    string NameVersionTable = "WindowsVersions";
+    const string NameVersionTable = "WindowsVersions";
+    const string UpdateManagerTable = "UpdateManager_Windows";
     const string TrueVarious[3] = {"yes", "y", "1"};
     string Architecture;
     string InstallDelimiter = "========================================================";
@@ -143,21 +146,25 @@ namespace Windows
             GetArchitectureOS();
             // Create temp folder
             MakeDirectory(NewTempFolder);
+            cout << InstallDelimiter << endl;
+            cout << "Downloading database.." << endl;
             // Download database Versions.db
             result = Download(DB_URL, NewTempFolder);
             switch(result)
             {
                 case 200:
                     cout << "Database successfully downloaded." << endl;
+                    cout << InstallDelimiter << endl;
                     database.open(&DB_PATH);
                     break;
                 case 502:
-                cout << "Error in downloading database." << endl;
+                    cout << "Error in downloading database." << endl;
                     // throw domain_error("Error in downloading database.");
                     break;
             }
         }
         void CommandManager();
+        void InstallUpdateManager();
         void InstallDeepForgeToolset(string channel);
 
     private:
@@ -245,7 +252,7 @@ namespace Windows
             It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`. 
             After extracting the contents, the function closes the `Unzipper` object.
         */
-        int UnpackArchive(string path_from, string path_to)
+        void UnpackArchive(string path_from, string path_to)
         {
             Unzipper unzipper(path_from);
             unzipper.extract(path_to);
