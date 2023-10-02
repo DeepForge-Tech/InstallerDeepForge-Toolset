@@ -39,7 +39,7 @@
 #include "../DatabaseConnect.cpp"
 #include <map>
 #include <zipper/unzipper.h>
-#include<fstream>
+#include <fstream>
 #include <cctype>
 
 #define CHUNK 16384
@@ -149,26 +149,17 @@ namespace Windows
             cout << InstallDelimiter << endl;
             cout << "Downloading database.." << endl;
             // Download database Versions.db
-            result = Download(DB_URL, NewTempFolder);
-            switch(result)
-            {
-                case 200:
-                    cout << "Database successfully downloaded." << endl;
-                    cout << InstallDelimiter << endl;
-                    database.open(&DB_PATH);
-                    break;
-                case 502:
-                    cout << "Error in downloading database." << endl;
-                    // throw domain_error("Error in downloading database.");
-                    break;
-            }
+            Download(DB_URL, NewTempFolder);
+            cout << "Database successfully downloaded." << endl;
+            cout << InstallDelimiter << endl;
+            database.open(&DB_PATH);
         }
         void CommandManager();
         void InstallUpdateManager();
         void InstallDeepForgeToolset(string channel);
 
     private:
-        int Download(string url, string dir)
+        void Download(string url, string dir)
         {
             try
             {
@@ -189,11 +180,10 @@ namespace Windows
                 }
                 // Reset all variables and preferences
                 progressbar.ResetAll();
-                return 200;
             }
             catch (exception& error)
             {
-                return 502;
+                cerr << error.what() << endl;
             }
         }
         // Method for create symlink on desktop
@@ -248,8 +238,8 @@ namespace Windows
                 filesystem::create_directory(fullPath);
             }
         }
-        /*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`. 
-            It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`. 
+        /*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`.
+            It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`.
             After extracting the contents, the function closes the `Unzipper` object.
         */
         void UnpackArchive(string path_from, string path_to)
@@ -282,11 +272,11 @@ namespace Windows
         // Method for getting architecture of OS
         void GetArchitectureOS()
         {
-            #if defined(__x86_64__)
-                Architecture = "amd64";
-            #elif __arm__
-                Architecture = "arm64";
-            #endif
+#if defined(__x86_64__)
+            Architecture = "amd64";
+#elif __arm__
+            Architecture = "arm64";
+#endif
         }
     };
 }

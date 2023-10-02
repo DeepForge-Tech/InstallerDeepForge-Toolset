@@ -69,7 +69,7 @@ namespace Linux
     string InstallDelimiter = "========================================================";
     string OS_NAME = "Linux";
     string Architecture;
-    CURL* curl = curl_easy_init();
+    CURL *curl = curl_easy_init();
     // init classes
     CURLcode res;
     ProgressBar_v1 progressbar;
@@ -124,19 +124,9 @@ namespace Linux
             MakeDirectory(NewTempFolder);
             cout << "Downloading database..." << endl;
             // Download database Versions.db
-            result = Download(DB_URL, NewTempFolder);
-            switch(result)
-            {
-                case 200:
-                    cout << "Database successfully downloaded." << endl;
-                    database.open(&DB_PATH);
-                    break;
-                case 502:
-                    cout << "❌ Error in downloading database." << endl;
-                    // throw domain_error("Error in downloading database.");
-                    break;
-            }
-            
+            Download(DB_URL, NewTempFolder);
+            cout << "Database successfully downloaded." << endl;
+            database.open(&DB_PATH);
         }
         void CommandManager();
         void InstallUpdateManager();
@@ -149,8 +139,6 @@ namespace Linux
             string symlinkPath = string(UserFolder) + "/Desktop/" + nameSymlink;
             string Command = "sudo ln -s " + filePath + " " + nameSymlink;
             system(Command.c_str());
-            // cout << symlinkPath << endl;
-            // CreateHardLinkA(symlinkPath.c_str(), filePath.c_str(), NULL);
         }
         /*The `MakeDirectory` function is responsible for creating a directory (folder) in the file system.*/
         void MakeDirectory(string dir)
@@ -182,11 +170,11 @@ namespace Linux
                 filesystem::create_directory(fullPath);
             }
         }
-        /*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`. 
-            It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`. 
+        /*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`.
+            It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`.
             After extracting the contents, the function closes the `Unzipper` object.
         */
-        int UnpackArchive(string path_from, string path_to)
+        void UnpackArchive(string path_from, string path_to)
         {
             Unzipper unzipper(path_from);
             unzipper.extract(path_to);
@@ -198,7 +186,7 @@ namespace Linux
             string name;
             string ShellScriptPath;
             string Command;
-            Download(ShellScript_URL,NewTempFolder);
+            Download(ShellScript_URL, NewTempFolder);
             name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
             ShellScriptPath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
             Command = "sudo bash " + ShellScriptPath;
@@ -225,14 +213,14 @@ namespace Linux
             return status;
         }
 
-        int Download(string url, string dir)
+        void Download(string url, string dir)
         {
             try
             {
                 string name = (url.substr(url.find_last_of("/")));
                 string filename = dir + "/" + name.replace(name.find("/"), 1, "");
-                FILE* file = fopen(filename.c_str(), "wb");
-                CURL* curl = curl_easy_init();
+                FILE *file = fopen(filename.c_str(), "wb");
+                CURL *curl = curl_easy_init();
                 curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
                 curl_easy_setopt(curl, CURLOPT_NOPROGRESS, false);
                 curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, &CallbackProgress);
@@ -243,19 +231,25 @@ namespace Linux
                 curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteData);
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
                 CURLcode response = curl_easy_perform(curl);
-                if (response != CURLE_OK) 
+                if (response != CURLE_OK)
                 {
                     switch (response)
                     {
-                        case CURLE_COULDNT_CONNECT:
-                            cerr << "❌ No internet connection." << endl;
-                            break;
-                        case CURLE_COULDNT_RESOLVE_HOST:
-                            cerr << "❌ Failed to resolve host. The given remote host was not allowed." << endl;
-                            break;
-                        case CURLE_COULDNT_RESOLVE_PROXY:
-                            cerr << "❌ Failed to resolve proxy. The given proxy host could not be resolved." << endl;
-                            break;
+                    case CURLE_COULDNT_CONNECT:
+                        cerr << "❌ Failed to connect to host or proxy." << endl;
+                        break;
+                    case CURLE_COULDNT_RESOLVE_HOST:
+                        cerr << "❌ Failed to resolve host. The given remote host was not allowed." << endl;
+                        break;
+                    case CURLE_COULDNT_RESOLVE_PROXY:
+                        cerr << "❌ Failed to resolve proxy. The given proxy host could not be resolved." << endl;
+                        break;
+                    case CURLE_UNSUPPORTED_PROTOCOL:
+                        cerr << "❌ Failed to connect to the site using this protocol." << endl;
+                        break;
+                    case CURLE_SSL_CONNECT_ERROR:
+                        cerr << "❌ The problem occurred during SSL/TLS handshake." << endl;
+                        break;
                     }
                 }
                 curl_easy_cleanup(curl);
@@ -268,11 +262,10 @@ namespace Linux
                     }
                 }
                 cout << InstallDelimiter << endl;
-                return 200;
             }
             catch (exception& error)
             {
-                return 502;
+                cerr << error.what() << endl;
             }
         }
         // Method for getting architecture of OS
