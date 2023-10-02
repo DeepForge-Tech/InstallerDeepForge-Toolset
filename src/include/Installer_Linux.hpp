@@ -132,7 +132,7 @@ namespace Linux
                     database.open(&DB_PATH);
                     break;
                 case 502:
-                    cout << "Error in downloading database." << endl;
+                    cout << "❌ Error in downloading database." << endl;
                     // throw domain_error("Error in downloading database.");
                     break;
             }
@@ -243,17 +243,20 @@ namespace Linux
                 curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteData);
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
                 CURLcode response = curl_easy_perform(curl);
-                switch (response)
+                if (response != CURLE_OK) 
                 {
-                    case CURLE_COULDNT_CONNECT:
-                        cout << CURLE_COULDNT_CONNECT << endl;
-                        break;
-                    case CURLE_COULDNT_RESOLVE_HOST:
-                        cout << CURLE_COULDNT_RESOLVE_HOST << endl;
-                        break;
-                    case CURLE_COULDNT_RESOLVE_PROXY:
-                        cout<<"Internet dose not exist";
-                        break;
+                    switch (response)
+                    {
+                        case CURLE_COULDNT_CONNECT:
+                            cerr << "❌ No internet connection." << endl;
+                            break;
+                        case CURLE_COULDNT_RESOLVE_HOST:
+                            cerr << "❌ Failed to resolve host. The given remote host was not allowed." << endl;
+                            break;
+                        case CURLE_COULDNT_RESOLVE_PROXY:
+                            cerr << "❌ Failed to resolve proxy. The given proxy host could not be resolved." << endl;
+                            break;
+                    }
                 }
                 curl_easy_cleanup(curl);
                 fclose(file);
