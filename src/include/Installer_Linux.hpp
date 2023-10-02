@@ -254,9 +254,6 @@ namespace Linux
                     case CURLE_COULDNT_RESOLVE_PROXY:
                         cout<<"Internet dose not exist";
                         break;
-                    default:
-                        cerr<<"Request failed:"<<curl_easy_strerror(res)<<endl;
-                        exit(1);
                 }
                 curl_easy_cleanup(curl);
                 fclose(file);
