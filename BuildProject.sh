@@ -107,6 +107,9 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       exit 1;
    fi
    echo "==> Building library Zipper"
+   cd src
+   mkdir lib
+   cd ..
    git clone --recursive https://github.com/sebastiandev/zipper.git
    cd zipper
    mkdir build
