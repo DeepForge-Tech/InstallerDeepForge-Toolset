@@ -129,7 +129,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
    cd build
    cmake ../
    make
-   find . -name "*.a" -exec mv "{}" ../../src/lib \;
+   find . -name "*.a" -exec mv "{}" ../../src/lib/ \;
    cd .. && cd ..
    sudo rm -rf ./zipper
    echo "==> Build of Zipper finished"
