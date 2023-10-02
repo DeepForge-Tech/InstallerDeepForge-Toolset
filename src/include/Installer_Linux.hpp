@@ -55,11 +55,14 @@ namespace Linux
     float DownloadSpeed;
     // string type
     const string ShellScript_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries.sh";
-    string NewApplicationFolder = "/usr/bin/DeepForge/DeepForge-Toolset";
-    string NewTempFolder = NewApplicationFolder + "/Temp";
+    const string NewOrganizationFolder = "/usr/bin/DeepForge";
+    const string NewApplicationFolder = NewOrganizationFolder + "/DeepForge-Toolset";
+    const string NewUpdateManagerFolder = NewOrganizationFolder + "/UpdateManager";
+    const string NewTempFolder = NewApplicationFolder + "/Temp";
     const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
     string DB_PATH = NewTempFolder + "/Versions.db";
+    const string UpdateManagerTable = "UpdateManager_Linux";
     string NameVersionTable = "LinuxVersions";
     const string TrueVarious[3] = {"yes", "y", "1"};
     string Answer;
@@ -111,10 +114,10 @@ namespace Linux
             string Command;
             system(Command.c_str());
             GetArchitectureOS();
-            char *UserFolder = getenv("HOME");
-            NewApplicationFolder = string(UserFolder) + "/DeepForge/DeepForge-Toolset";
-            NewTempFolder = NewApplicationFolder + "/Temp";
-            DB_PATH = NewTempFolder + "/Versions.db";
+            // char *UserFolder = getenv("HOME");
+            // NewApplicationFolder = string(UserFolder) + "/DeepForge/DeepForge-Toolset";
+            // NewTempFolder = NewApplicationFolder + "/Temp";
+            // DB_PATH = NewTempFolder + "/Versions.db";
             Command = "sudo -s chmod 777 /usr/bin/";
             system(Command.c_str());
             // Create temp folder
