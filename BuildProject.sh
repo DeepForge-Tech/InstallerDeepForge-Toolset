@@ -113,12 +113,11 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
    git clone --recursive https://github.com/sebastiandev/zipper.git
    cd zipper
    mkdir build
-   cd build
-   cmake ../
+   cmake .
    make
-   find . -name "*.a" -exec mv "{}" ../../src/lib/ \;
+   find . -name "*.a" -exec mv "{}" ../src/lib/ \;
    # find . -name "*.so" -exec mv "{}" ../../src/lib \;
-   cd .. && cd ..
+   cd ..
    sudo rm -rf ./zipper
    echo "==> Zipper successfully builded"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
@@ -127,14 +126,15 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
    brew  install jsoncpp sqlite3 sqlite-utils fmt clang-format curl googletest gcc zlib cmake
    echo "==> Building library Zipper"
    git clone --recursive https://github.com/sebastiandev/zipper.git
+   cd src
+   mkdir lib
+   cd ..
    cd zipper
    mkdir build
-   cd build
-   cmake ../
+   cmake .
    make
-   find . -name "*.a" -exec cp "{}" ../../src/lib/ \;
-   find . -name "*.a" -exec cp "{}" /usr/local/lib/ \;
-   cd .. && cd ..
+   find . -name "*.a" -exec cp "{}" ../src/lib/ \;
+   cd ..
    sudo rm -rf ./zipper
    echo "==> Build of Zipper finished"
 fi
