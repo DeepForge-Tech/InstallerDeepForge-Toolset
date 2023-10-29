@@ -74,6 +74,10 @@ namespace macOS
     const string ShellScript_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries.sh";
     const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
+    const string NewOrganizationFolder = "/usr/bin/DeepForge";
+    const string NewApplicationFolder = NewOrganizationFolder + "/DeepForge-Toolset";
+    const string NewUpdateManagerFolder = NewOrganizationFolder + "/UpdateManager";
+    const string NewTempFolder = NewApplicationFolder + "/Temp";
     string DB_PATH;
     string NameVersionTable = "macOSVersions";
     const string TrueVarious[3] = {"yes", "y", "1"};
