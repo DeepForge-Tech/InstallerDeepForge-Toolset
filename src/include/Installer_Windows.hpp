@@ -42,7 +42,10 @@
 #include <cctype>
 #include "Logger.cpp"
 
+#define DB_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
 #define OS_NAME "Windows"
+#define UpdateManagerTable "UpdateManager_Windows"
+#define NameVersionTable "WindowsVersions"
 
 using namespace std;
 using namespace DB;
@@ -65,11 +68,8 @@ namespace Windows
     const string NewApplicationFolder = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset";
     const string NewUpdateManagerFolder = NewOrganizationFolder + "\\UpdateManager";
     const string NewTempFolder = NewApplicationFolder + "\\Temp";
-    const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
     string DB_PATH = NewTempFolder + "\\Versions.db";
-    const string NameVersionTable = "WindowsVersions";
-    const string UpdateManagerTable = "UpdateManager_Windows";
     const string TrueVarious[3] = {"yes", "y", "1"};
     string InstallDelimiter = "========================================================";
     #if defined(__x86_64__)

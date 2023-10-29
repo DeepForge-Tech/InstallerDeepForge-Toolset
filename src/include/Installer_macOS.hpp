@@ -39,7 +39,10 @@
 #include "zipper/unzipper.h"
 #include "Logger.cpp"
 
+#define DB_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
 #define OS_NAME "macOS"
+#define UpdateManagerTable "UpdateManager_macOS"
+#define NameVersionTable "macOSVersions"
 
 using namespace std;
 using namespace DB;
@@ -69,15 +72,13 @@ namespace macOS
         string Architecture = "arm64";
     #endif
     string Answer;
-    string NewOrganizationFolder;
     string NewApplicationFolder = "";
+    string NewOrganizationFolder;
     string NewTempFolder;
     string NewUpdateManagerFolder;
     const string ShellScript_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries.sh";
-    const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
     string DB_PATH;
-    string NameVersionTable = "macOSVersions";
     const string TrueVarious[3] = {"yes", "y", "1"};
     string InstallDelimiter = "========================================================";
 
