@@ -161,6 +161,7 @@ namespace macOS
             database.open(&DB_PATH);
         }
         void CommandManager();
+        void InstallUpdateManager();
         void InstallDeepForgeToolset(string channel);
 
     private:
