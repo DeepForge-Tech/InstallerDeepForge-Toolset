@@ -153,7 +153,7 @@ mkdir $os
 cd ..
 echo "==> Building project"
 case "${unameOut}" in
-	Darwin*) 	sudo clang++ -o ./build/$os/InstallerDeepForge-Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -lZipper -lz -lcurl -lsqlite3 -std=c++2a -Bstatic;;
+	Darwin*) 	sudo clang++ -o ./build/$os/InstallerDeepForge-Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -L ./src/lib -lZipper -lz -lcurl -lsqlite3 -std=c++2a -Bstatic;;
 	Linux*)		sudo g++ -o ./build/$os/InstallerDeepForge-Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -L ./src/lib -lZipper -lz -lcurl -lsqlite3 -std=c++2a -Bstatic;;
 esac
 echo "==> Build of project finished"
