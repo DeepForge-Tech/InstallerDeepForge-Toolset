@@ -64,18 +64,32 @@ namespace DB
         {
             sqlite3_close(db);
         }
-        
+        int CreateTable(string NameTable, map<string,string> Columns);
         string GetValueFromDB(string NameTable, string NameApp, string NameColumn);
-        string GetVersionFromDB(string NameTable,string Channel,string NameColumn,string Architecture);
-        map<string,string>  GetAllVersionsFromDB(string NameTable,string NameColumn,string Architecture);
-        string GetLatestVersion(string NameTable,string Channel,string NameColumn,string Architecture);
-        string GetApplicationURL(string NameTable,string Channel,string NameColumn,string Architecture,string Version);
+        string GetVersionFromDB(string NameTable, string Channel, string NameColumn, string Architecture);
+        map<string, string> GetAllVersionsFromDB(string NameTable, string NameColumn, string Architecture);
+        string GetLatestVersion(string NameTable, string Channel, string NameColumn, string Architecture);
+        string GetApplicationURL(string NameTable, string Channel, string NameColumn, string Architecture, string Version);
         map<string, string> GetAllValuesFromDB(string NameTable, string NameColumn);
         map<string, string> GetDevPackFromDB(string NameTable, string NameColumn);
         int InsertApplicationsToTable(string NameTable, string NameApp, string WindowsCommand, string macOSCommand, string LinuxCommand);
-        int RemoveApplicationsFromTable(string NameTable,string NameApp);
+        int RemoveApplicationsFromTable(string NameTable, string NameApp);
         int AddApplications(string Tables[]);
         int RemoveApplications(string Tables[]);
+        int InsertLogInformationToTable(string NameTable,string Architecture,string OS_NAME,string Channel,string FunctionName,string LogText);
+        // Method of make string to upper
+        string to_upper(string sentence)
+        {
+            string new_sentence = "";
+            for (int i = 0; i < sentence.length(); i++)
+            {
+                char ch = sentence[i];
+                // cout << ch << endl;
+                ch = toupper(ch);
+                new_sentence += ch;
+            }
+            return new_sentence;
+        }
 
     private:
         int GetArraySize(string NameTable, string NameColumn);

@@ -31,6 +31,19 @@
 using namespace std;
 using namespace DB;
 
+int Database::CreateTable(string NameTable, map<string,string> Columns)
+{
+    SQL_COMMAND = "CREATE TABLE " + NameTable + "(\n";
+    for (const auto &element:Columns)
+    {
+        SQL_COMMAND = SQL_COMMAND + "\t" + element.first + to_upper(element.second);
+        SQL_COMMAND += ")";
+    }
+    int RESULT_SQL = sqlite3_exec(db, SQL_COMMAND.c_str(), callback, NULL, NULL);
+    if (RESULT_SQL != SQLITE_OK)
+        throw runtime_error("Error in DELETE command");
+    return 0;
+}
 string Database::GetValueFromDB(string NameTable, string NameApp, string NameColumn)
 {
     // ArraySize = GetArraySize("Applications",NameColumn);
@@ -320,5 +333,14 @@ int Database::RemoveApplications(string Tables[])
                 cout << NameApp << " successfully added to " << Tables[i] << endl;
         }
     }
+    return 0;
+}
+
+int Database::InsertLogInformationToTable(string NameTable,string Architecture,string OS_NAME,string Channel,string FunctionName,string LogText)
+{
+    SQL_COMMAND = "INSERT INTO 'main'.'" + NameTable + "' ('Architecture', 'Channel', 'LogText', 'OS_NAME','FunctionName') VALUES ('" + Architecture + "', '" + Channel + "', '" + LogText + "', '" + OS_NAME + "', '" + FunctionName + "');";
+    int RESULT_SQL = sqlite3_exec(db, SQL_COMMAND.c_str(), callback, NULL, NULL);
+    if (RESULT_SQL != SQLITE_OK)
+        throw runtime_error("Error in INSERT command");
     return 0;
 }

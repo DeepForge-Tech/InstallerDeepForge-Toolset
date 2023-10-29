@@ -29,7 +29,6 @@
 #include <iostream>
 #include <conio.h>
 #include <Windows.h>
-#pragma comment(lib, "urlmon.lib")
 #include "Progressbar.hpp"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -41,8 +40,9 @@
 #include <zipper/unzipper.h>
 #include <fstream>
 #include <cctype>
+#include "Logger.cpp"
 
-#define CHUNK 16384
+#define OS_NAME "Windows"
 
 using namespace std;
 using namespace DB;
@@ -56,8 +56,9 @@ namespace Windows
     int Percentage;
     int TempPercentage = 0;
     // float type
-    float LastSize;
-    float LastTotalSize;
+    double LastSize;
+    double LastTotalSize;
+    double DownloadSpeed;
     // string type
     string Answer;
     const string NewOrganizationFolder = "C:\\ProgramData\\DeepForge";
@@ -70,10 +71,14 @@ namespace Windows
     const string NameVersionTable = "WindowsVersions";
     const string UpdateManagerTable = "UpdateManager_Windows";
     const string TrueVarious[3] = {"yes", "y", "1"};
-    string Architecture;
     string InstallDelimiter = "========================================================";
-    string OS_NAME = "Windows";
+    #if defined(__x86_64__)
+        string Architecture = "amd64";
+    #elif __arm__
+        string Architecture = "arm64";
+    #endif
     // init classes
+    Logger logger;
     ProgressBar_v1 progressbar;
     Database database;
 
@@ -125,11 +130,11 @@ namespace Windows
         {
 
             Percentage = static_cast<float>(ulProgress) / static_cast<float>(ulProgressMax) * 100;
-            if (TempPercentage != Percentage && TempPercentage <= 98)
+            if (TempPercentage != Percentage && TempPercentage <= 100)
             {
-                progressbar.Update(0.0, (float)(ulProgress), (float)(ulProgressMax));
-                LastSize = (float)(ulProgress);
-                LastTotalSize = (float)(ulProgressMax);
+                progressbar.Update((double)(ulProgress), (double)(ulProgressMax));
+                LastSize = (double)(ulProgress);
+                LastTotalSize = (double)(ulProgressMax);
                 TempPercentage = Percentage;
             }
             return S_OK;
@@ -141,13 +146,12 @@ namespace Windows
     public:
         Installer()
         {
-            // Changing the encoding in the Windows console
-            system("chcp 65001");
-            GetArchitectureOS();
+            // Set console code page to UTF-8 so console known how to interpret string data
+            SetConsoleOutputCP(CP_UTF8);
             // Create temp folder
             MakeDirectory(NewTempFolder);
             cout << InstallDelimiter << endl;
-            cout << "Downloading database.." << endl;
+            cout << "Downloading database..." << endl;
             // Download database Versions.db
             Download(DB_URL, NewTempFolder);
             cout << "Database successfully downloaded." << endl;
@@ -170,20 +174,31 @@ namespace Windows
                 string filename = dir + "/" + name.replace(name.find("/"), 1, "");
                 // Call method for download file
                 HRESULT Download = URLDownloadToFile(NULL, url.c_str(), filename.c_str(), 0, static_cast<IBindStatusCallback *>(&writer));
+                switch (Download)
+                {
+                    case -2146697211:
+                        throw domain_error("No internet connection");
+                    case -2147467260:
+                        throw domain_error("Connection reset");
+                }
                 // If the progress bar is not completely filled in, then paint over manually
-                if (Process < 100 && Download == S_OK)
+                if (Process < 100 && Process != Percentage)
                 {
                     for (int i = (Process - 1); i < 99; i++)
                     {
-                        progressbar.Update(0.0, LastSize, LastTotalSize);
+                        progressbar.Update(LastSize, LastTotalSize);
                     }
                 }
                 // Reset all variables and preferences
                 progressbar.ResetAll();
+                Percentage = 0;
+                TempPercentage = 0;
             }
             catch (exception& error)
             {
-                cerr << error.what() << endl;
+                string ErrorText = "==> ❌ " + string(error.what());
+                logger.SendError(Architecture,"Empty",OS_NAME,"Download()",error.what());
+                cerr << ErrorText << endl;
             }
         }
         // Method for create symlink on desktop
@@ -248,7 +263,29 @@ namespace Windows
             unzipper.extract(path_to);
             unzipper.close();
         }
+        void AddToStartupSystem(string filePath)
+        {
+            filePath = filePath + ".exe";
+            HKEY hKey;
+            const char* czStartName = "DeepForge-UpdateManager";
+            // const char* czExePath   = "C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\DeepForgeToolset.exe";
 
+            LONG lnRes = RegOpenKeyEx(  HKEY_CURRENT_USER,
+                                        "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+                                        0 , KEY_WRITE,
+                                        &hKey);
+            if( ERROR_SUCCESS == lnRes )
+            {
+                lnRes = RegSetValueEx(  hKey,
+                                        czStartName,
+                                        0,
+                                        REG_SZ,
+                                        (unsigned char*)filePath.c_str(),
+                                        strlen(filePath.c_str()) );
+            }
+
+            RegCloseKey(hKey);
+        }
         void RebootSystem()
         {
             system("shutdown -r -t 0");
@@ -268,15 +305,6 @@ namespace Windows
                 }
             }
             return status;
-        }
-        // Method for getting architecture of OS
-        void GetArchitectureOS()
-        {
-#if defined(__x86_64__)
-            Architecture = "amd64";
-#elif __arm__
-            Architecture = "arm64";
-#endif
         }
     };
 }
