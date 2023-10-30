@@ -392,7 +392,7 @@ int Database::RemoveApplications(string Tables[])
 
         for (int i = 0; i < Tables->size(); i++)
         {
-            RESULT_COMMAND = RemoveApplicationsFromTable(Tables[i], NameApp);
+            RESULT_COMMAND = RemoveApplicationFromTable(Tables[i], NameApp);
             if (RESULT_COMMAND == 0)
                 cout << NameApp << " successfully removed to " << Tables[i] << endl;
         }

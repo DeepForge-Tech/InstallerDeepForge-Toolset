@@ -239,9 +239,18 @@ namespace macOS
                 }
                 AppInformationDB.open(&pathFile);
                 /* The bellow code is creating a table called "Applications" in the AppInformationDB database using the CreateTable method. It then inserts values into the "Applications" table using the InsertValuesToTable method. The boolean variable "exists" is used to store the result of the CreateTable method, indicating whether the table creation was successful or not. The integer variable "result" is used to store the number of rows affected by the InsertValuesToTable method. */
-                bool exists = AppInformationDB.CreateTable("Applications",ApplicationColumns);
-                /* The bellow code is calling a method named "InsertValuesToTable" from the "AppInformationDB" class. It is passing two arguments to the method: the table name "Applications" and the variable "ApplicationFields". The method is likely inserting values into the specified table in a database. The result of the method call is being stored in an integer variable named "result". */
-                int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
+                bool existsTable = AppInformationDB.CreateTable("Applications",ApplicationColumns);
+                int existsValue = AppInformationDB.ExistNameAppInTable("Applications","DeepForge-Toolset");
+                /* The code is checking if a table called "Applications" exists in the database. If the table does not exist (existsTable == -1), it inserts values into the table using the AppInformationDB.InsertValuesToTable() method. If the table does exist, it removes an application called "DeepForge-Toolset" from the table using the AppInformationDB.RemoveApplicationFromTable() method, and then inserts values into the table using the AppInformationDB.InsertValuesToTable() method. */
+                if (existsTable == -1)
+                {
+                    int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
+                }
+                else
+                {
+                    AppInformationDB.RemoveApplicationFromTable("Applications","DeepForge-Toolset");
+                    int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
+                }
             }
             catch (exception &error)
             {
