@@ -65,6 +65,8 @@ namespace DB
             sqlite3_close(db);
         }
         int CreateTable(string NameTable, map<string,string> Columns);
+        int InsertValuesToTable(string NameTable,map<string,string> Fields);
+        int ExistNameAppInTable(string NameTable,string NameApp);
         string GetValueFromDB(string NameTable, string NameApp, string NameColumn);
         string GetVersionFromDB(string NameTable, string Channel, string NameColumn, string Architecture);
         map<string, string> GetAllVersionsFromDB(string NameTable, string NameColumn, string Architecture);
@@ -73,7 +75,7 @@ namespace DB
         map<string, string> GetAllValuesFromDB(string NameTable, string NameColumn);
         map<string, string> GetDevPackFromDB(string NameTable, string NameColumn);
         int InsertApplicationsToTable(string NameTable, string NameApp, string WindowsCommand, string macOSCommand, string LinuxCommand);
-        int RemoveApplicationsFromTable(string NameTable, string NameApp);
+        int RemoveApplicationFromTable(string NameTable, string NameApp);
         int AddApplications(string Tables[]);
         int RemoveApplications(string Tables[]);
         int InsertLogInformationToTable(string NameTable,string Architecture,string OS_NAME,string Channel,string FunctionName,string LogText);
@@ -90,6 +92,7 @@ namespace DB
             }
             return new_sentence;
         }
+
 
     private:
         int GetArraySize(string NameTable, string NameColumn);

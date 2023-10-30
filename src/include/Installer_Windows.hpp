@@ -41,6 +41,7 @@
 #include <fstream>
 #include <cctype>
 #include "Logger.cpp"
+#include <fstream>
 
 #define DB_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
 #define OS_NAME "Windows"
@@ -72,11 +73,11 @@ namespace Windows
     string DB_PATH = NewTempFolder + "\\Versions.db";
     const string TrueVarious[3] = {"yes", "y", "1"};
     string InstallDelimiter = "========================================================";
-    #if defined(__x86_64__)
-        string Architecture = "amd64";
-    #elif __arm__
-        string Architecture = "arm64";
-    #endif
+#if defined(__x86_64__)
+    string Architecture = "amd64";
+#elif __arm__
+    string Architecture = "arm64";
+#endif
     // init classes
     Logger logger;
     ProgressBar_v1 progressbar;
@@ -176,10 +177,10 @@ namespace Windows
                 HRESULT Download = URLDownloadToFile(NULL, url.c_str(), filename.c_str(), 0, static_cast<IBindStatusCallback *>(&writer));
                 switch (Download)
                 {
-                    case -2146697211:
-                        throw domain_error("No internet connection");
-                    case -2147467260:
-                        throw domain_error("Connection reset");
+                case -2146697211:
+                    throw domain_error("No internet connection");
+                case -2147467260:
+                    throw domain_error("Connection reset");
                 }
                 // If the progress bar is not completely filled in, then paint over manually
                 if (Process < 100 && Process != Percentage)
@@ -194,10 +195,10 @@ namespace Windows
                 Percentage = 0;
                 TempPercentage = 0;
             }
-            catch (exception& error)
+            catch (exception &error)
             {
                 string ErrorText = "==> ❌ " + string(error.what());
-                logger.SendError(Architecture,"Empty",OS_NAME,"Download()",error.what());
+                logger.SendError(Architecture, "Empty", OS_NAME, "Download()", error.what());
                 cerr << ErrorText << endl;
             }
         }
@@ -209,6 +210,41 @@ namespace Windows
             char *UserFolder = getenv("USERPROFILE");
             string symlinkPath = string(UserFolder) + "\\Desktop\\" + nameSymlink;
             CreateHardLinkA(symlinkPath.c_str(), filePath.c_str(), NULL);
+        }
+        void WriteInformation(string version)
+        {
+            try
+            {
+                map<string,string> ApplicationColumns = {
+                    {"Name","TEXT"},
+                    {"Version","TEXT"},
+                };
+                map<string,string> ApplicationFields = {
+                    {"Name","DeepForge-Toolset"},
+                    {"Version",version},
+                };
+                string pathFile = NewUpdateManagerFolder + "\\AppInformation.db";
+                Database AppInformationDB;
+                /* The bellow code is checking if a file exists at the specified path. If the file does not exist, it creates a new file and writes an empty string to it. Then, it opens a database connection using the file as the database path. It checks if a table named "Applications" exists in the database. If the table does not exist, it creates the table with the specified columns. Finally, it inserts values into the "Applications" table. */
+                if (filesystem::exists(pathFile) == false)
+                {
+                    ofstream file(pathFile);
+                    file << "";
+                    file.close();
+                    
+                }
+                AppInformationDB.open(&pathFile);
+                /* The bellow code is creating a table called "Applications" in the AppInformationDB database using the CreateTable method. It then inserts values into the "Applications" table using the InsertValuesToTable method. The boolean variable "exists" is used to store the result of the CreateTable method, indicating whether the table creation was successful or not. The integer variable "result" is used to store the number of rows affected by the InsertValuesToTable method. */
+                bool exists = AppInformationDB.CreateTable("Applications",ApplicationColumns);
+                /* The bellow code is calling a method named "InsertValuesToTable" from the "AppInformationDB" class. It is passing two arguments to the method: the table name "Applications" and the variable "ApplicationFields". The method is likely inserting values into the specified table in a database. The result of the method call is being stored in an integer variable named "result". */
+                int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
+            }
+            catch (exception &error)
+            {
+                // Error output
+                logger.SendError(Architecture, "Empty", OS_NAME, "WriteInformation", error.what());
+                cerr << error.what() << endl;
+            }
         }
         // Method of make string to lower
         string to_lower(string sentence)
@@ -267,21 +303,21 @@ namespace Windows
         {
             filePath = filePath + ".exe";
             HKEY hKey;
-            const char* czStartName = "DeepForge-UpdateManager";
+            const char *czStartName = "DeepForge-UpdateManager";
             // const char* czExePath   = "C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\DeepForgeToolset.exe";
 
-            LONG lnRes = RegOpenKeyEx(  HKEY_CURRENT_USER,
-                                        "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
-                                        0 , KEY_WRITE,
-                                        &hKey);
-            if( ERROR_SUCCESS == lnRes )
+            LONG lnRes = RegOpenKeyEx(HKEY_CURRENT_USER,
+                                      "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+                                      0, KEY_WRITE,
+                                      &hKey);
+            if (ERROR_SUCCESS == lnRes)
             {
-                lnRes = RegSetValueEx(  hKey,
-                                        czStartName,
-                                        0,
-                                        REG_SZ,
-                                        (unsigned char*)filePath.c_str(),
-                                        strlen(filePath.c_str()) );
+                lnRes = RegSetValueEx(hKey,
+                                      czStartName,
+                                      0,
+                                      REG_SZ,
+                                      (unsigned char *)filePath.c_str(),
+                                      strlen(filePath.c_str()));
             }
 
             RegCloseKey(hKey);

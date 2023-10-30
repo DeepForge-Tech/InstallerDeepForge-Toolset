@@ -215,6 +215,41 @@ namespace macOS
             unzipper.extract(path_to);
             unzipper.close();
         }
+        void WriteInformation(string version)
+        {
+            try
+            {
+                map<string,string> ApplicationColumns = {
+                    {"Name","TEXT"},
+                    {"Version","TEXT"},
+                };
+                map<string,string> ApplicationFields = {
+                    {"Name","DeepForge-Toolset"},
+                    {"Version",version},
+                };
+                string pathFile = NewUpdateManagerFolder + "\\AppInformation.db";
+                Database AppInformationDB;
+                /* The bellow code is checking if a file exists at the specified path. If the file does not exist, it creates a new file and writes an empty string to it. Then, it opens a database connection using the file as the database path. It checks if a table named "Applications" exists in the database. If the table does not exist, it creates the table with the specified columns. Finally, it inserts values into the "Applications" table. */
+                if (filesystem::exists(pathFile) == false)
+                {
+                    ofstream file(pathFile);
+                    file << "";
+                    file.close();
+                    
+                }
+                AppInformationDB.open(&pathFile);
+                /* The bellow code is creating a table called "Applications" in the AppInformationDB database using the CreateTable method. It then inserts values into the "Applications" table using the InsertValuesToTable method. The boolean variable "exists" is used to store the result of the CreateTable method, indicating whether the table creation was successful or not. The integer variable "result" is used to store the number of rows affected by the InsertValuesToTable method. */
+                bool exists = AppInformationDB.CreateTable("Applications",ApplicationColumns);
+                /* The bellow code is calling a method named "InsertValuesToTable" from the "AppInformationDB" class. It is passing two arguments to the method: the table name "Applications" and the variable "ApplicationFields". The method is likely inserting values into the specified table in a database. The result of the method call is being stored in an integer variable named "result". */
+                int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
+            }
+            catch (exception &error)
+            {
+                // Error output
+                logger.SendError(Architecture, "Empty", OS_NAME, "WriteInformation", error.what());
+                cerr << error.what() << endl;
+            }
+        }
         void AddToStartupSystem(string filePath)
         {
 
