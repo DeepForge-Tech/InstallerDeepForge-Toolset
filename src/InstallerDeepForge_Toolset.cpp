@@ -68,7 +68,11 @@ void Installer::InstallUpdateManager()
         file_path = NewUpdateManagerFolder + "/DeepForge-UpdateManager";
         cout << "==> ✅ UpdateManager " << version << " successfully installed" << endl;
         cout << InstallDelimiter << endl;
-        AddToStartupSystem(file_path);
+        #if defined(_WIN32)
+            AddToStartupSystem(file_path);
+        #else
+            AddToStartupSystem();
+        #endif
     }
     catch (exception &error)
     {

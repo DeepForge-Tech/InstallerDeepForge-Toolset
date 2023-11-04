@@ -254,9 +254,11 @@ namespace Linux
                 cerr << error.what() << endl;
             }
         }
-        void AddToStartupSystem(string filePath)
+        void AddToStartupSystem()
         {
-            
+            string ServicePath = NewTempFolder + "/DeepForge-UpdateManager.service";
+            string Command = "sudo mv " + ServicePath + " /etc/systemd/system/DeepForge-UpdateManager.service && sudo chmod 644 /etc/systemd/system/DeepForge-UpdateManager.service && sudo systemctl enable /etc/systemd/system/DeepForge-UpdateManager.service";
+            system(Command.c_str());
         }
         /* The `InstallLibraries()` function is responsible for downloading and executing a shell script that installs additional libraries or dependencies required by the DeepForge Toolset. */
         void InstallLibraries()

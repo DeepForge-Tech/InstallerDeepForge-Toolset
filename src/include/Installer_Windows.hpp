@@ -268,7 +268,7 @@ namespace Windows
             }
             return new_sentence;
         }
-        // Method to iterate through creating folders
+        /* The 'MakeDirectory' function is used to create a directory (folder) in the file system.*/
         void MakeDirectory(string dir)
         {
             string currentDir;
@@ -292,7 +292,14 @@ namespace Windows
                 }
                 dir.erase(0, pos + delimiter.length());
             }
-            fullPath = fullPath + "\\" + dir;
+            if (fullPath != "")
+            {
+                fullPath = fullPath + "\\" + dir;
+            }
+            else
+            {
+                fullPath = dir + "\\";
+            }
             if (filesystem::exists(fullPath) == false)
             {
                 filesystem::create_directory(fullPath);
