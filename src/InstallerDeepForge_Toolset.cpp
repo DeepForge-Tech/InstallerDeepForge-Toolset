@@ -39,7 +39,7 @@ using namespace Windows;
 
 Installer installer;
 
-string AllChannels[4] = {"stable\\latest", "stable", "beta", "beta\\latest"};
+string AllChannels[2] = {"stable", "beta"};
 
 /**
  * The InstallUpdateManager function downloads and installs the latest version of the Update Manager
@@ -56,28 +56,28 @@ void Installer::InstallUpdateManager()
         string ArchivePath;
         string Command;
         string file_path;
-        version = database.GetLatestVersion(UpdateManagerTable, "stable\\latest", "Version", Architecture);
-        UpdateManagerUrl = database.GetApplicationURL(UpdateManagerTable, "stable\\latest", "Url", Architecture, version);
-        cout << "==> Installing UpdateManager..." << endl;
-        Download(UpdateManagerUrl, NewTempFolder);
+        version = database.GetLatestVersion(UpdateManagerTable, "stable", "Version", Architecture);
+        UpdateManagerUrl = database.GetApplicationURL(UpdateManagerTable, "stable", "Url", Architecture, version);
+        cout << translate["Installing"].asString() << " UpdateManager..." << endl;
+        Download(UpdateManagerUrl, NewTempFolder,true);
         name = (UpdateManagerUrl.substr(UpdateManagerUrl.find_last_of("/")));
         ArchivePath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
         MakeDirectory(NewUpdateManagerFolder);
         UnpackArchive(ArchivePath, NewUpdateManagerFolder);
         filesystem::remove(ArchivePath);
         file_path = NewUpdateManagerFolder + "/DeepForge-UpdateManager";
-        cout << "==> ✅ UpdateManager " << version << " successfully installed" << endl;
+        cout << "==> ✅ UpdateManager " << version << " " << translate["Installed"].asString() << endl;
         cout << InstallDelimiter << endl;
-        #if defined(_WIN32)
-            AddToStartupSystem(file_path);
-        #else
-            AddToStartupSystem();
-        #endif
+#if defined(_WIN32)
+        AddToStartupSystem(file_path);
+#else
+        AddToStartupSystem();
+#endif
     }
     catch (exception &error)
     {
         string ErrorText = "==> ❌ " + string(error.what());
-        logger.SendError(Architecture,"Empty",OS_NAME,"InstallUpdateManager()",error.what());
+        logger.SendError(Architecture, "Empty", OS_NAME, "InstallUpdateManager()", error.what());
         cerr << ErrorText << endl;
     }
 }
@@ -95,7 +95,6 @@ void Installer::InstallDeepForgeToolset(string channel)
 {
     try
     {
-        string version;
         string ApplicationURL;
         string name;
         string filename;
@@ -103,36 +102,52 @@ void Installer::InstallDeepForgeToolset(string channel)
         string Command;
         string file_path;
         cout << InstallDelimiter << endl;
-        cout << "==> Installing DeepForge Toolset..." << endl;
-        version = database.GetLatestVersion(NameVersionTable, channel, "Version", Architecture);
-        ApplicationURL = database.GetApplicationURL(NameVersionTable, channel, "Url", Architecture, version);
-        Download(ApplicationURL, NewTempFolder);
+        cout << translate["Installing"].asString() << " DeepForge Toolset..." << endl;
+        ApplicationURL = database.GetApplicationURL(NameVersionTable, channel, "Url", Architecture, DEEPFORGE_TOOLSET_VERSION);
+        Download(ApplicationURL, NewTempFolder,true);
         name = (ApplicationURL.substr(ApplicationURL.find_last_of("/")));
         ArchivePath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
         MakeDirectory(NewApplicationFolder);
         UnpackArchive(ArchivePath, NewApplicationFolder);
-        #if defined(__linux__)
-            InstallLibraries();
-        #elif __APPLE__
-            InstallLibraries();
-        #endif
+#if defined(__linux__)
+        InstallLibraries();
+#elif __APPLE__
+        InstallLibraries();
+#endif
         file_path = NewApplicationFolder + "/DeepForgeToolset";
         CreateSymlink("DeepForgeToolset", file_path);
-        WriteInformation(version);
         filesystem::remove(ArchivePath);
-        cout << "==> ✅ DeepForge Toolset " << version << " successfully installed" << endl;
+        cout << "==> ✅ DeepForge Toolset " << DEEPFORGE_TOOLSET_VERSION << " " << translate["Installed"].asString() << endl;
+        AddToPATH();
         cout << InstallDelimiter << endl;
-        InstallUpdateManager();
-
+        if (Updating == true)
+        {
+            InstallUpdateManager();
+            WriteInformation(DEEPFORGE_TOOLSET_VERSION);
+        }
     }
     catch (exception &error)
     {
         string ErrorText = "==> ❌ " + string(error.what());
-        logger.SendError(Architecture,"Empty",OS_NAME,"InstallDeepForgeToolset()",error.what());
+        logger.SendError(Architecture, "Empty", OS_NAME, "InstallDeepForgeToolset()", error.what());
         cerr << ErrorText << endl;
     }
 }
 
+void Installer::ChangeUpdating()
+{
+    cout << InstallDelimiter << endl;
+    cout << translate["ChangeUpdating"].asString();
+    getline(cin, Answer);
+    if (Answer.empty())
+    {
+        Updating = true;
+    }
+    else
+    {
+        Updating = CheckAnswer(Answer);
+    }
+}   
 /**
  * The CommandManager function allows the user to select a version of the DeepForge Toolset and
  * installs it.
@@ -141,6 +156,7 @@ void Installer::CommandManager()
 {
     try
     {
+        ChangeLanguage();
         map<int, string> EnumerateChannels;
         map<string, string> Channels = database.GetAllVersionsFromDB(NameVersionTable, "Channel", Architecture);
         int size = (sizeof(AllChannels) / sizeof(AllChannels[0]));
@@ -157,19 +173,21 @@ void Installer::CommandManager()
             {
                 cout << n << ". " << AllChannels[i] << endl;
                 EnumerateChannels.insert(pair<int, string>(n, AllChannels[i]));
-                if (AllChannels[i] == "stable\\latest")
+                if (AllChannels[i] == "stable")
                 {
                     defaultChannel = n;
                 }
                 n++;
             }
         }
-        cout << "Change version of DeepForge Toolset (default - " << defaultChannel << "):";
+
+        cout << translate["ChangeStability"].asString() << defaultChannel << "):";
         getline(cin, Answer);
         /* This code block is responsible for handling user input to select a version of the DeepForge
         Toolset to install. */
         if (Answer.empty())
         {
+            installer.ChangeUpdating();
             installer.InstallDeepForgeToolset(EnumerateChannels[defaultChannel]);
         }
         else
@@ -177,12 +195,19 @@ void Installer::CommandManager()
             int TempAnswer = stoi(Answer);
             if (EnumerateChannels.find(TempAnswer) != EnumerateChannels.end())
             {
+                installer.ChangeUpdating();
                 installer.InstallDeepForgeToolset(EnumerateChannels[TempAnswer]);
             }
             else
             {
                 CommandManager();
             }
+        }
+        cout << translate["Reboot"].asString();
+        getline(cin,Answer);
+        if (Answer.empty() || CheckAnswer(Answer) == true)
+        {
+            RebootSystem();
         }
     }
     catch (exception &error)

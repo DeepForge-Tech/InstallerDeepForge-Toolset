@@ -73,7 +73,7 @@ namespace Linux
     string InstallDelimiter = "========================================================";
     #if defined(__x86_64__)
         string Architecture = "amd64";
-    #elif __arm__
+    #elif __arm__ || __aarch64__ || _M_ARM64
         string Architecture = "arm64";
     #endif
     // init classes
@@ -161,6 +161,8 @@ namespace Linux
         void CommandManager();
         void InstallUpdateManager();
         void InstallDeepForgeToolset(string channel);
+        void ChangeStabilityApp(string version);
+        string ChangeVersionApp();
 
     private:
         void CreateSymlink(string nameSymlink, string filePath)
@@ -253,6 +255,10 @@ namespace Linux
                 logger.SendError(Architecture, "Empty", OS_NAME, "WriteInformation", error.what());
                 cerr << error.what() << endl;
             }
+        }
+        void AddToPATH(string path)
+        {
+
         }
         void AddToStartupSystem()
         {

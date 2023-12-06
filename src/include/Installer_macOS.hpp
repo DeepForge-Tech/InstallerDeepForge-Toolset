@@ -68,7 +68,7 @@ namespace macOS
     // string type
     #if defined(__x86_64__)
         string Architecture = "amd64";
-    #elif __arm__
+    #elif __arm__ || __aarch64__ || _M_ARM64
         string Architecture = "arm64";
     #endif
     string Answer;
@@ -163,6 +163,8 @@ namespace macOS
         void CommandManager();
         void InstallUpdateManager();
         void InstallDeepForgeToolset(string channel);
+        void ChangeStabilityApp(string version);
+        string ChangeVersionApp();
 
     private:
         /* The `CreateSymlink` function is creating a symbolic link (symlink) in the `/Applications` directory. It takes two parameters: `nameSymlink` which is the name of the symlink, and `filePath` which is the path to the file or directory that the symlink will point to.*/
@@ -242,7 +244,7 @@ namespace macOS
                 bool existsTable = AppInformationDB.CreateTable("Applications",ApplicationColumns);
                 int existsValue = AppInformationDB.ExistNameAppInTable("Applications","DeepForge-Toolset");
                 /* The code is checking if a table called "Applications" exists in the database. If the table does not exist (existsTable == -1), it inserts values into the table using the AppInformationDB.InsertValuesToTable() method. If the table does exist, it removes an application called "DeepForge-Toolset" from the table using the AppInformationDB.RemoveApplicationFromTable() method, and then inserts values into the table using the AppInformationDB.InsertValuesToTable() method. */
-                if (existsTable == -1)
+                if (existsTable == 1)
                 {
                     int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
                 }
@@ -259,7 +261,11 @@ namespace macOS
                 cerr << error.what() << endl;
             }
         }
-        void AddToStartupSystem(string filePath)
+        void AddToPATH(string path)
+        {
+
+        }
+        void AddToStartupSystem()
         {
 
         }

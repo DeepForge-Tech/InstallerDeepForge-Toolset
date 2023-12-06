@@ -42,11 +42,21 @@
 #include <cctype>
 #include "Logger.cpp"
 #include <fstream>
+#include <AclAPI.h>
+#include <Lmcons.h>
+#include <urlmon.h>
+#include "json/json.h"
+#pragma comment (lib, "urlmon.lib")
 
+#define DEEPFORGE_TOOLSET_VERSION "0.1"
 #define DB_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
 #define OS_NAME "Windows"
 #define UpdateManagerTable "UpdateManager_Windows"
 #define NameVersionTable "WindowsVersions"
+#define Locale_RU_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_ru.json"
+#define Locale_EN_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_en.json"
+#define PathmanURL_AMD64 "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/pathman-v0.5.2-windows-amd64.exe"
+#define PathmanURL_ARM64 "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/pathman-v0.5.2-windows-amd64.exe"
 
 using namespace std;
 using namespace DB;
@@ -59,6 +69,9 @@ namespace Windows
     int result;
     int Percentage;
     int TempPercentage = 0;
+    // bool type
+    bool Updating = true;
+    bool withProgress = true;
     // float type
     double LastSize;
     double LastTotalSize;
@@ -66,7 +79,7 @@ namespace Windows
     // string type
     string Answer;
     const string NewOrganizationFolder = "C:\\ProgramData\\DeepForge";
-    const string NewApplicationFolder = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset";
+    const string NewApplicationFolder = NewOrganizationFolder + "\\DeepForge-Toolset";
     const string NewUpdateManagerFolder = NewOrganizationFolder + "\\UpdateManager";
     const string NewTempFolder = NewApplicationFolder + "\\Temp";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
@@ -75,9 +88,10 @@ namespace Windows
     string InstallDelimiter = "========================================================";
 #if defined(__x86_64__)
     string Architecture = "amd64";
-#elif __arm__
+#elif __arm__ || __aarch64__ || _M_ARM64
     string Architecture = "arm64";
 #endif
+    Json::Value translate;
     // init classes
     Logger logger;
     ProgressBar_v1 progressbar;
@@ -129,14 +143,16 @@ namespace Windows
 
         virtual HRESULT __stdcall OnProgress(ULONG ulProgress, ULONG ulProgressMax, ULONG ulStatusCode, LPCWSTR szStatusText)
         {
-
-            Percentage = static_cast<float>(ulProgress) / static_cast<float>(ulProgressMax) * 100;
-            if (TempPercentage != Percentage && TempPercentage <= 100)
+            if (withProgress == true)
             {
-                progressbar.Update((double)(ulProgress), (double)(ulProgressMax));
-                LastSize = (double)(ulProgress);
-                LastTotalSize = (double)(ulProgressMax);
-                TempPercentage = Percentage;
+                Percentage = static_cast<float>(ulProgress) / static_cast<float>(ulProgressMax) * 100;
+                if (TempPercentage != Percentage && TempPercentage <= 97)
+                {
+                    progressbar.Update((double)(ulProgress), (double)(ulProgressMax));
+                    LastSize = (double)(ulProgress);
+                    LastTotalSize = (double)(ulProgressMax);
+                    TempPercentage = Percentage;
+                }
             }
             return S_OK;
         }
@@ -151,10 +167,9 @@ namespace Windows
             SetConsoleOutputCP(CP_UTF8);
             // Create temp folder
             MakeDirectory(NewTempFolder);
-            cout << InstallDelimiter << endl;
             cout << "Downloading database..." << endl;
             // Download database Versions.db
-            Download(DB_URL, NewTempFolder);
+            Download(DB_URL, NewTempFolder,true);
             cout << "Database successfully downloaded." << endl;
             cout << InstallDelimiter << endl;
             database.open(&DB_PATH);
@@ -162,14 +177,82 @@ namespace Windows
         void CommandManager();
         void InstallUpdateManager();
         void InstallDeepForgeToolset(string channel);
+        void ChangeUpdating();
+        void ChangeLanguage()
+        {
+            string NumLang;
+            cout << "1. Russian" << endl;
+            cout << "2. English" << endl;
+            cout << "Choose language (default - 1):";
+            getline(cin, NumLang);
+            if (NumLang == "1" || NumLang.empty())
+            {
+                ReadJSON("Russian");
+            }
+            else if (NumLang == "2")
+            {
+                ReadJSON("English");
+            }
+            // If the user enters a non-digit, then the method is called again
+            else
+            {
+                ChangeLanguage();
+            }
+            cout << InstallDelimiter << endl;
+        }
+        // JSON file reading function with interface localization
+    void ReadJSON(string language)
+    {
+        try
+        {
+            if (language == "Russian")
+            {
+                string LocaleDir = NewApplicationFolder + "\\locale";
+                string LocalePath = LocaleDir + "\\locale_ru.json";
+                MakeDirectory(LocaleDir);
+                Download(Locale_RU_URL,LocaleDir,false);
+                ifstream file(LocalePath);
+                // File open check
+                if (file.is_open())
+                {
+                    // Dictionary entry with translation
+                    file >> translate;
+                    file.close();
+                }
+            }
+            else if (language == "English")
+            {
+                string LocaleDir = NewApplicationFolder + "\\locale";
+                string LocalePath = LocaleDir + "\\locale_en.json";
+                MakeDirectory(LocaleDir);
+                Download(Locale_EN_URL,LocaleDir,false);
+                ifstream file(LocalePath);
+                // File open check
+                if (file.is_open())
+                {
+                    // Dictionary entry with translation
+                    file >> translate;
+                    file.close();
+                }
+            }
+        }
+        catch (exception &error)
+        {
+            // Error output
+            logger.WriteError("Function: ReadJSON");
+            logger.WriteError(error.what());
+            logger.SendError(Architecture,"Empty",OS_NAME,"ReadJSON",error.what());
+        }
+    }
 
     private:
-        void Download(string url, string dir)
+        void Download(string url, string dir,bool Progress)
         {
             try
             {
                 // Class for write data on windows
                 WriteData writer;
+                withProgress = Progress;
                 // Get name of file from url
                 string name = (url.substr(url.find_last_of("/")));
                 string filename = dir + "/" + name.replace(name.find("/"), 1, "");
@@ -182,18 +265,22 @@ namespace Windows
                 case -2147467260:
                     throw domain_error("Connection reset");
                 }
-                // If the progress bar is not completely filled in, then paint over manually
-                if (Process < 100 && Process != Percentage)
+                if (Progress == true)
                 {
-                    for (int i = (Process - 1); i < 99; i++)
+                    // If the progress bar is not completely filled in, then paint over manually
+                    if (Process < 100 && Process != Percentage)
                     {
-                        progressbar.Update(LastSize, LastTotalSize);
+                        for (int i = (Process - 1); i < 98; i++)
+                        {
+                            progressbar.Update(LastSize, LastTotalSize);
+                        }
+                        progressbar.Update(LastTotalSize, LastTotalSize);
                     }
+                    // Reset all variables and preferences
+                    progressbar.ResetAll();
+                    Percentage = 0;
+                    TempPercentage = 0;
                 }
-                // Reset all variables and preferences
-                progressbar.ResetAll();
-                Percentage = 0;
-                TempPercentage = 0;
             }
             catch (exception &error)
             {
@@ -201,6 +288,16 @@ namespace Windows
                 logger.SendError(Architecture, "Empty", OS_NAME, "Download()", error.what());
                 cerr << ErrorText << endl;
             }
+        }
+        void AddToPATH()
+        {
+            string Command = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe add " + NewApplicationFolder + " && del C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe";
+            #if defined(__x86_64__)
+                Download(PathmanURL_AMD64,NewTempFolder,false);
+            #elif __arm__ || __aarch64__ || _M_ARM64
+                Download(PathmanURL_ARM64,NewTempFolder,false);
+            #endif
+            system(Command.c_str());
         }
         // Method for create symlink on desktop
         void CreateSymlink(string nameSymlink, string filePath)
@@ -251,7 +348,7 @@ namespace Windows
             catch (exception &error)
             {
                 // Error output
-                logger.SendError(Architecture, "Empty", OS_NAME, "WriteInformation", error.what());
+                logger.SendError(Architecture, "Empty", OS_NAME, "WriteInformation()", error.what());
                 cerr << error.what() << endl;
             }
         }
@@ -283,7 +380,7 @@ namespace Windows
                     fullPath = fullPath + "\\" + currentDir;
                     if (filesystem::exists(fullPath) == false)
                     {
-                        filesystem::create_directory(fullPath);
+                        CreateDirectoryA(fullPath.c_str(),NULL);
                     }
                 }
                 else
@@ -302,7 +399,7 @@ namespace Windows
             }
             if (filesystem::exists(fullPath) == false)
             {
-                filesystem::create_directory(fullPath);
+                CreateDirectoryA(fullPath.c_str(),NULL);
             }
         }
         /*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`.
