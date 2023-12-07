@@ -1,0 +1,9 @@
+[Unit]
+Description=DeepForge-UpdateManager
+
+[Service]
+Type=simple
+ExecStart=sudo /usr/bin/DeepForge/UpdateManager/UpdateManager
+
+[Install]
+WantedBy=multi-user.target

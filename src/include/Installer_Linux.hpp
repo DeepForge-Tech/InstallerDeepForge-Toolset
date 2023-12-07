@@ -37,6 +37,13 @@
 #include "../DatabaseConnect.cpp"
 #include <map>
 #include "zipper/unzipper.h"
+#include "Logger.cpp"
+
+#define URL_DESKTOP_SYMLINK "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/DeepForgeToolset.desktop"
+#define DB_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
+#define NameVersionTable "LinuxVersions"
+#define UpdateManagerTable "UpdateManager_Linux"
+#define OS_NAME "Linux"
 
 using namespace std;
 using namespace DB;
@@ -54,49 +61,78 @@ namespace Linux
     float LastTotalSize;
     float DownloadSpeed;
     // string type
+    const string NewOrganizationFolder = "/usr/bin/DeepForge";
+    const string NewApplicationFolder = NewOrganizationFolder + "/DeepForge-Toolset";
+    const string NewUpdateManagerFolder = NewOrganizationFolder + "/UpdateManager";
+    const string NewTempFolder = NewApplicationFolder + "/Temp";
     const string ShellScript_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries.sh";
-    string NewApplicationFolder = "/usr/bin/DeepForge/DeepForge-Toolset";
-    string NewTempFolder = NewApplicationFolder + "/Temp";
-    const string DB_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db";
     std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
     string DB_PATH = NewTempFolder + "/Versions.db";
-    string NameVersionTable = "LinuxVersions";
     const string TrueVarious[3] = {"yes", "y", "1"};
     string Answer;
     string InstallDelimiter = "========================================================";
-    string OS_NAME = "Linux";
-    string Architecture;
-    CURL* curl = curl_easy_init();
+    #if defined(__x86_64__)
+        string Architecture = "amd64";
+    #elif __arm__ || __aarch64__ || _M_ARM64
+        string Architecture = "arm64";
+    #endif
     // init classes
+    CURL *curl = curl_easy_init();
+    Logger logger;
     CURLcode res;
     ProgressBar_v1 progressbar;
     Database database;
 
-    // Function for calc percentage of download progresss
+    /**
+     * The function `CallbackProgress` is a callback function used to track the progress of a download
+     * and update a progress bar accordingly.
+     *
+     * @param ptr The `ptr` parameter is a pointer to user-defined data that can be passed to the
+     * callback function. It allows you to pass additional information or context to the callback
+     * function if needed.
+     * @param TotalToDownload The total size of the file to be downloaded in bytes.
+     * @param NowDownloaded The amount of data that has been downloaded so far.
+     * @param TotalToUpload The total size of the data to be uploaded in bytes.
+     * @param NowUploaded The parameter "NowUploaded" represents the amount of data that has been
+     * uploaded so far. It is a double data type.
+     *
+     * @return an integer value of 0.
+     */
     int CallbackProgress(void *ptr, double TotalToDownload, double NowDownloaded, double TotalToUpload, double NowUploaded)
     {
         if (TotalToDownload <= 0.0)
         {
             return 0;
         }
-
+        // double DownloadSpeed;
         Percentage = static_cast<float>(NowDownloaded) / static_cast<float>(TotalToDownload) * 100;
+        /* The bellow code is checking if the `TempPercentage` is not equal to `Percentage` and is less
+        than or equal to 100. If this condition is true, it retrieves the download speed using
+        `curl_easy_getinfo` and updates a progress bar using the `progressbar.Update` function. It
+        also updates some variables (`LastDownloadSpeed`, `LastSize`, `LastTotalSize`, and
+        `TempPercentage`) with the current values. */
         if (TempPercentage != Percentage && TempPercentage <= 100)
         {
-            curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD, &DownloadSpeed);
-            if ((CURLE_OK == res) && (DownloadSpeed > 0.0))
-            {
-                // printf("Average download speed: %lu kbyte/sec.\n",
-                //         (unsigned long)(DownloadSpeed / 1024));
-                float Speed = (float)(DownloadSpeed / 1024);
-                progressbar.Update(Speed);
-                TempPercentage = Percentage;
-            }
+            progressbar.Update(NowDownloaded, TotalToDownload);
+            LastSize = NowDownloaded;
+            LastTotalSize = TotalToDownload;
+            TempPercentage = Percentage;
         }
         return 0;
     }
-
-    // Function for write data from curl
+    /**
+     * The function "WriteData" writes data from a pointer to a file stream.
+     *
+     * @param ptr ptr is a pointer to the data that needs to be written to the file. It points to the
+     * starting address of the data.
+     * @param size The size parameter specifies the size of each element to be written.
+     * @param nmemb The parameter "nmemb" stands for "number of members". It represents the number of
+     * elements, each with a size of "size", that you want to write to the file.
+     * @param stream The stream parameter is a pointer to a FILE object, which represents the file
+     * stream that the data will be written to.
+     *
+     * @return the number of elements successfully written to the file stream.
+     */
     size_t WriteData(void *ptr, size_t size, size_t nmemb, FILE *stream)
     {
         size_t WriteProcess = fwrite(ptr, size, nmemb, stream);
@@ -108,35 +144,25 @@ namespace Linux
     public:
         Installer()
         {
-            string Command;
-            system(Command.c_str());
-            GetArchitectureOS();
-            char *UserFolder = getenv("HOME");
-            NewApplicationFolder = string(UserFolder) + "/DeepForge/DeepForge-Toolset";
-            NewTempFolder = NewApplicationFolder + "/Temp";
-            DB_PATH = NewTempFolder + "/Versions.db";
-            Command = "sudo -s chmod 777 /usr/bin/";
+            // char *UserFolder = getenv("HOME");
+            // NewApplicationFolder = string(UserFolder) + "/DeepForge/DeepForge-Toolset";
+            // NewTempFolder = NewApplicationFolder + "/Temp";
+            // DB_PATH = NewTempFolder + "/Versions.db";
+            string Command = "sudo -s chmod 777 /usr/bin/";
             system(Command.c_str());
             // Create temp folder
             MakeDirectory(NewTempFolder);
-            cout << "Downloading database..." << endl;
+            cout << "==> Downloading database..." << endl;
             // Download database Versions.db
-            result = Download(DB_URL, NewTempFolder);
-            switch(result)
-            {
-                case 200:
-                    cout << "Database successfully downloaded." << endl;
-                    database.open(&DB_PATH);
-                    break;
-                case 502:
-                    cout << "Error in downloading database." << endl;
-                    // throw domain_error("Error in downloading database.");
-                    break;
-            }
-            
+            Download(DB_URL, NewTempFolder);
+            cout << "==> Database successfully downloaded." << endl;
+            database.open(&DB_PATH);
         }
         void CommandManager();
+        void InstallUpdateManager();
         void InstallDeepForgeToolset(string channel);
+        void ChangeStabilityApp(string version);
+        string ChangeVersionApp();
 
     private:
         void CreateSymlink(string nameSymlink, string filePath)
@@ -145,8 +171,6 @@ namespace Linux
             string symlinkPath = string(UserFolder) + "/Desktop/" + nameSymlink;
             string Command = "sudo ln -s " + filePath + " " + nameSymlink;
             system(Command.c_str());
-            // cout << symlinkPath << endl;
-            // CreateHardLinkA(symlinkPath.c_str(), filePath.c_str(), NULL);
         }
         /*The `MakeDirectory` function is responsible for creating a directory (folder) in the file system.*/
         void MakeDirectory(string dir)
@@ -178,15 +202,69 @@ namespace Linux
                 filesystem::create_directory(fullPath);
             }
         }
-        /*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`. 
-            It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`. 
+        /*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`.
+            It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`.
             After extracting the contents, the function closes the `Unzipper` object.
         */
-        int UnpackArchive(string path_from, string path_to)
+        void UnpackArchive(string path_from, string path_to)
         {
             Unzipper unzipper(path_from);
             unzipper.extract(path_to);
             unzipper.close();
+        }
+        void WriteInformation(string version)
+        {
+            try
+            {
+                map<string,string> ApplicationColumns = {
+                    {"Name","TEXT"},
+                    {"Version","TEXT"},
+                };
+                map<string,string> ApplicationFields = {
+                    {"Name","DeepForge-Toolset"},
+                    {"Version",version},
+                };
+                string pathFile = NewUpdateManagerFolder + "\\AppInformation.db";
+                Database AppInformationDB;
+                /* The bellow code is checking if a file exists at the specified path. If the file does not exist, it creates a new file and writes an empty string to it. Then, it opens a database connection using the file as the database path. It checks if a table named "Applications" exists in the database. If the table does not exist, it creates the table with the specified columns. Finally, it inserts values into the "Applications" table. */
+                if (filesystem::exists(pathFile) == false)
+                {
+                    ofstream file(pathFile);
+                    file << "";
+                    file.close();
+                    
+                }
+                AppInformationDB.open(&pathFile);
+                /* The bellow code is creating a table called "Applications" in the AppInformationDB database using the CreateTable method. It then inserts values into the "Applications" table using the InsertValuesToTable method. The boolean variable "exists" is used to store the result of the CreateTable method, indicating whether the table creation was successful or not. The integer variable "result" is used to store the number of rows affected by the InsertValuesToTable method. */
+                bool existsTable = AppInformationDB.CreateTable("Applications",ApplicationColumns);
+                int existsValue = AppInformationDB.ExistNameAppInTable("Applications","DeepForge-Toolset");
+                /* The code is checking if a table called "Applications" exists in the database. If the table does not exist (existsTable == -1), it inserts values into the table using the AppInformationDB.InsertValuesToTable() method. If the table does exist, it removes an application called "DeepForge-Toolset" from the table using the AppInformationDB.RemoveApplicationFromTable() method, and then inserts values into the table using the AppInformationDB.InsertValuesToTable() method. */
+                if (existsTable == -1)
+                {
+                    int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
+                }
+                else
+                {
+                    AppInformationDB.RemoveApplicationFromTable("Applications","DeepForge-Toolset");
+                    int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
+                }
+            }
+            catch (exception &error)
+            {
+                // Error output
+                logger.SendError(Architecture, "Empty", OS_NAME, "WriteInformation", error.what());
+                cerr << error.what() << endl;
+            }
+        }
+        void AddToPATH(string path)
+        {
+
+        }
+        void AddToStartupSystem()
+        {
+            string ServicePath = NewTempFolder + "/DeepForge-UpdateManager.service";
+            string Command = "sudo mv " + ServicePath + " /etc/systemd/system/DeepForge-UpdateManager.service && sudo chmod 644 /etc/systemd/system/DeepForge-UpdateManager.service && sudo systemctl enable /etc/systemd/system/DeepForge-UpdateManager.service";
+            system(Command.c_str());
         }
         /* The `InstallLibraries()` function is responsible for downloading and executing a shell script that installs additional libraries or dependencies required by the DeepForge Toolset. */
         void InstallLibraries()
@@ -194,7 +272,7 @@ namespace Linux
             string name;
             string ShellScriptPath;
             string Command;
-            Download(ShellScript_URL,NewTempFolder);
+            Download(ShellScript_URL, NewTempFolder);
             name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
             ShellScriptPath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
             Command = "sudo bash " + ShellScriptPath;
@@ -221,14 +299,13 @@ namespace Linux
             return status;
         }
 
-        int Download(string url, string dir)
+        void Download(string url, string dir)
         {
-            try
-            {
+            try {
                 string name = (url.substr(url.find_last_of("/")));
                 string filename = dir + "/" + name.replace(name.find("/"), 1, "");
-                FILE* file = fopen(filename.c_str(), "wb");
-                CURL* curl = curl_easy_init();
+                FILE *file = fopen(filename.c_str(), "wb");
+                CURL *curl = curl_easy_init();
                 curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
                 curl_easy_setopt(curl, CURLOPT_NOPROGRESS, false);
                 curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, &CallbackProgress);
@@ -239,31 +316,44 @@ namespace Linux
                 curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteData);
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
                 CURLcode response = curl_easy_perform(curl);
+                if (response != CURLE_OK)
+                {
+                    switch (response)
+                    {
+                    case CURLE_COULDNT_CONNECT:
+                        throw domain_error("Failed to connect to host or proxy.");
+                    case CURLE_COULDNT_RESOLVE_HOST:
+                        throw domain_error("Failed to resolve host. The given remote host was not allowed.");
+                    case CURLE_COULDNT_RESOLVE_PROXY:
+                        throw domain_error("Failed to resolve proxy. The given proxy host could not be resolved.");
+                    case CURLE_UNSUPPORTED_PROTOCOL:
+                        throw domain_error("Failed to connect to the site using this protocol.");
+                    case CURLE_SSL_CONNECT_ERROR:
+                        throw domain_error("The problem occurred during SSL/TLS handshake.");
+                    }
+                }
                 curl_easy_cleanup(curl);
                 fclose(file);
-                if (Process < 100)
+                // If the progress bar is not completely filled in, then paint over manually
+                if (Process < 100 && Process != Percentage)
                 {
                     for (int i = (Process - 1); i < 99; i++)
                     {
-                        progressbar.Update(0.0, LastSize, LastTotalSize);
+                        progressbar.Update(LastSize, LastTotalSize);
                     }
                 }
+                // Reset all variables and preferences
+                progressbar.ResetAll();
+                Percentage = 0;
+                TempPercentage = 0;
                 cout << InstallDelimiter << endl;
-                return 200;
             }
             catch (exception& error)
             {
-                return 502;
+                string ErrorText = "==> ❌ " + string(error.what());
+                logger.SendError(Architecture,"Empty",OS_NAME,"Download()",error.what());
+                cerr << ErrorText << endl;
             }
-        }
-        // Method for getting architecture of OS
-        void GetArchitectureOS()
-        {
-            #if defined(__x86_64__)
-                Architecture = "amd64";
-            #elif __arm__
-                Architecture = "arm64";
-            #endif
         }
     };
 }

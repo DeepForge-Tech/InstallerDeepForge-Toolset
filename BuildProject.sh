@@ -107,15 +107,17 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       exit 1;
    fi
    echo "==> Building library Zipper"
+   cd src
+   mkdir lib
+   cd ..
    git clone --recursive https://github.com/sebastiandev/zipper.git
    cd zipper
    mkdir build
-   cd build
-   cmake ../
+   cmake .
    make
-   find . -name "*.a" -exec mv "{}" ../../src/lib \;
-   find . -name "*.so" -exec mv "{}" ../../src/lib \;
-   cd .. && cd ..
+   find . -name "*.a" -exec mv "{}" ../src/lib/ \;
+   # find . -name "*.so" -exec mv "{}" ../../src/lib \;
+   cd ..
    sudo rm -rf ./zipper
    echo "==> Zipper successfully builded"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
@@ -124,13 +126,15 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
    brew  install jsoncpp sqlite3 sqlite-utils fmt clang-format curl googletest gcc zlib cmake
    echo "==> Building library Zipper"
    git clone --recursive https://github.com/sebastiandev/zipper.git
+   cd src
+   mkdir lib
+   cd ..
    cd zipper
    mkdir build
-   cd build
-   cmake ../
+   cmake .
    make
-   find . -name "*.a" -exec mv "{}" ../../src/lib \;
-   cd .. && cd ..
+   find . -name "*.a" -exec cp "{}" ../src/lib/ \;
+   cd ..
    sudo rm -rf ./zipper
    echo "==> Build of Zipper finished"
 fi
@@ -149,8 +153,8 @@ mkdir $os
 cd ..
 echo "==> Building project"
 case "${unameOut}" in
-	Darwin*) 	sudo clang++ -o ./build/$os/InstallerDeepForge-Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -L ./src/lib -lZipper -lz -lcurl -lsqlite3 -std=c++2a -Bstatic;;
-	Linux*)		sudo g++ -o ./build/$os/InstallerDeepForge-Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -L ./src/lib -lZipper -lz -lcurl -lsqlite3 -std=c++2a -Bstatic;;
+	Darwin*) 	sudo clang++ -o ./build/$os/InstallerDeepForge-Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -L ./src/lib -lZipper -lz -lcurl -lsqlite3 -ljsoncpp -std=c++2a -Bstatic;;
+	Linux*)		sudo g++ -o ./build/$os/InstallerDeepForge-Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -L ./src/lib -lZipper -lz -lcurl -lsqlite3 -ljsoncpp -std=c++2a -Bstatic;;
 esac
 echo "==> Build of project finished"
 cd build

@@ -31,7 +31,7 @@ namespace Bar
         int LastSizeStr;
         string OutputStr;
 
-        void Update(float NetworkSpeed = 0, float DownloadedSize = 0.0, float TotalSize = 0.0)
+        void Update(double DownloadedSize = 0.0, double TotalSize = 0.0)
         {
             Process += 1;
             Output = startSymbol;
@@ -59,19 +59,9 @@ namespace Bar
             }
             cout << "\r" << EmptyStr << flush;
             OutputStr = Output + " " + to_string(Process) + "%  ";
-            if (DownloadedSize != 0.0 && NetworkSpeed != 0 && TotalSize != 0.0)
+            if (DownloadedSize != 0.0  && TotalSize != 0.0)
             {
-                string Speed = AutoConvertSpeed(NetworkSpeed);
-                OutputStr = OutputStr + AutoConvertSize(DownloadedSize) + " / " + AutoConvertSize(TotalSize) + " | " + Speed;
-            }
-            else if (NetworkSpeed != 0)
-            {
-                string Speed = AutoConvertSpeed(NetworkSpeed);
-                OutputStr += Speed;
-            }
-            else if (DownloadedSize != 0.0 && TotalSize != 0.0)
-            {
-                OutputStr += AutoConvertSize(DownloadedSize);
+                OutputStr = OutputStr + AutoConvertSize(DownloadedSize) + " / " + AutoConvertSize(TotalSize);
             }
             cout << "\r" << OutputStr << flush;
             LastSizeStr = OutputStr.size();
@@ -88,7 +78,7 @@ namespace Bar
         }
 
     private:
-        string round(float value)
+        string round(double value)
         {
             // Print value to a string
             std::stringstream ss;
@@ -106,25 +96,6 @@ namespace Bar
                 }
             }
             return str;
-        }
-
-        string AutoConvertSpeed(float NetworkSpeed)
-        {
-            string ConvertedSpeed;
-            NetworkSpeed = convert_to_KB(NetworkSpeed);
-            if (NetworkSpeed >= 1024)
-            {
-                ConvertedSpeed = round(convert_to_MB(NetworkSpeed)) + " MB/s";
-            }
-            else if (convert_to_KB(NetworkSpeed) < 1)
-            {
-                ConvertedSpeed = round(convert_to_KBit(NetworkSpeed)) + " KBit/s";
-            }
-            else
-            {
-                ConvertedSpeed = round(NetworkSpeed) + " KB/s";
-            }
-            return ConvertedSpeed;
         }
 
         string AutoConvertSize(float Size)
@@ -146,33 +117,21 @@ namespace Bar
             return ConvertedSize;
         }
 
-        float convert_to_MB(float Value)
+        double convert_to_MB(double Value)
         {
-            float NewValue = Value / 1024;
+            double NewValue = Value / 1024;
             return NewValue;
         }
 
-        float convert_to_KB(float Value)
+        double convert_to_KB(double Value)
         {
-            float NewValue = Value / 1024;
+            double NewValue = Value / 1024;
             return NewValue;
         }
 
-        float convert_to_GB(float Value)
+        double convert_to_GB(double Value)
         {
-            float NewValue = Value / 1024;
-            return NewValue;
-        }
-
-        float convert_to_MBit(float Value)
-        {
-            float NewValue = Value * 0.008;
-            return NewValue;
-        }
-
-        float convert_to_KBit(float Value)
-        {
-            float NewValue = Value * 8;
+            double NewValue = Value / 1024;
             return NewValue;
         }
     };

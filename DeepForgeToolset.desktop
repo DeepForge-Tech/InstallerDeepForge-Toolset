@@ -1,0 +1,15 @@
+[Desktop Entry]
+Name=DeepForge Toolset
+Comment=
+GenericName=DeepForge Toolset
+Keywords=toolset
+Exec=sudo /usr/bin/DeepForge/DeepForge-Toolset/DeepForgeToolset
+Terminal=false
+Type=Application
+Icon=/usr/bin/DeepForge/DeepForge-Toolset/Logo/DeepForgeToolset.ico
+Path=/usr/bin/DeepForge/DeepForge-Toolset/
+Categories=
+StartupNotify=true
+Terminal=true
+TerminalOptions=\s--noclose
+Type=Application
