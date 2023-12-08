@@ -12,10 +12,10 @@
 #include <map>
 #include "json/json.h"
 #if defined(__linux__) || __APPLE__
-#include "./Client_UNIX.hpp"
+#include "Client_UNIX.hpp"
 using namespace UNIX;
 #elif _WIN32
-#include "./Client_POSIX.hpp"
+#include "Client_POSIX.hpp"
 using namespace POSIX;
 #endif
 

@@ -35,15 +35,13 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "../DatabaseConnect.cpp"
+#include "../DatabaseConnect.hpp"
 #include <map>
-#include <zipper/unzipper.h>
+#include "zipper/unzipper.h"
 #include <fstream>
 #include <cctype>
 #include "Logger.cpp"
 #include <fstream>
-#include <AclAPI.h>
-#include <Lmcons.h>
 #include <urlmon.h>
 #include "json/json.h"
 #pragma comment (lib, "urlmon.lib")

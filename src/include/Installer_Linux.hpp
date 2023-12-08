@@ -34,7 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <curl/curl.h>
-#include "../DatabaseConnect.cpp"
+#include "../DatabaseConnect.hpp"
 #include <map>
 #include "zipper/unzipper.h"
 #include "Logger.cpp"
