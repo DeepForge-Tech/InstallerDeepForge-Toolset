@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.21)
 project(InstallerDeepForge-Toolset)
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_CXX_STANDARD 20)
 include (GNUInstallDirs)
 include(FetchContent)
-# set(BUILD_STATIC_LIBS ON)
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_FIND_LIBRARY_SUFFIXES .a .so .dylib)
 set(ZIPPER_STATIC ON)
@@ -22,22 +22,25 @@ FetchContent_Declare(jsoncpp
   GIT_TAG master
 )
 FetchContent_MakeAvailable(jsoncpp)
-
+# find_package(jsoncpp REQUIRED)
 # Zlib
 FetchContent_Declare(zlib
   GIT_REPOSITORY https://github.com/madler/zlib.git
   GIT_TAG master
 )
 FetchContent_MakeAvailable(zlib)
-
-# # CURL
+set(ZLIB_INCLUDE_DIRS ${zlib_SOURCE_DIR})
+set(ZLIB_LIBRARY zlibstatic CACHE STRING "")
+set(ZLIB_LIBRARIES ${ZLIB_LIBRARY})
+set(ZLIB_FOUND 1)
+add_library(ZLIB::ZLIB ALIAS zlibstatic)
+# find_package(ZLIB)
+# CURL
 FetchContent_Declare(curl
   GIT_REPOSITORY https://github.com/curl/curl.git
   GIT_TAG master
 )
 FetchContent_MakeAvailable(curl)
-
-
 
 # SQLite 3
 FetchContent_Declare(SQLite
