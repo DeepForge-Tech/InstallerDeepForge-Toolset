@@ -80,7 +80,7 @@ namespace Windows
     const string NewApplicationFolder = NewOrganizationFolder + "\\DeepForge-Toolset";
     const string NewUpdateManagerFolder = NewOrganizationFolder + "\\UpdateManager";
     const string NewTempFolder = NewApplicationFolder + "\\Temp";
-    std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
+    filesystem::path ProjectDir = filesystem::current_path().generic_string();
     string DB_PATH = NewTempFolder + "\\Versions.db";
     const string TrueVarious[3] = {"yes", "y", "1"};
     string InstallDelimiter = "========================================================";
