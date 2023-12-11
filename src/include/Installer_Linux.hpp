@@ -388,7 +388,7 @@ namespace Linux
             {
                 // Error output
                 logger.SendError(Architecture, "Empty", OS_NAME, "WriteInformation", error.what());
-                cerr << error.what() << endl;
+                cerr << "❌ " << error.what() << endl;
             }
         }
         void AddToStartupSystem()

@@ -17,10 +17,8 @@ jobs:
     - uses: actions/checkout@v3
     - name: Install libraries
       run: sudo add-apt-repository universe && sudo apt update && sudo apt upgrade && sudo apt install curl && sudo apt-get install libcurl4-openssl-dev libgtest-dev googletest google-mock libgmock-dev libtbb-dev
-    - name: Make directories
-      run: mkdir build && cd build
     - name: Configuring project
-      run: cmake ..
+      run: cmake .
     - name: Building project
       run: cmake --build .
   build_macOS_12:
@@ -31,10 +29,8 @@ jobs:
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       - name: Install libraries
         run: brew  install clang-format curl googletest gcc cmake
-      - name: Make directory build
-        run: mkdir build && cd build
       - name: Configuring project
-        run: cmake ..
+        run: cmake .
       - name: Building project
         run: cmake --build .
   build_macOS_13:
@@ -45,9 +41,7 @@ jobs:
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       - name: Install libraries
         run: brew  install clang-format curl googletest gcc cmake
-      - name: Make directory build
-        run: mkdir build && cd build
       - name: Configuring project
-        run: cmake ..
+        run: cmake .
       - name: Building project
         run: cmake --build .

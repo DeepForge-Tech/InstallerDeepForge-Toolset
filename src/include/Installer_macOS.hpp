@@ -348,7 +348,7 @@ namespace macOS
             catch (exception &error)
             {
                 logger.SendError(Architecture, "Empty", OS_NAME, "UnpackArchive()", error.what());
-                cerr << error.what() << endl;
+                cerr << "❌ " << error.what() << endl;
             }
         }
         void WriteInformation(string version)
