@@ -28,23 +28,27 @@
 #include <filesystem>
 #include <iostream>
 #include <conio.h>
+#include <winsock2.h>
 #include <Windows.h>
 #include "Progressbar.hpp"
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+// #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "../DatabaseConnect.hpp"
 #include <map>
-#include "zipper/unzipper.h"
 #include <fstream>
 #include <cctype>
 #include "Logger.cpp"
 #include <fstream>
 #include <urlmon.h>
 #include "json/json.h"
-#pragma comment (lib, "urlmon.lib")
+#include <string>
+#include <vector>
+#include <zip.h>
+#include <cstring>
+#pragma comment(lib, "urlmon.lib")
 
 #define DEEPFORGE_TOOLSET_VERSION "0.1"
 #define DB_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
@@ -59,7 +63,6 @@
 using namespace std;
 using namespace DB;
 using namespace Bar;
-using namespace zipper;
 
 namespace Windows
 {
@@ -167,7 +170,7 @@ namespace Windows
             MakeDirectory(NewTempFolder);
             cout << "Downloading database..." << endl;
             // Download database Versions.db
-            Download(DB_URL, NewTempFolder,true);
+            Download(DB_URL, NewTempFolder, true);
             cout << "Database successfully downloaded." << endl;
             cout << InstallDelimiter << endl;
             database.open(&DB_PATH);
@@ -199,52 +202,52 @@ namespace Windows
             cout << InstallDelimiter << endl;
         }
         // JSON file reading function with interface localization
-    void ReadJSON(string language)
-    {
-        try
+        void ReadJSON(string language)
         {
-            if (language == "Russian")
+            try
             {
-                string LocaleDir = NewApplicationFolder + "\\locale";
-                string LocalePath = LocaleDir + "\\locale_ru.json";
-                MakeDirectory(LocaleDir);
-                Download(Locale_RU_URL,LocaleDir,false);
-                ifstream file(LocalePath);
-                // File open check
-                if (file.is_open())
+                if (language == "Russian")
                 {
-                    // Dictionary entry with translation
-                    file >> translate;
-                    file.close();
+                    string LocaleDir = NewApplicationFolder + "\\locale";
+                    string LocalePath = LocaleDir + "\\locale_ru.json";
+                    MakeDirectory(LocaleDir);
+                    Download(Locale_RU_URL, LocaleDir, false);
+                    ifstream file(LocalePath);
+                    // File open check
+                    if (file.is_open())
+                    {
+                        // Dictionary entry with translation
+                        file >> translate;
+                        file.close();
+                    }
+                }
+                else if (language == "English")
+                {
+                    string LocaleDir = NewApplicationFolder + "\\locale";
+                    string LocalePath = LocaleDir + "\\locale_en.json";
+                    MakeDirectory(LocaleDir);
+                    Download(Locale_EN_URL, LocaleDir, false);
+                    ifstream file(LocalePath);
+                    // File open check
+                    if (file.is_open())
+                    {
+                        // Dictionary entry with translation
+                        file >> translate;
+                        file.close();
+                    }
                 }
             }
-            else if (language == "English")
+            catch (exception &error)
             {
-                string LocaleDir = NewApplicationFolder + "\\locale";
-                string LocalePath = LocaleDir + "\\locale_en.json";
-                MakeDirectory(LocaleDir);
-                Download(Locale_EN_URL,LocaleDir,false);
-                ifstream file(LocalePath);
-                // File open check
-                if (file.is_open())
-                {
-                    // Dictionary entry with translation
-                    file >> translate;
-                    file.close();
-                }
+                // Error output
+                logger.WriteError("Function: ReadJSON");
+                logger.WriteError(error.what());
+                logger.SendError(Architecture, "Empty", OS_NAME, "ReadJSON", error.what());
             }
         }
-        catch (exception &error)
-        {
-            // Error output
-            logger.WriteError("Function: ReadJSON");
-            logger.WriteError(error.what());
-            logger.SendError(Architecture,"Empty",OS_NAME,"ReadJSON",error.what());
-        }
-    }
 
     private:
-        void Download(string url, string dir,bool Progress)
+        void Download(string url, string dir, bool Progress)
         {
             try
             {
@@ -290,11 +293,11 @@ namespace Windows
         void AddToPATH()
         {
             string Command = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe add " + NewApplicationFolder + " && del C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe";
-            #if defined(__x86_64__)
-                Download(PathmanURL_AMD64,NewTempFolder,false);
-            #elif __arm__ || __aarch64__ || _M_ARM64
-                Download(PathmanURL_ARM64,NewTempFolder,false);
-            #endif
+#if defined(__x86_64__)
+            Download(PathmanURL_AMD64, NewTempFolder, false);
+#elif __arm__ || __aarch64__ || _M_ARM64
+            Download(PathmanURL_ARM64, NewTempFolder, false);
+#endif
             system(Command.c_str());
         }
         // Method for create symlink on desktop
@@ -310,13 +313,13 @@ namespace Windows
         {
             try
             {
-                map<string,string> ApplicationColumns = {
-                    {"Name","TEXT"},
-                    {"Version","TEXT"},
+                map<string, string> ApplicationColumns = {
+                    {"Name", "TEXT"},
+                    {"Version", "TEXT"},
                 };
-                map<string,string> ApplicationFields = {
-                    {"Name","DeepForge-Toolset"},
-                    {"Version",version},
+                map<string, string> ApplicationFields = {
+                    {"Name", "DeepForge-Toolset"},
+                    {"Version", version},
                 };
                 string pathFile = NewUpdateManagerFolder + "\\AppInformation.db";
                 Database AppInformationDB;
@@ -326,21 +329,20 @@ namespace Windows
                     ofstream file(pathFile);
                     file << "";
                     file.close();
-                    
                 }
                 AppInformationDB.open(&pathFile);
                 /* The bellow code is creating a table called "Applications" in the AppInformationDB database using the CreateTable method. It then inserts values into the "Applications" table using the InsertValuesToTable method. The boolean variable "exists" is used to store the result of the CreateTable method, indicating whether the table creation was successful or not. The integer variable "result" is used to store the number of rows affected by the InsertValuesToTable method. */
-                bool existsTable = AppInformationDB.CreateTable("Applications",ApplicationColumns);
-                int existsValue = AppInformationDB.ExistNameAppInTable("Applications","DeepForge-Toolset");
+                bool existsTable = AppInformationDB.CreateTable("Applications", ApplicationColumns);
+                int existsValue = AppInformationDB.ExistNameAppInTable("Applications", "DeepForge-Toolset");
                 /* The code is checking if a table called "Applications" exists in the database. If the table does not exist (existsTable == -1), it inserts values into the table using the AppInformationDB.InsertValuesToTable() method. If the table does exist, it removes an application called "DeepForge-Toolset" from the table using the AppInformationDB.RemoveApplicationFromTable() method, and then inserts values into the table using the AppInformationDB.InsertValuesToTable() method. */
                 if (existsTable == -1)
                 {
-                    int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
+                    int result = AppInformationDB.InsertValuesToTable("Applications", ApplicationFields);
                 }
                 else
                 {
-                    AppInformationDB.RemoveApplicationFromTable("Applications","DeepForge-Toolset");
-                    int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
+                    AppInformationDB.RemoveApplicationFromTable("Applications", "DeepForge-Toolset");
+                    int result = AppInformationDB.InsertValuesToTable("Applications", ApplicationFields);
                 }
             }
             catch (exception &error)
@@ -378,7 +380,7 @@ namespace Windows
                     fullPath = fullPath + "\\" + currentDir;
                     if (filesystem::exists(fullPath) == false)
                     {
-                        CreateDirectoryA(fullPath.c_str(),NULL);
+                        CreateDirectoryA(fullPath.c_str(), NULL);
                     }
                 }
                 else
@@ -397,7 +399,7 @@ namespace Windows
             }
             if (filesystem::exists(fullPath) == false)
             {
-                CreateDirectoryA(fullPath.c_str(),NULL);
+                CreateDirectoryA(fullPath.c_str(), NULL);
             }
         }
         /*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`.
@@ -406,9 +408,65 @@ namespace Windows
         */
         void UnpackArchive(string path_from, string path_to)
         {
-            Unzipper unzipper(path_from);
-            unzipper.extract(path_to);
-            unzipper.close();
+            try
+            {
+                MakeDirectory(path_to);
+                int err;
+                struct zip *zip = zip_open(path_from.c_str(), ZIP_RDONLY, &err);
+                if (zip == nullptr)
+                {
+                    string ErrorText = "Cannot open zip archive: " + path_from;
+                    throw runtime_error(ErrorText);
+                }
+
+                int num_entries = zip_get_num_entries(zip, 0);
+                for (int i = 0; i < num_entries; ++i)
+                {
+                    zip_stat_t zip_stat;
+                    zip_stat_init(&zip_stat);
+                    int err = zip_stat_index(zip, i, 0, &zip_stat);
+                    if (err != 0)
+                    {
+                        zip_close(zip);
+                    }
+
+                    string file_name = zip_stat.name;
+                    string full_path = path_to + "/" + file_name;
+                    filesystem::path file_dir(full_path);
+                    MakeDirectory(file_dir.remove_filename().string());
+
+                    struct zip_file *zip_file = zip_fopen_index(zip, i, 0);
+                    if (zip_file == nullptr)
+                    {
+                        string ErrorText = "Cannot open file in zip archive: " + file_name;
+                        zip_close(zip);
+                        throw runtime_error(ErrorText);
+                    }
+
+                    ofstream out_file(full_path,ios::binary);
+                    if (!out_file.is_open())
+                    {
+                        string ErrorText = "Cannot open file for writing: " + full_path;
+                        zip_fclose(zip_file);
+                        zip_close(zip);
+                        throw runtime_error(ErrorText);
+                    }
+
+                    vector<char> buffer(zip_stat.size);
+                    zip_fread(zip_file, buffer.data(), buffer.size());
+                    out_file.write(buffer.data(), buffer.size());
+                    out_file.close();
+
+                    zip_fclose(zip_file);
+                }
+
+                zip_close(zip);
+            }
+            catch (exception &error)
+            {
+                logger.SendError(Architecture, "Empty", OS_NAME, "UnpackArchive()", error.what());
+                cerr << error.what() << endl;
+            }
         }
         void AddToStartupSystem(string filePath)
         {

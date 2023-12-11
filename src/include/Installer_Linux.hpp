@@ -36,11 +36,19 @@
 #include <curl/curl.h>
 #include "../DatabaseConnect.hpp"
 #include <map>
-#include "zipper/unzipper.h"
 #include "Logger.cpp"
+#include "json/json.h"
+#include <string>
+#include <vector>
+#include <zip.h>
+#include <cstring>
+#include <fstream>
 
+#define DEEPFORGE_TOOLSET_VERSION "0.1"
 #define URL_DESKTOP_SYMLINK "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/DeepForgeToolset.desktop"
 #define DB_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
+#define Locale_RU_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_ru.json"
+#define Locale_EN_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_en.json"
 #define NameVersionTable "LinuxVersions"
 #define UpdateManagerTable "UpdateManager_Linux"
 #define OS_NAME "Linux"
@@ -48,7 +56,6 @@
 using namespace std;
 using namespace DB;
 using namespace Bar;
-using namespace zipper;
 
 namespace Linux
 {
@@ -56,6 +63,9 @@ namespace Linux
     int result;
     int Percentage;
     int TempPercentage = 0;
+    // boold type
+    bool Updating = true;
+    bool withProgress = true;
     // float type
     float LastSize;
     float LastTotalSize;
@@ -76,6 +86,7 @@ namespace Linux
     #elif __arm__ || __aarch64__ || _M_ARM64
         string Architecture = "arm64";
     #endif
+    Json::Value translate;
     // init classes
     CURL *curl = curl_easy_init();
     Logger logger;
@@ -104,19 +115,22 @@ namespace Linux
         {
             return 0;
         }
-        // double DownloadSpeed;
-        Percentage = static_cast<float>(NowDownloaded) / static_cast<float>(TotalToDownload) * 100;
-        /* The bellow code is checking if the `TempPercentage` is not equal to `Percentage` and is less
-        than or equal to 100. If this condition is true, it retrieves the download speed using
-        `curl_easy_getinfo` and updates a progress bar using the `progressbar.Update` function. It
-        also updates some variables (`LastDownloadSpeed`, `LastSize`, `LastTotalSize`, and
-        `TempPercentage`) with the current values. */
-        if (TempPercentage != Percentage && TempPercentage <= 100)
+        if (withProgress == true)
         {
-            progressbar.Update(NowDownloaded, TotalToDownload);
-            LastSize = NowDownloaded;
-            LastTotalSize = TotalToDownload;
-            TempPercentage = Percentage;
+            // double DownloadSpeed;
+            Percentage = static_cast<float>(NowDownloaded) / static_cast<float>(TotalToDownload) * 100;
+            /* The bellow code is checking if the `TempPercentage` is not equal to `Percentage` and is less
+            than or equal to 100. If this condition is true, it retrieves the download speed using
+            `curl_easy_getinfo` and updates a progress bar using the `progressbar.Update` function. It
+            also updates some variables (`LastDownloadSpeed`, `LastSize`, `LastTotalSize`, and
+            `TempPercentage`) with the current values. */
+            if (TempPercentage != Percentage && TempPercentage <= 100)
+            {
+                progressbar.Update(NowDownloaded, TotalToDownload);
+                LastSize = NowDownloaded;
+                LastTotalSize = TotalToDownload;
+                TempPercentage = Percentage;
+            }
         }
         return 0;
     }
@@ -154,16 +168,81 @@ namespace Linux
             MakeDirectory(NewTempFolder);
             cout << "==> Downloading database..." << endl;
             // Download database Versions.db
-            Download(DB_URL, NewTempFolder);
+            Download(DB_URL, NewTempFolder,true);
             cout << "==> Database successfully downloaded." << endl;
             database.open(&DB_PATH);
         }
         void CommandManager();
+        // void AddToPATH();
         void InstallUpdateManager();
         void InstallDeepForgeToolset(string channel);
-        void ChangeStabilityApp(string version);
-        string ChangeVersionApp();
-
+        void ChangeUpdating();
+        void ChangeLanguage()
+        {
+            string NumLang;
+            cout << "1. Russian" << endl;
+            cout << "2. English" << endl;
+            cout << "Choose language (default - 1):";
+            getline(cin, NumLang);
+            if (NumLang == "1" || NumLang.empty())
+            {
+                ReadJSON("Russian");
+            }
+            else if (NumLang == "2")
+            {
+                ReadJSON("English");
+            }
+            // If the user enters a non-digit, then the method is called again
+            else
+            {
+                ChangeLanguage();
+            }
+            cout << InstallDelimiter << endl;
+        }
+        // JSON file reading function with interface localization
+        void ReadJSON(string language)
+        {
+            try
+            {
+                if (language == "Russian")
+                {
+                    string LocaleDir = NewApplicationFolder + "\\locale";
+                    string LocalePath = LocaleDir + "\\locale_ru.json";
+                    MakeDirectory(LocaleDir);
+                    Download(Locale_RU_URL,LocaleDir,false);
+                    ifstream file(LocalePath);
+                    // File open check
+                    if (file.is_open())
+                    {
+                        // Dictionary entry with translation
+                        file >> translate;
+                        file.close();
+                    }
+                }
+                else if (language == "English")
+                {
+                    string LocaleDir = NewApplicationFolder + "\\locale";
+                    string LocalePath = LocaleDir + "\\locale_en.json";
+                    MakeDirectory(LocaleDir);
+                    Download(Locale_EN_URL,LocaleDir,false);
+                    ifstream file(LocalePath);
+                    // File open check
+                    if (file.is_open())
+                    {
+                        // Dictionary entry with translation
+                        file >> translate;
+                        file.close();
+                    }
+                }
+            }
+            catch (exception &error)
+            {
+                // Error output
+                logger.WriteError("Function: ReadJSON");
+                logger.WriteError(error.what());
+                logger.SendError(Architecture,"Empty",OS_NAME,"ReadJSON",error.what());
+            }
+        }
     private:
         void CreateSymlink(string nameSymlink, string filePath)
         {
@@ -208,9 +287,65 @@ namespace Linux
         */
         void UnpackArchive(string path_from, string path_to)
         {
-            Unzipper unzipper(path_from);
-            unzipper.extract(path_to);
-            unzipper.close();
+            try
+            {
+                MakeDirectory(path_to);
+                int err;
+                struct zip *zip = zip_open(path_from.c_str(), ZIP_RDONLY, &err);
+                if (zip == nullptr)
+                {
+                    string ErrorText = "Cannot open zip archive: " + path_from;
+                    throw runtime_error(ErrorText);
+                }
+
+                int num_entries = zip_get_num_entries(zip, 0);
+                for (int i = 0; i < num_entries; ++i)
+                {
+                    zip_stat_t zip_stat;
+                    zip_stat_init(&zip_stat);
+                    int err = zip_stat_index(zip, i, 0, &zip_stat);
+                    if (err != 0)
+                    {
+                        zip_close(zip);
+                    }
+
+                    string file_name = zip_stat.name;
+                    string full_path = path_to + "/" + file_name;
+                    filesystem::path file_dir(full_path);
+                    MakeDirectory(file_dir.remove_filename().string());
+
+                    struct zip_file *zip_file = zip_fopen_index(zip, i, 0);
+                    if (zip_file == nullptr)
+                    {
+                        string ErrorText = "Cannot open file in zip archive: " + file_name;
+                        zip_close(zip);
+                        throw runtime_error(ErrorText);
+                    }
+
+                    ofstream out_file(full_path,ios::binary);
+                    if (!out_file.is_open())
+                    {
+                        string ErrorText = "Cannot open file for writing: " + full_path;
+                        zip_fclose(zip_file);
+                        zip_close(zip);
+                        throw runtime_error(ErrorText);
+                    }
+
+                    vector<char> buffer(zip_stat.size);
+                    zip_fread(zip_file, buffer.data(), buffer.size());
+                    out_file.write(buffer.data(), buffer.size());
+                    out_file.close();
+
+                    zip_fclose(zip_file);
+                }
+
+                zip_close(zip);
+            }
+            catch (exception &error)
+            {
+                logger.SendError(Architecture, "Empty", OS_NAME, "UnpackArchive()", error.what());
+                cerr << error.what() << endl;
+            }
         }
         void WriteInformation(string version)
         {
@@ -256,10 +391,6 @@ namespace Linux
                 cerr << error.what() << endl;
             }
         }
-        void AddToPATH(string path)
-        {
-
-        }
         void AddToStartupSystem()
         {
             string ServicePath = NewTempFolder + "/DeepForge-UpdateManager.service";
@@ -272,7 +403,7 @@ namespace Linux
             string name;
             string ShellScriptPath;
             string Command;
-            Download(ShellScript_URL, NewTempFolder);
+            Download(ShellScript_URL, NewTempFolder,false);
             name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
             ShellScriptPath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
             Command = "sudo bash " + ShellScriptPath;
@@ -299,9 +430,10 @@ namespace Linux
             return status;
         }
 
-        void Download(string url, string dir)
+        void Download(string url, string dir,bool Progress)
         {
             try {
+                withProgress = Progress;
                 string name = (url.substr(url.find_last_of("/")));
                 string filename = dir + "/" + name.replace(name.find("/"), 1, "");
                 FILE *file = fopen(filename.c_str(), "wb");
@@ -335,17 +467,21 @@ namespace Linux
                 curl_easy_cleanup(curl);
                 fclose(file);
                 // If the progress bar is not completely filled in, then paint over manually
-                if (Process < 100 && Process != Percentage)
+                if (Progress = true)
                 {
-                    for (int i = (Process - 1); i < 99; i++)
+                    if (Process < 100 && Process != Percentage)
                     {
-                        progressbar.Update(LastSize, LastTotalSize);
+                        for (int i = (Process - 1); i < 99; i++)
+                        {
+                            progressbar.Update(LastSize, LastTotalSize);
+                        }
                     }
+                
+                    // Reset all variables and preferences
+                    progressbar.ResetAll();
+                    Percentage = 0;
+                    TempPercentage = 0;
                 }
-                // Reset all variables and preferences
-                progressbar.ResetAll();
-                Percentage = 0;
-                TempPercentage = 0;
                 cout << InstallDelimiter << endl;
             }
             catch (exception& error)

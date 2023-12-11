@@ -6,7 +6,7 @@ include (GNUInstallDirs)
 include(FetchContent)
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_FIND_LIBRARY_SUFFIXES .a .so .dylib)
-set(ZIPPER_STATIC ON)
+# set(ZIPPER_STATIC ON)
 # find_package(ZLIB)
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/lib)
 # fmt
@@ -24,23 +24,33 @@ FetchContent_Declare(jsoncpp
 FetchContent_MakeAvailable(jsoncpp)
 # find_package(jsoncpp REQUIRED)
 # Zlib
-FetchContent_Declare(zlib
-  GIT_REPOSITORY https://github.com/madler/zlib.git
-  GIT_TAG master
-)
-FetchContent_MakeAvailable(zlib)
-set(ZLIB_INCLUDE_DIRS ${zlib_SOURCE_DIR})
-set(ZLIB_LIBRARY zlibstatic CACHE STRING "")
-set(ZLIB_LIBRARIES ${ZLIB_LIBRARY})
-set(ZLIB_FOUND 1)
-add_library(ZLIB::ZLIB ALIAS zlibstatic)
-# find_package(ZLIB)
+# FetchContent_Declare(zlib
+#   GIT_REPOSITORY https://github.com/madler/zlib.git
+#   GIT_TAG master
+# )
+# FetchContent_MakeAvailable(zlib)
+# set(ZLIB_INCLUDE_DIRS ${zlib_SOURCE_DIR} )
+# set(ZLIB_LIBRARY zlibstatic CACHE STRING "")
+# set(ZLIB_LIBRARIES ${ZLIB_LIBRARY})
+# set(ZLIB_FOUND 1)
+# add_library(ZLIB::ZLIB ALIAS zlibstatic)
+# set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/include/zlib")
+# set(ZLIB_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/src/include/zlib")
+# find_package(ZLIB REQUIRED)
+# include_directories(${ZLIB_INCLUDE_DIRS})
 # CURL
-FetchContent_Declare(curl
-  GIT_REPOSITORY https://github.com/curl/curl.git
-  GIT_TAG master
-)
-FetchContent_MakeAvailable(curl)
+# FetchContent_Declare(curl
+#   GIT_REPOSITORY https://github.com/DeepForge-Technology/curl.git
+#   GIT_TAG master
+# )
+# FetchContent_MakeAvailable(curl)
+FIND_PACKAGE(CURL)
+IF(CURL_FOUND)
+  INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIR})
+  SET(requiredlibs ${requiredlibs} ${CURL_LIBRARIES} )
+ELSE(CURL_FOUND)
+  MESSAGE(FATAL_ERROR "Could not find the CURL library and development files.")
+ENDIF(CURL_FOUND)
 
 # SQLite 3
 FetchContent_Declare(SQLite
@@ -48,14 +58,12 @@ FetchContent_Declare(SQLite
   GIT_TAG master
 )
 FetchContent_MakeAvailable(SQLite)
-# Zipper
-FetchContent_Declare(Zipper
-  GIT_REPOSITORY https://github.com/sebastiandev/zipper.git
+# libzip
+FetchContent_Declare(libzip
+  GIT_REPOSITORY https://github.com/DeepForge-Technology/libzip.git
   GIT_TAG master
-  GIT_SUBMODULES_RECURSE TRUE
 )
-FetchContent_MakeAvailable(Zipper)
-
+FetchContent_MakeAvailable(libzip)
 
 include_directories("./include")
 set(SOURCE_FILES
@@ -68,30 +76,27 @@ add_executable(InstallerDeepForge-Toolset ${SOURCE_FILES})
 if (WIN32)
   set(LIBRARIES
     fmt::fmt 
-    staticZipper
     urlmon
     jsoncpp_static
     ws2_32
-    libcurl_static
-    zlibstatic
+    curl
+    zip
     SQLite
   )
 elseif(APPLE)
   set(LIBRARIES
     fmt::fmt 
-    staticZipper
     jsoncpp_static
-    libcurl_static
-    zlibstatic
+    curl
+    zip
     SQLite
   )
 elseif(UNIX)
   set(LIBRARIES
     fmt::fmt 
-    staticZipper
     jsoncpp_static
-    libcurl_static
-    zlibstatic
+    curl
+    zip
     SQLite
   )
 endif()

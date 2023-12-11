@@ -118,7 +118,9 @@ void Installer::InstallDeepForgeToolset(string channel)
         CreateSymlink("DeepForgeToolset", file_path);
         filesystem::remove(ArchivePath);
         cout << "==> ✅ DeepForge Toolset " << DEEPFORGE_TOOLSET_VERSION << " " << translate["Installed"].asString() << endl;
-        AddToPATH();
+        #if defined(_WIN32)
+            AddToPATH();
+        #endif
         cout << InstallDelimiter << endl;
         if (Updating == true)
         {
