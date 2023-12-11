@@ -18,7 +18,7 @@ jobs:
     - name: Install libraries
       run: sudo add-apt-repository universe && sudo apt update && sudo apt upgrade && sudo apt install curl && sudo apt-get install libcurl4-openssl-dev libgtest-dev googletest google-mock libgmock-dev libtbb-dev
     - name: Building project
-      run: mkdir build && cd build && cmake . && cmake --build .
+      run: mkdir build && cd build && cmake .. && cmake --build .
   build_macOS_12:
     runs-on: macos-12
     steps:
@@ -28,7 +28,7 @@ jobs:
       - name: Install libraries
         run: brew  install clang-format curl googletest gcc cmake
       - name: Building project
-        run: mkdir build && cd build && cmake . && cmake --build .
+        run: mkdir build && cd build && cmake .. && cmake --build .
   build_macOS_13:
     runs-on: macos-13
     steps:
@@ -38,4 +38,4 @@ jobs:
       - name: Install libraries
         run: brew  install clang-format curl googletest gcc cmake
       - name: Building project
-        run: mkdir build && cd build && cmake . && cmake --build .
+        run: mkdir build && cd build && cmake .. && cmake --build .
