@@ -22,28 +22,7 @@ FetchContent_Declare(jsoncpp
   GIT_TAG master
 )
 FetchContent_MakeAvailable(jsoncpp)
-# find_package(jsoncpp REQUIRED)
-# Zlib
-# FetchContent_Declare(zlib
-#   GIT_REPOSITORY https://github.com/madler/zlib.git
-#   GIT_TAG master
-# )
-# FetchContent_MakeAvailable(zlib)
-# set(ZLIB_INCLUDE_DIRS ${zlib_SOURCE_DIR} )
-# set(ZLIB_LIBRARY zlibstatic CACHE STRING "")
-# set(ZLIB_LIBRARIES ${ZLIB_LIBRARY})
-# set(ZLIB_FOUND 1)
-# add_library(ZLIB::ZLIB ALIAS zlibstatic)
-# set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/include/zlib")
-# set(ZLIB_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/src/include/zlib")
-# find_package(ZLIB REQUIRED)
-# include_directories(${ZLIB_INCLUDE_DIRS})
-# CURL
-# FetchContent_Declare(curl
-#   GIT_REPOSITORY https://github.com/DeepForge-Technology/curl.git
-#   GIT_TAG master
-# )
-# FetchContent_MakeAvailable(curl)
+
 FIND_PACKAGE(CURL)
 IF(CURL_FOUND)
   INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIR})

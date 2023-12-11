@@ -13,6 +13,6 @@ int main()
     // char *data = client.OpenJSON("./toJSON.json");
     string ProjectDir = std::filesystem::current_path().generic_string();
     string JSON_Path = ProjectDir + "/toJson.json";
-    client.SendJSON(JSON_Path);
+    client.SEND_JSON_FILE(JSON_Path);
     return 0;
 }

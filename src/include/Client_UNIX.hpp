@@ -10,7 +10,7 @@
 #include <iostream>
 #include <fstream>
 
-#define PORT 743
+#define PORT 746
 #define BUFFER_MAX_LENGHT 16384
 #define IP_ADDRESS "64.226.99.105"
 
