@@ -33,7 +33,6 @@
 #include "Progressbar.hpp"
 #include <sys/types.h>
 #include <sys/stat.h>
-// #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "../DatabaseConnect.hpp"
@@ -44,10 +43,6 @@
 #include <fstream>
 #include <urlmon.h>
 #include "json/json.h"
-#include <string>
-#include <vector>
-#include <zip.h>
-#include <cstring>
 #pragma comment(lib, "urlmon.lib")
 
 #define DEEPFORGE_TOOLSET_VERSION "0.1"
@@ -87,11 +82,11 @@ namespace Windows
     string DB_PATH = NewTempFolder + "\\Versions.db";
     const string TrueVarious[3] = {"yes", "y", "1"};
     string InstallDelimiter = "========================================================";
-#if defined(__x86_64__)
-    string Architecture = "amd64";
-#elif __arm__ || __aarch64__ || _M_ARM64
-    string Architecture = "arm64";
-#endif
+    #if defined(_M_AMD64)
+        string Architecture = "amd64";
+    #elif defined(_M_ARM64)
+        string Architecture = "arm64";
+    #endif
     Json::Value translate;
     // init classes
     Logger logger;
@@ -335,7 +330,7 @@ namespace Windows
                 bool existsTable = AppInformationDB.CreateTable("Applications", ApplicationColumns);
                 int existsValue = AppInformationDB.ExistNameAppInTable("Applications", "DeepForge-Toolset");
                 /* The code is checking if a table called "Applications" exists in the database. If the table does not exist (existsTable == -1), it inserts values into the table using the AppInformationDB.InsertValuesToTable() method. If the table does exist, it removes an application called "DeepForge-Toolset" from the table using the AppInformationDB.RemoveApplicationFromTable() method, and then inserts values into the table using the AppInformationDB.InsertValuesToTable() method. */
-                if (existsTable == -1)
+                if (existsTable == false)
                 {
                     int result = AppInformationDB.InsertValuesToTable("Applications", ApplicationFields);
                 }
@@ -408,65 +403,8 @@ namespace Windows
         */
         void UnpackArchive(string path_from, string path_to)
         {
-            try
-            {
-                MakeDirectory(path_to);
-                int err;
-                struct zip *zip = zip_open(path_from.c_str(), ZIP_RDONLY, &err);
-                if (zip == nullptr)
-                {
-                    string ErrorText = "Cannot open zip archive: " + path_from;
-                    throw runtime_error(ErrorText);
-                }
-
-                int num_entries = zip_get_num_entries(zip, 0);
-                for (int i = 0; i < num_entries; ++i)
-                {
-                    zip_stat_t zip_stat;
-                    zip_stat_init(&zip_stat);
-                    int err = zip_stat_index(zip, i, 0, &zip_stat);
-                    if (err != 0)
-                    {
-                        zip_close(zip);
-                    }
-
-                    string file_name = zip_stat.name;
-                    string full_path = path_to + "/" + file_name;
-                    filesystem::path file_dir(full_path);
-                    MakeDirectory(file_dir.remove_filename().string());
-
-                    struct zip_file *zip_file = zip_fopen_index(zip, i, 0);
-                    if (zip_file == nullptr)
-                    {
-                        string ErrorText = "Cannot open file in zip archive: " + file_name;
-                        zip_close(zip);
-                        throw runtime_error(ErrorText);
-                    }
-
-                    ofstream out_file(full_path,ios::binary);
-                    if (!out_file.is_open())
-                    {
-                        string ErrorText = "Cannot open file for writing: " + full_path;
-                        zip_fclose(zip_file);
-                        zip_close(zip);
-                        throw runtime_error(ErrorText);
-                    }
-
-                    vector<char> buffer(zip_stat.size);
-                    zip_fread(zip_file, buffer.data(), buffer.size());
-                    out_file.write(buffer.data(), buffer.size());
-                    out_file.close();
-
-                    zip_fclose(zip_file);
-                }
-
-                zip_close(zip);
-            }
-            catch (exception &error)
-            {
-                logger.SendError(Architecture, "Empty", OS_NAME, "UnpackArchive()", error.what());
-                cerr << "❌ " << error.what() << endl;
-            }
+            string unpack_command = "tar -xf" + path_from + "--directory " + path_to;
+            system(unpack_command.c_str());
         }
         void AddToStartupSystem(string filePath)
         {
