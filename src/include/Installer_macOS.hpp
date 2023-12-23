@@ -39,9 +39,11 @@
 #include "Logger.cpp"
 #include <string>
 #include <vector>
-#include <zip.h>
+#include "zip/zip.h"
 #include <cstring>
 #include <fstream>
+#include <thread>
+#include <mutex>
 
 #define DEEPFORGE_TOOLSET_VERSION "0.1"
 #define Locale_RU_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_ru.json"
@@ -61,6 +63,7 @@ namespace macOS
     int result;
     int Percentage;
     int TempPercentage = 0;
+    int defaultChannel = 1;
     // bool type
     bool Updating = true;
     bool withProgress = true;
@@ -68,6 +71,9 @@ namespace macOS
     float LastSize;
     float LastTotalSize;
     float DownloadSpeed;
+    // map type
+    map<int, string> EnumerateChannels;
+    map<string, string> Channels;
     // string type
     #if defined(__x86_64__)
         string Architecture = "amd64";
@@ -79,11 +85,14 @@ namespace macOS
     string NewOrganizationFolder;
     string NewTempFolder;
     string NewUpdateManagerFolder;
+    string LocaleDir;
     const string ShellScript_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries.sh";
-    std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
+    filesystem::path ProjectDir = filesystem::current_path().generic_string();
     string DB_PATH;
     const string TrueVarious[3] = {"yes", "y", "1"};
+    string AllChannels[2] = {"stable", "beta"};
     string InstallDelimiter = "========================================================";
+    mutex mtx;
     Json::Value translate;
     // init classes
     Logger logger;
@@ -150,6 +159,85 @@ namespace macOS
         size_t WriteProcess = fwrite(ptr, size, nmemb, stream);
         return WriteProcess;
     }
+    void UploadInformation()
+    {
+        mtx.lock();
+        Channels = database.GetAllVersionsFromDB(NameVersionTable, "Channel", Architecture);
+        mtx.unlock();
+        int size = (sizeof(AllChannels) / sizeof(AllChannels[0]));
+        int n = 1;
+        /* The code is iterating over the `AllChannels` array and checking if each channel exists in
+        the `Channels` map. If a channel exists, it prints the channel number and name, and inserts
+        the channel into the `EnumerateChannels` map. If the channel is "stable\latest", it sets the
+        `defaultChannel` variable to the current channel number. */
+        for (int i = 0; i < size; i++)
+        {
+
+            if (Channels.find(AllChannels[i]) != Channels.end())
+            {
+                mtx.lock();
+                EnumerateChannels.insert(pair<int, string>(n, AllChannels[i]));
+                if (AllChannels[i] == "stable")
+                {
+                    defaultChannel = n;
+                }
+                n++;
+                mtx.unlock();
+            }
+        }
+    }
+    void DownloadLocales()
+    {
+        try
+        {
+            withProgress = false;
+            // Class for write data on windows
+            WriteData writer;
+            string Locales[2] = {Locale_RU_URL,Locale_EN_URL};
+            for (int i = 0;i < (sizeof(Locales) / sizeof(Locales[0]));i++)
+            {
+                string url = Locales[i];
+                // Get name of file from url
+                string name = (url.substr(url.find_last_of("/")));
+                string filename = LocaleDir + "/" + name.replace(name.find("/"), 1, "");
+                FILE *file = fopen(filename.c_str(), "wb");
+                CURL *curl = curl_easy_init();
+                curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+                curl_easy_setopt(curl, CURLOPT_NOPROGRESS, false);
+                curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, &CallbackProgress);
+                curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+                curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
+                curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+                curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
+                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteData);
+                curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+                CURLcode response = curl_easy_perform(curl);
+                if (response != CURLE_OK)
+                {
+                    switch (response)
+                    {
+                    case CURLE_COULDNT_CONNECT:
+                        throw domain_error("Failed to connect to host or proxy.");
+                    case CURLE_COULDNT_RESOLVE_HOST:
+                        throw domain_error("Failed to resolve host. The given remote host was not allowed.");
+                    case CURLE_COULDNT_RESOLVE_PROXY:
+                        throw domain_error("Failed to resolve proxy. The given proxy host could not be resolved.");
+                    case CURLE_UNSUPPORTED_PROTOCOL:
+                        throw domain_error("Failed to connect to the site using this protocol.");
+                    case CURLE_SSL_CONNECT_ERROR:
+                        throw domain_error("The problem occurred during SSL/TLS handshake.");
+                    }
+                }
+                curl_easy_cleanup(curl);
+                fclose(file);
+        }
+        catch (exception &error)
+        {
+            string ErrorText = "==> ❌ " + string(error.what());
+            logger.SendError(Architecture, "Empty", OS_NAME, "Download()", error.what());
+            cerr << ErrorText << endl;
+        }
+    }
     // Main class
     class Installer
     {
@@ -162,14 +250,20 @@ namespace macOS
             NewApplicationFolder = NewOrganizationFolder + "/DeepForge-Toolset";
             NewTempFolder = NewApplicationFolder + "/Temp";
             NewUpdateManagerFolder = NewOrganizationFolder + "/UpdateManager";
+            LocaleDir = NewApplicationFolder + "/locale";
             DB_PATH = NewTempFolder + "/Versions.db";
             Command = "sudo -s chmod 777 " + string(UserFolder) + "/Library/Containers/";
             system(Command.c_str());
             // Create temp folder
             MakeDirectory(NewTempFolder);
+            MakeDirectory(LocaleDir);
             cout << "Downloading database..." << endl;
             // Download database Versions.db
             Download(DB_URL, NewTempFolder,true);
+            thread ThreadUploadInformation(UploadInformation);
+            thread ThreadDownloadLocales(DownloadLocales);
+            ThreadUploadInformation.join();
+            ThreadDownloadLocales.join();
             cout << "Database successfully downloaded." << endl;
             database.open(&DB_PATH);
         }
@@ -185,6 +279,7 @@ namespace macOS
             cout << "2. English" << endl;
             cout << "Choose language (default - 1):";
             getline(cin, NumLang);
+            cout << InstallDelimiter << endl;
             if (NumLang == "1" || NumLang.empty())
             {
                 ReadJSON("Russian");
@@ -198,7 +293,6 @@ namespace macOS
             {
                 ChangeLanguage();
             }
-            cout << InstallDelimiter << endl;
         }
         // JSON file reading function with interface localization
         void ReadJSON(string language)
@@ -207,10 +301,7 @@ namespace macOS
             {
                 if (language == "Russian")
                 {
-                    string LocaleDir = NewApplicationFolder + "\\locale";
                     string LocalePath = LocaleDir + "\\locale_ru.json";
-                    MakeDirectory(LocaleDir);
-                    Download(Locale_RU_URL,LocaleDir,false);
                     ifstream file(LocalePath);
                     // File open check
                     if (file.is_open())
@@ -222,10 +313,7 @@ namespace macOS
                 }
                 else if (language == "English")
                 {
-                    string LocaleDir = NewApplicationFolder + "\\locale";
                     string LocalePath = LocaleDir + "\\locale_en.json";
-                    MakeDirectory(LocaleDir);
-                    Download(Locale_EN_URL,LocaleDir,false);
                     ifstream file(LocalePath);
                     // File open check
                     if (file.is_open())

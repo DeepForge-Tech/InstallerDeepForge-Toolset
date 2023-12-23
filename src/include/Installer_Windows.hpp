@@ -43,6 +43,8 @@
 #include <fstream>
 #include <urlmon.h>
 #include "json/json.h"
+#include <thread>
+#include <mutex>
 #pragma comment(lib, "urlmon.lib")
 
 #define DEEPFORGE_TOOLSET_VERSION "0.1"
@@ -65,6 +67,7 @@ namespace Windows
     int result;
     int Percentage;
     int TempPercentage = 0;
+    int defaultChannel = 1;
     // bool type
     bool Updating = true;
     bool withProgress = true;
@@ -72,26 +75,34 @@ namespace Windows
     double LastSize;
     double LastTotalSize;
     double DownloadSpeed;
+    // map type
+    map<int, string> EnumerateChannels;
+    map<string, string> Channels;
     // string type
     string Answer;
+    string AllChannels[2] = {"stable", "beta"};
     const string NewOrganizationFolder = "C:\\ProgramData\\DeepForge";
     const string NewApplicationFolder = NewOrganizationFolder + "\\DeepForge-Toolset";
     const string NewUpdateManagerFolder = NewOrganizationFolder + "\\UpdateManager";
     const string NewTempFolder = NewApplicationFolder + "\\Temp";
+    const string LocaleDir = NewApplicationFolder + "\\locale";
     filesystem::path ProjectDir = filesystem::current_path().generic_string();
     string DB_PATH = NewTempFolder + "\\Versions.db";
     const string TrueVarious[3] = {"yes", "y", "1"};
     string InstallDelimiter = "========================================================";
-    #if defined(_M_AMD64)
-        string Architecture = "amd64";
-    #elif defined(_M_ARM64)
-        string Architecture = "arm64";
-    #endif
+#if defined(_M_AMD64)
+    string Architecture = "amd64";
+#elif defined(_M_ARM64)
+    string Architecture = "arm64";
+#endif
+    mutex mtx;
     Json::Value translate;
     // init classes
     Logger logger;
     ProgressBar_v1 progressbar;
     Database database;
+
+    
 
     class WriteData : public IBindStatusCallback
     {
@@ -153,6 +164,66 @@ namespace Windows
             return S_OK;
         }
     };
+
+    void UploadInformation()
+    {
+        mtx.lock();
+        Channels = database.GetAllVersionsFromDB(NameVersionTable, "Channel", Architecture);
+        mtx.unlock();
+        int size = (sizeof(AllChannels) / sizeof(AllChannels[0]));
+        int n = 1;
+        /* The code is iterating over the `AllChannels` array and checking if each channel exists in
+        the `Channels` map. If a channel exists, it prints the channel number and name, and inserts
+        the channel into the `EnumerateChannels` map. If the channel is "stable\latest", it sets the
+        `defaultChannel` variable to the current channel number. */
+        for (int i = 0; i < size; i++)
+        {
+
+            if (Channels.find(AllChannels[i]) != Channels.end())
+            {
+                mtx.lock();
+                EnumerateChannels.insert(pair<int, string>(n, AllChannels[i]));
+                if (AllChannels[i] == "stable")
+                {
+                    defaultChannel = n;
+                }
+                n++;
+                mtx.unlock();
+            }
+        }
+    }
+    void DownloadLocales()
+    {
+        try
+        {
+            withProgress = false;
+            // Class for write data on windows
+            WriteData writer;
+            string Locales[2] = {Locale_RU_URL,Locale_EN_URL};
+            for (int i = 0;i < (sizeof(Locales) / sizeof(Locales[0]));i++)
+            {
+                string url = Locales[i];
+                // Get name of file from url
+                string name = (url.substr(url.find_last_of("/")));
+                string filename = LocaleDir + "/" + name.replace(name.find("/"), 1, "");
+                // Call method for download file
+                HRESULT Download = URLDownloadToFile(NULL, url.c_str(), filename.c_str(), 0, static_cast<IBindStatusCallback *>(&writer));
+                switch (Download)
+                {
+                case -2146697211:
+                    throw domain_error("No internet connection");
+                case -2147467260:
+                    throw domain_error("Connection reset");
+                }
+            }
+        }
+        catch (exception &error)
+        {
+            string ErrorText = "==> ❌ " + string(error.what());
+            logger.SendError(Architecture, "Empty", OS_NAME, "Download()", error.what());
+            cerr << ErrorText << endl;
+        }
+    }
     // Main class
     class Installer
     {
@@ -163,17 +234,24 @@ namespace Windows
             SetConsoleOutputCP(CP_UTF8);
             // Create temp folder
             MakeDirectory(NewTempFolder);
+            MakeDirectory(LocaleDir);
             cout << "Downloading database..." << endl;
             // Download database Versions.db
             Download(DB_URL, NewTempFolder, true);
+            database.open(&DB_PATH);
+            thread ThreadUploadInformation(UploadInformation);
+            thread ThreadDownloadLocales(DownloadLocales);
+            ThreadUploadInformation.join();
+            ThreadDownloadLocales.join();
             cout << "Database successfully downloaded." << endl;
             cout << InstallDelimiter << endl;
-            database.open(&DB_PATH);
         }
+
         void CommandManager();
         void InstallUpdateManager();
         void InstallDeepForgeToolset(string channel);
         void ChangeUpdating();
+
         void ChangeLanguage()
         {
             string NumLang;
@@ -181,6 +259,7 @@ namespace Windows
             cout << "2. English" << endl;
             cout << "Choose language (default - 1):";
             getline(cin, NumLang);
+            cout << InstallDelimiter << endl;
             if (NumLang == "1" || NumLang.empty())
             {
                 ReadJSON("Russian");
@@ -194,7 +273,6 @@ namespace Windows
             {
                 ChangeLanguage();
             }
-            cout << InstallDelimiter << endl;
         }
         // JSON file reading function with interface localization
         void ReadJSON(string language)
@@ -203,10 +281,8 @@ namespace Windows
             {
                 if (language == "Russian")
                 {
-                    string LocaleDir = NewApplicationFolder + "\\locale";
                     string LocalePath = LocaleDir + "\\locale_ru.json";
                     MakeDirectory(LocaleDir);
-                    Download(Locale_RU_URL, LocaleDir, false);
                     ifstream file(LocalePath);
                     // File open check
                     if (file.is_open())
@@ -218,10 +294,8 @@ namespace Windows
                 }
                 else if (language == "English")
                 {
-                    string LocaleDir = NewApplicationFolder + "\\locale";
                     string LocalePath = LocaleDir + "\\locale_en.json";
                     MakeDirectory(LocaleDir);
-                    Download(Locale_EN_URL, LocaleDir, false);
                     ifstream file(LocalePath);
                     // File open check
                     if (file.is_open())
@@ -288,9 +362,9 @@ namespace Windows
         void AddToPATH()
         {
             string Command = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe add " + NewApplicationFolder + " && del C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe";
-#if defined(__x86_64__)
+#if defined(_M_AMD64)
             Download(PathmanURL_AMD64, NewTempFolder, false);
-#elif __arm__ || __aarch64__ || _M_ARM64
+#elif _M_ARM64
             Download(PathmanURL_ARM64, NewTempFolder, false);
 #endif
             system(Command.c_str());
@@ -403,7 +477,7 @@ namespace Windows
         */
         void UnpackArchive(string path_from, string path_to)
         {
-            string unpack_command = "tar -xf" + path_from + "--directory " + path_to;
+            string unpack_command = "tar -xf" + path_from + " --directory " + path_to;
             system(unpack_command.c_str());
         }
         void AddToStartupSystem(string filePath)

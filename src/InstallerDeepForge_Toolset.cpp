@@ -39,8 +39,6 @@ using namespace Windows;
 
 Installer installer;
 
-string AllChannels[2] = {"stable", "beta"};
-
 /**
  * The InstallUpdateManager function downloads and installs the latest version of the Update Manager
  * application.
@@ -59,7 +57,7 @@ void Installer::InstallUpdateManager()
         version = database.GetLatestVersion(UpdateManagerTable, "stable", "Version", Architecture);
         UpdateManagerUrl = database.GetApplicationURL(UpdateManagerTable, "stable", "Url", Architecture, version);
         cout << translate["Installing"].asString() << " UpdateManager..." << endl;
-        Download(UpdateManagerUrl, NewTempFolder,true);
+        Download(UpdateManagerUrl, NewTempFolder, true);
         name = (UpdateManagerUrl.substr(UpdateManagerUrl.find_last_of("/")));
         ArchivePath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
         MakeDirectory(NewUpdateManagerFolder);
@@ -104,7 +102,7 @@ void Installer::InstallDeepForgeToolset(string channel)
         cout << InstallDelimiter << endl;
         cout << translate["Installing"].asString() << " DeepForge Toolset..." << endl;
         ApplicationURL = database.GetApplicationURL(NameVersionTable, channel, "Url", Architecture, DEEPFORGE_TOOLSET_VERSION);
-        Download(ApplicationURL, NewTempFolder,true);
+        Download(ApplicationURL, NewTempFolder, true);
         name = (ApplicationURL.substr(ApplicationURL.find_last_of("/")));
         ArchivePath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
         MakeDirectory(NewApplicationFolder);
@@ -118,9 +116,9 @@ void Installer::InstallDeepForgeToolset(string channel)
         CreateSymlink("DeepForgeToolset", file_path);
         filesystem::remove(ArchivePath);
         cout << "==> ✅ DeepForge Toolset " << DEEPFORGE_TOOLSET_VERSION << " " << translate["Installed"].asString() << endl;
-        #if defined(_WIN32)
-            AddToPATH();
-        #endif
+#if defined(_WIN32)
+        AddToPATH();
+#endif
         cout << InstallDelimiter << endl;
         if (Updating == true)
         {
@@ -149,7 +147,7 @@ void Installer::ChangeUpdating()
     {
         Updating = CheckAnswer(Answer);
     }
-}   
+}
 /**
  * The CommandManager function allows the user to select a version of the DeepForge Toolset and
  * installs it.
@@ -159,30 +157,11 @@ void Installer::CommandManager()
     try
     {
         ChangeLanguage();
-        map<int, string> EnumerateChannels;
-        map<string, string> Channels = database.GetAllVersionsFromDB(NameVersionTable, "Channel", Architecture);
-        int size = (sizeof(AllChannels) / sizeof(AllChannels[0]));
-        int n = 1;
-        int defaultChannel = 1;
-        /* The code is iterating over the `AllChannels` array and checking if each channel exists in
-        the `Channels` map. If a channel exists, it prints the channel number and name, and inserts
-        the channel into the `EnumerateChannels` map. If the channel is "stable\latest", it sets the
-        `defaultChannel` variable to the current channel number. */
-        for (int i = 0; i < size; i++)
+        for (int i = 1;i < EnumerateChannels.size() + 1;i++)
         {
-
-            if (Channels.find(AllChannels[i]) != Channels.end())
-            {
-                cout << n << ". " << AllChannels[i] << endl;
-                EnumerateChannels.insert(pair<int, string>(n, AllChannels[i]));
-                if (AllChannels[i] == "stable")
-                {
-                    defaultChannel = n;
-                }
-                n++;
-            }
+            cout << i << ". " << EnumerateChannels[i] << endl;
         }
-
+        // cout << defaultChannel << ". " << AllChannels[defaultChannel] << endl;
         cout << translate["ChangeStability"].asString() << defaultChannel << "):";
         getline(cin, Answer);
         /* This code block is responsible for handling user input to select a version of the DeepForge
@@ -206,7 +185,7 @@ void Installer::CommandManager()
             }
         }
         cout << translate["Reboot"].asString();
-        getline(cin,Answer);
+        getline(cin, Answer);
         if (Answer.empty() || CheckAnswer(Answer) == true)
         {
             RebootSystem();
