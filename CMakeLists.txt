@@ -19,13 +19,6 @@ FetchContent_Declare(fmt
 )
 FetchContent_MakeAvailable(fmt)
 
-# jsoncpp
-FetchContent_Declare(jsoncpp
-  GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
-  GIT_TAG master
-)
-FetchContent_MakeAvailable(jsoncpp)
-
 # FIND_PACKAGE(CURL)
 # IF(CURL_FOUND)
 #   INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIR})
@@ -49,6 +42,12 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
       "/DWIN32 /D_WINDOWS /EHsc /WX /wd4355 /wd4251 /wd4250 /wd4996"
       CACHE STRING "Debug compiler flags" FORCE
     )
+    # jsoncpp
+  FetchContent_Declare(jsoncpp
+  GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
+  GIT_TAG master
+  )
+  FetchContent_MakeAvailable(jsoncpp)
 else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast")  
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_STATICLIB -static-libgcc -static-libstdc++ -Bstatic")
@@ -62,6 +61,12 @@ else()
     GIT_TAG master
   )
   FetchContent_MakeAvailable(libcurl)
+  # jsoncpp
+  FetchContent_Declare(jsoncpp
+  GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
+  GIT_TAG master
+  )
+  FetchContent_MakeAvailable(jsoncpp)
 endif()
 #target_include_directories(InstallerDeepForge-Toolset PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/include)
