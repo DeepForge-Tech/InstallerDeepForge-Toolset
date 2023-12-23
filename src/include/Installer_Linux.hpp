@@ -228,6 +228,7 @@ namespace Linux
                 }
                 curl_easy_cleanup(curl);
                 fclose(file);
+            }
         }
         catch (exception &error)
         {
