@@ -191,8 +191,6 @@ namespace macOS
         try
         {
             withProgress = false;
-            // Class for write data on windows
-            WriteData writer;
             string Locales[2] = {Locale_RU_URL,Locale_EN_URL};
             for (int i = 0;i < (sizeof(Locales) / sizeof(Locales[0]));i++)
             {
