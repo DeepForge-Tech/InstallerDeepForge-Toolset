@@ -9,25 +9,7 @@ set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package(Threads REQUIRED)
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_FIND_LIBRARY_SUFFIXES .a .so .dylib)
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(CMAKE_CXX_FLAGS_DEBUG
-      "/DWIN32 /D_WINDOWS /EHsc /WX /wd4355 /wd4251 /wd4250 /wd4996"
-      CACHE STRING "Debug compiler flags" FORCE
-    )
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast")  
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_STATICLIB -static-libgcc -static-libstdc++ -Bstatic")
-  FetchContent_Declare(libzip
-    GIT_REPOSITORY https://github.com/DeepForge-Technology/libzip.git
-    GIT_TAG master
-  )
-  FetchContent_MakeAvailable(libzip)
-  FetchContent_Declare(libcurl
-    GIT_REPOSITORY https://github.com/DeepForge-Technology/curl.git
-    GIT_TAG master
-  )
-  FetchContent_MakeAvailable(libcurl)
-endif()
+
 # find_package(ZLIB)
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/lib)
 # fmt
@@ -62,6 +44,25 @@ FetchContent_Declare(SQLite
   GIT_TAG master
 )
 FetchContent_MakeAvailable(SQLite)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(CMAKE_CXX_FLAGS_DEBUG
+      "/DWIN32 /D_WINDOWS /EHsc /WX /wd4355 /wd4251 /wd4250 /wd4996"
+      CACHE STRING "Debug compiler flags" FORCE
+    )
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast")  
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_STATICLIB -static-libgcc -static-libstdc++ -Bstatic")
+  FetchContent_Declare(libzip
+    GIT_REPOSITORY https://github.com/DeepForge-Technology/libzip.git
+    GIT_TAG master
+  )
+  FetchContent_MakeAvailable(libzip)
+  FetchContent_Declare(libcurl
+    GIT_REPOSITORY https://github.com/DeepForge-Technology/curl.git
+    GIT_TAG master
+  )
+  FetchContent_MakeAvailable(libcurl)
+endif()
 #target_include_directories(InstallerDeepForge-Toolset PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 set(SOURCE_FILES
@@ -83,7 +84,7 @@ if (WIN32)
 elseif(APPLE)
   set(LIBRARIES
     fmt::fmt 
-    jsoncpp_static
+    jsoncpp
     libcurl_static
     zip
     SQLite
@@ -92,8 +93,8 @@ elseif(APPLE)
 elseif(UNIX)
   set(LIBRARIES
     fmt::fmt 
-    jsoncpp_static
-    libcurl
+    jsoncpp
+    libcurl_static
     SQLite
     zip
     Threads::Threads
