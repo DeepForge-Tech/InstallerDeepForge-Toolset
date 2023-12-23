@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install libraries
-      run: sudo add-apt-repository universe && sudo apt update && sudo apt upgrade && sudo apt install curl && sudo apt-get install libcurl4-openssl-dev libgtest-dev googletest google-mock libgmock-dev libtbb-dev
+      run: sudo add-apt-repository universe && sudo apt update && sudo apt upgrade && sudo apt install curl && sudo apt-get install libcurl4-openssl-dev libgtest-dev googletest google-mock libgmock-dev libtbb-dev libjsoncpp-dev
     - name: Building project
       run: mkdir build && cd build && cmake .. && cmake --build .
   build_macOS_12:
