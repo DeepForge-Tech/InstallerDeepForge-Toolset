@@ -51,6 +51,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     )
 else()
   include_directories(/usr/local/include)
+  include_directories(../../include)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast")  
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -I /usr/local/include -I ../../include -DCURL_STATICLIB -static-libgcc -static-libstdc++ -Bstatic")
   FetchContent_Declare(libzip
