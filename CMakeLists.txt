@@ -66,11 +66,15 @@ else()
   endif()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast")  
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -I /usr/local/include -I ../../include -DCURL_STATICLIB -static-libgcc -static-libstdc++ -Bstatic")
-  FetchContent_Declare(libzip
-    GIT_REPOSITORY https://github.com/DeepForge-Technology/libzip.git
-    GIT_TAG master
-  )
-  FetchContent_MakeAvailable(libzip)
+  if (APPLE)
+    find_package(libzip REQUIRED)
+  else()
+    FetchContent_Declare(libzip
+      GIT_REPOSITORY https://github.com/DeepForge-Technology/libzip.git
+      GIT_TAG master
+    )
+    FetchContent_MakeAvailable(libzip)
+  endif()
   FetchContent_Declare(libcurl
     GIT_REPOSITORY https://github.com/DeepForge-Technology/curl.git
     GIT_TAG master
@@ -100,7 +104,7 @@ elseif(APPLE)
     fmt::fmt 
     jsoncpp
     libcurl_static
-    zip
+    libzip::zip
     SQLite
     Threads::Threads
   )

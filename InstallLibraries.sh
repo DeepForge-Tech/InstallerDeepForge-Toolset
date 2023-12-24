@@ -1,10 +1,10 @@
 #!/bin/bash
 echo "==> Installing libraries"
 # Installing libraries
-YUM_PACKAGE_NAME="jsoncpp jsoncpp-devel make cmake g++ gcc gtest-devel gtest gmock-devel gmock curl libcurl-devel libcurl sqlite-devel sqlite-tcl libstdc++.x86_64 libstdc++-devel.x86_64 libstdc++-static.x86_64 zlib"
+YUM_PACKAGE_NAME="make cmake gcc-c++ curl libcurl sqlite-devel openssl-devel"
 DEB_PACKAGE_NAME="g++ gcc build-essential cmake make curl libcurl4-openssl-dev libjsoncpp-dev libfmt-dev libsqlite3-dev libgtest-dev googletest google-mock libgmock-dev libtbb-dev libzip-dev zlib1g-dev"
 PACMAN_PACKAGE_NAME="jsoncpp gcc base-devel cmake  clang gtest lib32-curl libcurl-compat libcurl-gnutls curl fmt lib32-sqlite sqlite sqlite-tcl zlib"
-ZYPPER_PACKAGE_NAME=""
+ZYPPER_PACKAGE_NAME="libcurl-devel gcc-c++ cmake gtest gmock zlib-devel fmt-devel sqlite3-devel jsoncpp-devel"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
    if [ -f /etc/os-release ]; then
       # freedesktop.org and systemd
@@ -106,63 +106,10 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       echo "Not found package manager"
       exit 1;
    fi
-   echo "==> Building library Zipper"
-   cd src
-   mkdir lib
-   cd ..
-   git clone --recursive https://github.com/sebastiandev/zipper.git
-   cd zipper
-   mkdir build
-   cmake .
-   make
-   find . -name "*.a" -exec mv "{}" ../src/lib/ \;
-   # find . -name "*.so" -exec mv "{}" ../../src/lib \;
-   cd ..
-   sudo rm -rf ./zipper
-   echo "==> Zipper successfully builded"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
    # Mac OSX
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
    brew  install jsoncpp sqlite3 sqlite-utils fmt clang-format curl googletest gcc zlib cmake
-   echo "==> Building library Zipper"
-   git clone --recursive https://github.com/sebastiandev/zipper.git
-   cd src
-   mkdir lib
-   cd ..
-   cd zipper
-   mkdir build
-   cmake .
-   make
-   find . -name "*.a" -exec cp "{}" ../src/lib/ \;
-   cd ..
-   sudo rm -rf ./zipper
-   echo "==> Build of Zipper finished"
 fi
 echo "==> Libraries successfully installed"
-unameOut=$(uname -a)
-case "${unameOut}" in
-	Darwin*) 	os="macOS";;
-	Linux*)		os="Linux";;
-esac
-# Building
-echo "==> Building"
-sudo rm -rf ./build/$os
-mkdir build
-cd build
-mkdir $os
-cd ..
-echo "==> Building project"
-case "${unameOut}" in
-	Darwin*) 	sudo clang++ -o ./build/$os/InstallerDeepForge-Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -L ./src/lib -lZipper -lz -lcurl -lsqlite3 -ljsoncpp -std=c++2a -Bstatic;;
-	Linux*)		sudo g++ -o ./build/$os/InstallerDeepForge-Toolset ./src/InstallerDeepForge_Toolset.cpp -DCURL_STATICLIB -I ../../include -I ./src/include -L ./src/lib -lZipper -lz -lcurl -lsqlite3 -ljsoncpp -std=c++2a -Bstatic;;
-esac
-echo "==> Build of project finished"
-cd build
-cd $os
-case "${unameOut}" in
-	Darwin*) 	./InstallerDeepForge-Toolset;;
-	Linux*)		sudo ./InstallerDeepForge-Toolset;;
-esac
-
-#echo "=================================="
 exit 0
