@@ -2,15 +2,6 @@ cmake_minimum_required(VERSION 3.21)
 project(InstallerDeepForge-Toolset)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_CXX_STANDARD 20)
-include(CheckFunctionExists)
-include(CheckIncludeFiles)
-include(CheckLibraryExists)
-include(CheckSymbolExists)
-include(CheckTypeSize)
-include(CheckCSourceRuns)
-include(CheckCSourceCompiles)
-include(CheckStructHasMember)
-include(TestBigEndian)
 include(GNUInstallDirs)
 include(FetchContent)
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
@@ -35,8 +26,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
       CACHE STRING "Debug compiler flags" FORCE
     )
 else()
-  include_directories(/usr/local/include)
-  include_directories(../../include)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")  
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -I /usr/local/include -I ../../include -DCURL_STATICLIB -Bstatic")
 endif()
@@ -94,36 +83,36 @@ elseif(APPLE)
     SQLite3
     Threads::Threads
   )
-elseif(UNIX)
-  FetchContent_Declare(libcurl
-  GIT_REPOSITORY https://github.com/DeepForge-Technology/curl.git
-  GIT_TAG master
-  )
-  FetchContent_MakeAvailable(libcurl)
-  FetchContent_Declare(libzip
-  GIT_REPOSITORY https://github.com/DeepForge-Technology/libzip.git
-  GIT_TAG master
-  )
-  FetchContent_MakeAvailable(libzip)
-  FetchContent_Declare(SQLite
-  GIT_REPOSITORY https://github.com/DeepForge-Technology/SQLite.git
-  GIT_TAG master
-  )
-  FetchContent_MakeAvailable(SQLite)
-  # jsoncpp
-  FetchContent_Declare(jsoncpp
-  GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
-  GIT_TAG master
-  )
-  FetchContent_MakeAvailable(jsoncpp)
-  set(LIBRARIES
-    fmt::fmt 
-    jsoncpp
-    libcurl_static
-    SQLite
-    zip
-    Threads::Threads
-  )
+# elseif(UNIX)
+#   FetchContent_Declare(libcurl
+#   GIT_REPOSITORY https://github.com/DeepForge-Technology/curl.git
+#   GIT_TAG master
+#   )
+#   FetchContent_MakeAvailable(libcurl)
+#   FetchContent_Declare(libzip
+#   GIT_REPOSITORY https://github.com/DeepForge-Technology/libzip.git
+#   GIT_TAG master
+#   )
+#   FetchContent_MakeAvailable(libzip)
+#   FetchContent_Declare(SQLite
+#   GIT_REPOSITORY https://github.com/DeepForge-Technology/SQLite.git
+#   GIT_TAG master
+#   )
+#   FetchContent_MakeAvailable(SQLite)
+#   # jsoncpp
+#   FetchContent_Declare(jsoncpp
+#   GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
+#   GIT_TAG master
+#   )
+#   FetchContent_MakeAvailable(jsoncpp)
+#   set(LIBRARIES
+#     fmt::fmt 
+#     jsoncpp
+#     libcurl_static
+#     SQLite
+#     zip
+#     Threads::Threads
+#   )
 endif()
 
 target_sources(InstallerDeepForge-Toolset PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/resource.rc)
