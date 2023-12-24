@@ -72,6 +72,7 @@ if (WIN32)
   )
 elseif(APPLE)
   find_package(libzip REQUIRED)
+  find_package(jsoncpp REQUIRED)
   FIND_PACKAGE(CURL)
   IF(CURL_FOUND)
     INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIR})
@@ -85,7 +86,7 @@ elseif(APPLE)
   endif (SQLITE3_FOUND)
   set(LIBRARIES
     fmt::fmt 
-    jsoncpp
+    jsoncpp_lib
     CURL
     libzip::zip
     SQLite3
