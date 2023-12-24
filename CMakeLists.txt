@@ -71,10 +71,10 @@ elseif(APPLE)
   ELSE(CURL_FOUND)
     MESSAGE(FATAL_ERROR "Could not find the CURL library and development files.")
   ENDIF(CURL_FOUND)
-  find_package (SQLite3)
+  find_package (SQLite)
   if (SQLITE3_FOUND)
-    include_directories(${SQLITE3_INCLUDE_DIRS})
-  endif (SQLITE3_FOUND)
+    include_directories(${SQLITE_INCLUDE_DIRS})
+  endif (SQLITE_FOUND)
   set(LIBRARIES
     fmt::fmt 
     ${JSONCPP_LIBRARIES}
@@ -83,36 +83,36 @@ elseif(APPLE)
     SQLite3
     Threads::Threads
   )
-# elseif(UNIX)
-#   FetchContent_Declare(libcurl
-#   GIT_REPOSITORY https://github.com/DeepForge-Technology/curl.git
-#   GIT_TAG master
-#   )
-#   FetchContent_MakeAvailable(libcurl)
-#   FetchContent_Declare(libzip
-#   GIT_REPOSITORY https://github.com/DeepForge-Technology/libzip.git
-#   GIT_TAG master
-#   )
-#   FetchContent_MakeAvailable(libzip)
-#   FetchContent_Declare(SQLite
-#   GIT_REPOSITORY https://github.com/DeepForge-Technology/SQLite.git
-#   GIT_TAG master
-#   )
-#   FetchContent_MakeAvailable(SQLite)
-#   # jsoncpp
-#   FetchContent_Declare(jsoncpp
-#   GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
-#   GIT_TAG master
-#   )
-#   FetchContent_MakeAvailable(jsoncpp)
-#   set(LIBRARIES
-#     fmt::fmt 
-#     jsoncpp
-#     libcurl_static
-#     SQLite
-#     zip
-#     Threads::Threads
-#   )
+elseif(UNIX)
+  FetchContent_Declare(libcurl
+  GIT_REPOSITORY https://github.com/DeepForge-Technology/curl.git
+  GIT_TAG master
+  )
+  FetchContent_MakeAvailable(libcurl)
+  FetchContent_Declare(libzip
+  GIT_REPOSITORY https://github.com/DeepForge-Technology/libzip.git
+  GIT_TAG master
+  )
+  FetchContent_MakeAvailable(libzip)
+  FetchContent_Declare(SQLite
+  GIT_REPOSITORY https://github.com/DeepForge-Technology/SQLite.git
+  GIT_TAG master
+  )
+  FetchContent_MakeAvailable(SQLite)
+  # jsoncpp
+  FetchContent_Declare(jsoncpp
+  GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
+  GIT_TAG master
+  )
+  FetchContent_MakeAvailable(jsoncpp)
+  set(LIBRARIES
+    fmt::fmt 
+    jsoncpp
+    libcurl_static
+    SQLite
+    zip
+    Threads::Threads
+  )
 endif()
 
 target_sources(InstallerDeepForge-Toolset PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/resource.rc)
