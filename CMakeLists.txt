@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 project(InstallerDeepForge-Toolset)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_CXX_STANDARD 20)
-include (GNUInstallDirs)
+include(GNUInstallDirs)
 include(FetchContent)
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
@@ -52,7 +52,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 else()
   include_directories(/usr/local/include)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast")  
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -I /usr/local/include -DCURL_STATICLIB -static-libgcc -static-libstdc++ -Bstatic")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -I /usr/local/include -I ../../include -DCURL_STATICLIB -static-libgcc -static-libstdc++ -Bstatic")
   FetchContent_Declare(libzip
     GIT_REPOSITORY https://github.com/DeepForge-Technology/libzip.git
     GIT_TAG master
