@@ -71,10 +71,15 @@ elseif(APPLE)
   ELSE(CURL_FOUND)
     MESSAGE(FATAL_ERROR "Could not find the CURL library and development files.")
   ENDIF(CURL_FOUND)
-  find_package (SQLite)
-  if (SQLITE3_FOUND)
-    include_directories(${SQLITE_INCLUDE_DIRS})
-  endif (SQLITE_FOUND)
+  # find_package (SQLite)
+  # if (SQLITE3_FOUND)
+  #   include_directories(${SQLITE_INCLUDE_DIRS})
+  # endif (SQLITE_FOUND)
+  FetchContent_Declare(SQLite
+  GIT_REPOSITORY https://github.com/DeepForge-Technology/SQLite.git
+  GIT_TAG master
+  )
+  FetchContent_MakeAvailable(SQLite)
   set(LIBRARIES
     fmt::fmt 
     ${JSONCPP_LIBRARIES}
