@@ -28,17 +28,6 @@ FetchContent_Declare(fmt
 )
 FetchContent_MakeAvailable(fmt)
 
-# jsoncpp
-FetchContent_Declare(jsoncpp
-  GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
-  GIT_TAG master
-)
-FetchContent_MakeAvailable(jsoncpp)
-
-
-
-# SQLite 3
-
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS_DEBUG
@@ -62,6 +51,12 @@ set(SOURCE_FILES
 add_executable(InstallerDeepForge-Toolset ${SOURCE_FILES})
 
 if (WIN32)
+  # jsoncpp
+  FetchContent_Declare(jsoncpp
+  GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
+  GIT_TAG master
+  )
+  FetchContent_MakeAvailable(jsoncpp)
   FetchContent_Declare(SQLite
     GIT_REPOSITORY https://github.com/DeepForge-Technology/SQLite.git
     GIT_TAG master
@@ -112,6 +107,12 @@ elseif(UNIX)
   GIT_TAG master
   )
   FetchContent_MakeAvailable(SQLite)
+  # jsoncpp
+  FetchContent_Declare(jsoncpp
+  GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
+  GIT_TAG master
+  )
+  FetchContent_MakeAvailable(jsoncpp)
   set(LIBRARIES
     fmt::fmt 
     jsoncpp
