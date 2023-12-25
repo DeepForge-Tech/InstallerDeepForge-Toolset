@@ -92,7 +92,7 @@ elseif(APPLE)
   set(LIBRARIES
     fmt::fmt 
     # ${JSONCPP_LIBRARIES}
-    jsoncpp
+    jsoncpp_static
     CURL
     libzip::zip
     SQLite
