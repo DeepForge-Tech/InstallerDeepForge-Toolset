@@ -414,13 +414,16 @@ namespace macOS
                         throw runtime_error(ErrorText);
                     }
 
-                    ofstream out_file(full_path,ios::binary);
-                    if (!out_file.is_open())
+                    if(filesystem::is_directory() == false)
                     {
-                        string ErrorText = "Cannot open file for writing: " + full_path;
-                        zip_fclose(zip_file);
-                        zip_close(zip);
-                        throw runtime_error(ErrorText);
+                        ofstream out_file(full_path,ios::binary);
+                        if (!out_file.is_open())
+                        {
+                            string ErrorText = "Cannot open file for writing: " + full_path;
+                            zip_fclose(zip_file);
+                            zip_close(zip);
+                            throw runtime_error(ErrorText);
+                        }
                     }
 
                     vector<char> buffer(zip_stat.size);
@@ -436,7 +439,7 @@ namespace macOS
             catch (exception &error)
             {
                 logger.SendError(Architecture, "Empty", OS_NAME, "UnpackArchive()", error.what());
-                cerr << error.what() << endl;
+                cerr << "❌ " << error.what() << endl;
             }
         }
         void WriteInformation(string version)
