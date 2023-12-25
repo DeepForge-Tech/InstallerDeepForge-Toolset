@@ -547,7 +547,7 @@ namespace Linux
                 curl_easy_cleanup(curl);
                 fclose(file);
                 // If the progress bar is not completely filled in, then paint over manually
-                if (Progress = true)
+                if (Progress == true)
                 {
                     if (Process < 100 && Process != Percentage)
                     {

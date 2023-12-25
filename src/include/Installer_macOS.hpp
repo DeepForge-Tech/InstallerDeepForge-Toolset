@@ -214,16 +214,16 @@ namespace macOS
                 {
                     switch (response)
                     {
-                    case CURLE_COULDNT_CONNECT:
-                        throw domain_error("Failed to connect to host or proxy.");
-                    case CURLE_COULDNT_RESOLVE_HOST:
-                        throw domain_error("Failed to resolve host. The given remote host was not allowed.");
-                    case CURLE_COULDNT_RESOLVE_PROXY:
-                        throw domain_error("Failed to resolve proxy. The given proxy host could not be resolved.");
-                    case CURLE_UNSUPPORTED_PROTOCOL:
-                        throw domain_error("Failed to connect to the site using this protocol.");
-                    case CURLE_SSL_CONNECT_ERROR:
-                        throw domain_error("The problem occurred during SSL/TLS handshake.");
+                        case CURLE_COULDNT_CONNECT:
+                            throw domain_error("Failed to connect to host or proxy.");
+                        case CURLE_COULDNT_RESOLVE_HOST:
+                            throw domain_error("Failed to resolve host. The given remote host was not allowed.");
+                        case CURLE_COULDNT_RESOLVE_PROXY:
+                            throw domain_error("Failed to resolve proxy. The given proxy host could not be resolved.");
+                        case CURLE_UNSUPPORTED_PROTOCOL:
+                            throw domain_error("Failed to connect to the site using this protocol.");
+                        case CURLE_SSL_CONNECT_ERROR:
+                            throw domain_error("The problem occurred during SSL/TLS handshake.");
                     }
                 }
                 curl_easy_cleanup(curl);
@@ -557,7 +557,7 @@ namespace macOS
                 curl_easy_cleanup(curl);
                 fclose(file);
                 // If the progress bar is not completely filled in, then paint over manually
-                if (Progress = true)
+                if (Progress == true)
                 {
                     if (Process < 100 && Process != Percentage)
                     {
