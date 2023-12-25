@@ -424,12 +424,11 @@ namespace macOS
                             zip_close(zip);
                             throw runtime_error(ErrorText);
                         }
+                        vector<char> buffer(zip_stat.size);
+                        zip_fread(zip_file, buffer.data(), buffer.size());
+                        out_file.write(buffer.data(), buffer.size());
+                        out_file.close();
                     }
-
-                    vector<char> buffer(zip_stat.size);
-                    zip_fread(zip_file, buffer.data(), buffer.size());
-                    out_file.write(buffer.data(), buffer.size());
-                    out_file.close();
 
                     zip_fclose(zip_file);
                 }
