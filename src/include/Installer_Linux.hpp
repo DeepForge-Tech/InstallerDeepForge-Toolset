@@ -255,8 +255,8 @@ namespace Linux
             cout << "==> Downloading database..." << endl;
             // Download database Versions.db
             Download(DB_URL, NewTempFolder,true);
-            cout << "==> Database successfully downloaded." << endl;
             database.open(&DB_PATH);
+            cout << "==> Database successfully downloaded." << endl;
         }
         void CommandManager();
         // void AddToPATH();
