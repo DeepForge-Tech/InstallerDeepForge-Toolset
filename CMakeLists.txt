@@ -18,7 +18,16 @@ FetchContent_Declare(fmt
   GIT_TAG master
 )
 FetchContent_MakeAvailable(fmt)
-
+# jsoncpp
+FetchContent_Declare(jsoncpp
+GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
+GIT_TAG master
+)
+if(NOT jsoncpp_POPULATED)
+  FetchContent_Populate(jsoncpp)
+  add_subdirectory(${jsoncpp_SOURCE_DIR} ${jsoncpp_BINARY_DIR})
+endif()
+FetchContent_MakeAvailable(jsoncpp)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS_DEBUG
@@ -37,15 +46,15 @@ set(SOURCE_FILES
     ./src/DatabaseConnect.cpp
     ./src/DatabaseConnect.hpp
 )
-add_executable(InstallerDeepForge-Toolset ${SOURCE_FILES})
+
 
 if (WIN32)
   # jsoncpp
-  FetchContent_Declare(jsoncpp
-  GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
-  GIT_TAG master
-  )
-  FetchContent_MakeAvailable(jsoncpp)
+  # FetchContent_Declare(jsoncpp
+  # GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
+  # GIT_TAG master
+  # )
+  # FetchContent_MakeAvailable(jsoncpp)
   FetchContent_Declare(SQLite
     GIT_REPOSITORY https://github.com/DeepForge-Technology/SQLite.git
     GIT_TAG master
@@ -61,8 +70,8 @@ if (WIN32)
   )
 elseif(APPLE)
   find_package(libzip REQUIRED)
-  find_package(PkgConfig REQUIRED)
-  pkg_check_modules(JSONCPP jsoncpp)
+  # find_package(PkgConfig REQUIRED)
+  # pkg_check_modules(JSONCPP jsoncpp)
 
   FIND_PACKAGE(CURL)
   IF(CURL_FOUND)
@@ -82,7 +91,8 @@ elseif(APPLE)
   FetchContent_MakeAvailable(SQLite)
   set(LIBRARIES
     fmt::fmt 
-    ${JSONCPP_LIBRARIES}
+    # ${JSONCPP_LIBRARIES}
+    jsoncpp
     CURL
     libzip::zip
     SQLite
@@ -105,11 +115,11 @@ elseif(UNIX)
   )
   FetchContent_MakeAvailable(SQLite)
   # jsoncpp
-  FetchContent_Declare(jsoncpp
-  GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
-  GIT_TAG master
-  )
-  FetchContent_MakeAvailable(jsoncpp)
+  # FetchContent_Declare(jsoncpp
+  # GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
+  # GIT_TAG master
+  # )
+  # FetchContent_MakeAvailable(jsoncpp)
   set(LIBRARIES
     fmt::fmt 
     jsoncpp
@@ -119,7 +129,7 @@ elseif(UNIX)
     Threads::Threads
   )
 endif()
-
+add_executable(InstallerDeepForge-Toolset ${SOURCE_FILES})
 target_sources(InstallerDeepForge-Toolset PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/resource.rc)
 target_link_libraries(InstallerDeepForge-Toolset 
   PRIVATE  
