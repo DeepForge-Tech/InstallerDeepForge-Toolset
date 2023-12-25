@@ -292,7 +292,7 @@ namespace Linux
             {
                 if (language == "Russian")
                 {
-                    string LocalePath = LocaleDir + "\\locale_ru.json";
+                    string LocalePath = LocaleDir + "/locale_ru.json";
                     ifstream file(LocalePath);
                     // File open check
                     if (file.is_open())
@@ -304,7 +304,7 @@ namespace Linux
                 }
                 else if (language == "English")
                 {
-                    string LocalePath = LocaleDir + "\\locale_en.json";
+                    string LocalePath = LocaleDir + "/locale_en.json";
                     ifstream file(LocalePath);
                     // File open check
                     if (file.is_open())
@@ -439,7 +439,7 @@ namespace Linux
                     {"Name","DeepForge-Toolset"},
                     {"Version",version},
                 };
-                string pathFile = NewUpdateManagerFolder + "\\AppInformation.db";
+                string pathFile = NewUpdateManagerFolder + "/AppInformation.db";
                 Database AppInformationDB;
                 /* The bellow code is checking if a file exists at the specified path. If the file does not exist, it creates a new file and writes an empty string to it. Then, it opens a database connection using the file as the database path. It checks if a table named "Applications" exists in the database. If the table does not exist, it creates the table with the specified columns. Finally, it inserts values into the "Applications" table. */
                 if (filesystem::exists(pathFile) == false)
