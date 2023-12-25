@@ -414,7 +414,7 @@ namespace macOS
                         throw runtime_error(ErrorText);
                     }
 
-                    if(filesystem::is_directory() == false)
+                    if(filesystem::is_directory(full_path) == false)
                     {
                         ofstream out_file(full_path,ios::binary);
                         if (!out_file.is_open())
