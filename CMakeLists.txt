@@ -77,7 +77,7 @@ if (WIN32)
     Threads::Threads
   )
 elseif(APPLE)
-  # find_package(libzip REQUIRED)
+  find_package(libzip REQUIRED)
   # find_package(PkgConfig REQUIRED)
   # pkg_check_modules(JSONCPP jsoncpp)
 
@@ -92,11 +92,11 @@ elseif(APPLE)
   # if (SQLITE3_FOUND)
   #   include_directories(${SQLITE_INCLUDE_DIRS})
   # endif (SQLITE_FOUND)
-  FetchContent_Declare(libzip
-    GIT_REPOSITORY https://github.com/DeepForge-Technology/libzip.git
-    GIT_TAG master
-  )
-  FetchContent_MakeAvailable(libzip)
+  # FetchContent_Declare(libzip
+  #   GIT_REPOSITORY https://github.com/DeepForge-Technology/libzip.git
+  #   GIT_TAG master
+  # )
+  # FetchContent_MakeAvailable(libzip)
   FetchContent_Declare(libcurl
   GIT_REPOSITORY https://github.com/DeepForge-Technology/curl.git
   GIT_TAG master
@@ -107,7 +107,7 @@ elseif(APPLE)
     # ${JSONCPP_LIBRARIES}
     jsoncpp_static
     libcurl
-    zip
+    libzip::zip
     SQLite
     Threads::Threads
   )
