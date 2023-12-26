@@ -54,13 +54,18 @@ set(SOURCE_FILES
 
 if(APPLE)
   add_executable(InstallerDeepForge-Toolset MACOSX_BUNDLE ${SOURCE_FILES})            
+  set(BUNDLE_NAME "InstallerDeepForge-Toolset.app")
+  set(MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
+  # set(MACOSX_BUNDLE_ICON ${CMAKE_CURRENT_SOURCE_DIR}/icon.icns)
+  set(MACOSX_BUNDLE_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
   set_target_properties(InstallerDeepForge-Toolset PROPERTIES
-      BUNDLE True
-      MACOSX_BUNDLE_GUI_IDENTIFIER my.domain.style.identifier.InstallerDeepForge-Toolset
-      MACOSX_BUNDLE_BUNDLE_NAME InstallerDeepForge-Toolset
-      MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
-      MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
-      MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
+      MACOSX_BUNDLE TRUE
+      MACOSX_BUNDLE_GUI_IDENTIFIER "com.DeepForge.InstallerDeepForge-Toolset"
+      MACOSX_BUNDLE_BUNDLE_NAME ${BUNDLE_NAME}
+      MACOSX_BUNDLE_INFO_PLIST ${MACOSX_BUNDLE_INFO_PLIST}
+      # MACOSX_BUNDLE_ICON_FILE ${MACOSX_BUNDLE_ICON}
+      MACOSX_BUNDLE_RESOURCE_DIR ${MACOSX_BUNDLE_RESOURCES}
   )
 else()
   add_executable(InstallerDeepForge-Toolset ${SOURCE_FILES})
@@ -144,14 +149,14 @@ target_link_libraries(InstallerDeepForge-Toolset
   PRIVATE  
   ${LIBRARIES}
 ) 
-if(APPLE)
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/InstallerDeepForge-Toolset.app/Contents)
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/InstallerDeepForge-Toolset.app/Contents/MacOS)
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/InstallerDeepForge-Toolset.app/Contents/Resources)
-  # Поиск всех файлов в исходной папке
-  file(GLOB ALL_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src*")
-  # Копирование всех найденных файлов в целевую папку
-  file(COPY ${ALL_SOURCE_FILES} DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/InstallerDeepForge-Toolset.app/Contents/Resources")
-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/build/InstallerDeepForge-Toolset DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/InstallerDeepForge-Toolset.app/Contents/MacOS")
-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/InstallerDeepForge-Toolset.app/Contents")
-endif()
+# if(APPLE)
+#   file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/InstallerDeepForge-Toolset.app/Contents)
+#   file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/InstallerDeepForge-Toolset.app/Contents/MacOS)
+#   file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/InstallerDeepForge-Toolset.app/Contents/Resources)
+#   # Поиск всех файлов в исходной папке
+#   file(GLOB ALL_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src*")
+#   # Копирование всех найденных файлов в целевую папку
+#   file(COPY ${ALL_SOURCE_FILES} DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/InstallerDeepForge-Toolset.app/Contents/Resources")
+#   file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/build/InstallerDeepForge-Toolset DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/InstallerDeepForge-Toolset.app/Contents/MacOS")
+#   file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/InstallerDeepForge-Toolset.app/Contents")
+# endif()
