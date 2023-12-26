@@ -52,6 +52,19 @@ set(SOURCE_FILES
     ./src/DatabaseConnect.hpp
 )
 
+if(APPLE)
+  add_executable(InstallerDeepForge-Toolset MACOSX_BUNDLE ${SOURCE_FILES})            
+  set_target_properties(InstallerDeepForge-Toolset PROPERTIES
+      BUNDLE True
+      MACOSX_BUNDLE_GUI_IDENTIFIER my.domain.style.identifier.InstallerDeepForge-Toolset
+      MACOSX_BUNDLE_BUNDLE_NAME InstallerDeepForge-Toolset
+      MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
+      MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
+      MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/cmake/customtemplate.plist.in
+  )
+else()
+  add_executable(InstallerDeepForge-Toolset ${SOURCE_FILES})
+endif()
 
 if (WIN32)
   # jsoncpp
@@ -124,7 +137,7 @@ elseif(UNIX)
     Threads::Threads
   )
 endif()
-add_executable(InstallerDeepForge-Toolset ${SOURCE_FILES})
+
 target_sources(InstallerDeepForge-Toolset PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/resource.rc)
 target_link_libraries(InstallerDeepForge-Toolset 
   PRIVATE  
