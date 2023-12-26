@@ -54,6 +54,7 @@ set(SOURCE_FILES
 
 if(APPLE)
   add_executable(InstallerDeepForge-Toolset MACOSX_BUNDLE ${SOURCE_FILES})   
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0.1")
   set(CMAKE_OSX_ARCHITECTURES "x86_64")         
   set(BUNDLE_NAME "InstallerDeepForge-Toolset.app")
   set(MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
