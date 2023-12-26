@@ -82,13 +82,13 @@ elseif(APPLE)
   # find_package(PkgConfig REQUIRED)
   # pkg_check_modules(JSONCPP jsoncpp)
 
-  # FIND_PACKAGE(CURL)
-  # IF(CURL_FOUND)
-  #   INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIR})
-  #   SET(requiredlibs ${requiredlibs} ${CURL_LIBRARIES} )
-  # ELSE(CURL_FOUND)
-  #   MESSAGE(FATAL_ERROR "Could not find the CURL library and development files.")
-  # ENDIF(CURL_FOUND)
+  FIND_PACKAGE(CURL)
+  IF(CURL_FOUND)
+    INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIR})
+    SET(requiredlibs ${requiredlibs} ${CURL_LIBRARIES} )
+  ELSE(CURL_FOUND)
+    MESSAGE(FATAL_ERROR "Could not find the CURL library and development files.")
+  ENDIF(CURL_FOUND)
   # find_package (SQLite)
   # if (SQLITE3_FOUND)
   #   include_directories(${SQLITE_INCLUDE_DIRS})
@@ -98,16 +98,16 @@ elseif(APPLE)
   #   GIT_TAG master
   # )
   # FetchContent_MakeAvailable(libzip)
-  FetchContent_Declare(libcurl
-  GIT_REPOSITORY https://github.com/DeepForge-Technology/curl.git
-  GIT_TAG master
-  )
-  FetchContent_MakeAvailable(libcurl)
+  # FetchContent_Declare(libcurl
+  # GIT_REPOSITORY https://github.com/DeepForge-Technology/curl.git
+  # GIT_TAG master
+  # )
+  # FetchContent_MakeAvailable(libcurl)
   set(LIBRARIES
     fmt::fmt 
     # ${JSONCPP_LIBRARIES}
     jsoncpp_static
-    libcurl
+    CURL
     libzip::zip
     SQLite
     Threads::Threads
