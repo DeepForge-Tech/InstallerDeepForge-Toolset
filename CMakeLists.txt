@@ -77,6 +77,7 @@ if (WIN32)
     Threads::Threads
   )
 elseif(APPLE)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -lstdc++") 
   find_package(libzip REQUIRED)
   # find_package(PkgConfig REQUIRED)
   # pkg_check_modules(JSONCPP jsoncpp)
