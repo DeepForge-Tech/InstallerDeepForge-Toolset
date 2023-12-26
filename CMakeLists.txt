@@ -58,8 +58,8 @@ if(APPLE)
   set(CMAKE_OSX_ARCHITECTURES "x86_64")         
   set(BUNDLE_NAME "InstallerDeepForge-Toolset.app")
   set(MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
-  # set(MACOSX_BUNDLE_ICON ${CMAKE_CURRENT_SOURCE_DIR}/icon.icns)
-  set(MACOSX_BUNDLE_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src)
+  set(MACOSX_BUNDLE_ICON ${CMAKE_CURRENT_SOURCE_DIR}/src/Logo/)
+  set(MACOSX_BUNDLE_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/InstallerDeepForge_Toolset.ico)
 
   set_target_properties(InstallerDeepForge-Toolset PROPERTIES
       MACOSX_BUNDLE TRUE
