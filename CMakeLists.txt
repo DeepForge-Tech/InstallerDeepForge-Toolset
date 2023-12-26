@@ -28,6 +28,11 @@ if(NOT jsoncpp_POPULATED)
   add_subdirectory(${jsoncpp_SOURCE_DIR} ${jsoncpp_BINARY_DIR})
 endif()
 FetchContent_MakeAvailable(jsoncpp)
+FetchContent_Declare(SQLite
+  GIT_REPOSITORY https://github.com/DeepForge-Technology/SQLite.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(SQLite)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS_DEBUG
@@ -50,16 +55,6 @@ set(SOURCE_FILES
 
 if (WIN32)
   # jsoncpp
-  # FetchContent_Declare(jsoncpp
-  # GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
-  # GIT_TAG master
-  # )
-  # FetchContent_MakeAvailable(jsoncpp)
-  FetchContent_Declare(SQLite
-    GIT_REPOSITORY https://github.com/DeepForge-Technology/SQLite.git
-    GIT_TAG master
-  )
-  FetchContent_MakeAvailable(SQLite)
   set(LIBRARIES
     fmt::fmt 
     urlmon
@@ -69,51 +64,51 @@ if (WIN32)
     Threads::Threads
   )
 elseif(APPLE)
-  find_package(libzip REQUIRED)
+  # find_package(libzip REQUIRED)
   # find_package(PkgConfig REQUIRED)
   # pkg_check_modules(JSONCPP jsoncpp)
 
-  FIND_PACKAGE(CURL)
-  IF(CURL_FOUND)
-    INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIR})
-    SET(requiredlibs ${requiredlibs} ${CURL_LIBRARIES} )
-  ELSE(CURL_FOUND)
-    MESSAGE(FATAL_ERROR "Could not find the CURL library and development files.")
-  ENDIF(CURL_FOUND)
+  # FIND_PACKAGE(CURL)
+  # IF(CURL_FOUND)
+  #   INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIR})
+  #   SET(requiredlibs ${requiredlibs} ${CURL_LIBRARIES} )
+  # ELSE(CURL_FOUND)
+  #   MESSAGE(FATAL_ERROR "Could not find the CURL library and development files.")
+  # ENDIF(CURL_FOUND)
   # find_package (SQLite)
   # if (SQLITE3_FOUND)
   #   include_directories(${SQLITE_INCLUDE_DIRS})
   # endif (SQLITE_FOUND)
-  FetchContent_Declare(SQLite
-  GIT_REPOSITORY https://github.com/DeepForge-Technology/SQLite.git
-  GIT_TAG master
+  FetchContent_Declare(libzip
+    GIT_REPOSITORY https://github.com/DeepForge-Technology/libzip.git
+    GIT_TAG master
   )
-  FetchContent_MakeAvailable(SQLite)
-  set(LIBRARIES
-    fmt::fmt 
-    # ${JSONCPP_LIBRARIES}
-    jsoncpp_static
-    CURL
-    libzip::zip
-    SQLite
-    Threads::Threads
-  )
-elseif(UNIX)
+  FetchContent_MakeAvailable(libzip)
   FetchContent_Declare(libcurl
   GIT_REPOSITORY https://github.com/DeepForge-Technology/curl.git
   GIT_TAG master
   )
   FetchContent_MakeAvailable(libcurl)
+  set(LIBRARIES
+    fmt::fmt 
+    # ${JSONCPP_LIBRARIES}
+    jsoncpp_static
+    libcurl
+    zip
+    SQLite
+    Threads::Threads
+  )
+elseif(UNIX)
   FetchContent_Declare(libzip
-  GIT_REPOSITORY https://github.com/DeepForge-Technology/libzip.git
-  GIT_TAG master
+    GIT_REPOSITORY https://github.com/DeepForge-Technology/libzip.git
+    GIT_TAG master
   )
   FetchContent_MakeAvailable(libzip)
-  FetchContent_Declare(SQLite
-  GIT_REPOSITORY https://github.com/DeepForge-Technology/SQLite.git
+  FetchContent_Declare(libcurl
+  GIT_REPOSITORY https://github.com/DeepForge-Technology/curl.git
   GIT_TAG master
   )
-  FetchContent_MakeAvailable(SQLite)
+  FetchContent_MakeAvailable(libcurl)
   # jsoncpp
   # FetchContent_Declare(jsoncpp
   # GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
