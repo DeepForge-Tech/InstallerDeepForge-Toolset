@@ -230,7 +230,7 @@ namespace macOS
                 fclose(file);
             }
         }
-        catch (exception &error)
+        catch (exception& error)
         {
             string ErrorText = "==> ❌ " + string(error.what());
             logger.SendError(Architecture, "Empty", OS_NAME, "Download()", error.what());
@@ -437,7 +437,7 @@ namespace macOS
 
                 zip_close(zip);
             }
-            catch (exception &error)
+            catch (exception& error)
             {
                 logger.SendError(Architecture, "Empty", OS_NAME, "UnpackArchive()", error.what());
                 cerr << "❌ " << error.what() << endl;
@@ -480,7 +480,7 @@ namespace macOS
                     int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
                 }
             }
-            catch (exception &error)
+            catch (exception& error)
             {
                 // Error output
                 logger.SendError(Architecture, "Empty", OS_NAME, "WriteInformation", error.what());
@@ -494,14 +494,14 @@ namespace macOS
         /* The `InstallLibraries()` function is responsible for downloading and executing a shell script that installs additional libraries or dependencies required by the DeepForge Toolset. */
         void InstallLibraries()
         {
-            string name;
-            string ShellScriptPath;
-            string Command;
-            Download(ShellScript_URL, NewTempFolder,false);
-            name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
-            ShellScriptPath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
-            Command = "bash " + ShellScriptPath;
-            system(Command.c_str());
+            // string name;
+            // string ShellScriptPath;
+            // string Command;
+            // Download(ShellScript_URL, NewTempFolder,false);
+            // name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
+            // ShellScriptPath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
+            // Command = "bash " + ShellScriptPath;
+            // system(Command.c_str());
         }
         /* The `RebootSystem()` function is responsible for rebooting the system. It uses the `system()` function to execute the command `sudo shutdown -r now`, which instructs the system to restart immediately. */
         void RebootSystem()

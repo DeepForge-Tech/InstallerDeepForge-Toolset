@@ -72,7 +72,7 @@ void Installer::InstallUpdateManager()
         AddToStartupSystem();
 #endif
     }
-    catch (exception &error)
+    catch (exception& error)
     {
         string ErrorText = "==> ❌ " + string(error.what());
         logger.SendError(Architecture, "Empty", OS_NAME, "InstallUpdateManager()", error.what());
@@ -126,7 +126,7 @@ void Installer::InstallDeepForgeToolset(string channel)
             WriteInformation(DEEPFORGE_TOOLSET_VERSION);
         }
     }
-    catch (exception &error)
+    catch (exception& error)
     {
         string ErrorText = "==> ❌ " + string(error.what());
         logger.SendError(Architecture, "Empty", OS_NAME, "InstallDeepForgeToolset()", error.what());
@@ -191,7 +191,7 @@ void Installer::CommandManager()
             RebootSystem();
         }
     }
-    catch (exception &error)
+    catch (exception& error)
     {
         CommandManager();
     }
