@@ -42,8 +42,8 @@
 #include "zip/zip.h"
 #include <cstring>
 #include <fstream>
-// #include <thread>
-// #include <mutex>
+#include <thread>
+#include <mutex>
 
 #define DEEPFORGE_TOOLSET_VERSION "0.1"
 #define Locale_RU_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_ru.json"
@@ -92,7 +92,7 @@ namespace macOS
     const string TrueVarious[3] = {"yes", "y", "1"};
     string AllChannels[2] = {"stable", "beta"};
     string InstallDelimiter = "========================================================";
-    // mutex mtx;
+    mutex mtx;
     Json::Value translate;
     // init classes
     Logger logger;
@@ -161,9 +161,9 @@ namespace macOS
     }
     void UploadInformation()
     {
-        // mtx.lock();
+        mtx.lock();
         Channels = database.GetAllVersionsFromDB(NameVersionTable, "Channel", Architecture);
-        // mtx.unlock();
+        mtx.unlock();
         int size = (sizeof(AllChannels) / sizeof(AllChannels[0]));
         int n = 1;
         /* The code is iterating over the `AllChannels` array and checking if each channel exists in
@@ -175,14 +175,14 @@ namespace macOS
 
             if (Channels.find(AllChannels[i]) != Channels.end())
             {
-                // mtx.lock();
+                mtx.lock();
                 EnumerateChannels.insert(pair<int, string>(n, AllChannels[i]));
                 if (AllChannels[i] == "stable")
                 {
                     defaultChannel = n;
                 }
                 n++;
-                // mtx.unlock();
+                mtx.unlock();
             }
         }
     }
