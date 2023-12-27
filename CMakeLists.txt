@@ -60,7 +60,7 @@ if(APPLE)
       MACOSX_BUNDLE_BUNDLE_NAME InstallerDeepForge-Toolset
       MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
       MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
-      MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/com.DeepForge-UpdateManager.plist
+      MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
   )
 else()
   add_executable(InstallerDeepForge-Toolset ${SOURCE_FILES})
