@@ -175,14 +175,14 @@ namespace macOS
 
             if (Channels.find(AllChannels[i]) != Channels.end())
             {
-                mtx.lock();
+                // mtx.lock();
                 EnumerateChannels.insert(pair<int, string>(n, AllChannels[i]));
                 if (AllChannels[i] == "stable")
                 {
                     defaultChannel = n;
                 }
                 n++;
-                mtx.unlock();
+                // mtx.unlock();
             }
         }
     }
