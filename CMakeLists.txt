@@ -53,21 +53,14 @@ set(SOURCE_FILES
 )
 
 if(APPLE)
-  add_executable(InstallerDeepForge-Toolset MACOSX_BUNDLE ${SOURCE_FILES})   
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0.1")
-  set(CMAKE_OSX_ARCHITECTURES "x86_64")         
-  set(BUNDLE_NAME "InstallerDeepForge-Toolset.app")
-  set(MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
-  set(MACOSX_BUNDLE_ICON ${CMAKE_CURRENT_SOURCE_DIR}/src/Logo/)
-  set(MACOSX_BUNDLE_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/InstallerDeepForge_Toolset.ico)
-
+  add_executable(InstallerDeepForge-Toolset MACOSX_BUNDLE ${SOURCE_FILES})            
   set_target_properties(InstallerDeepForge-Toolset PROPERTIES
-      MACOSX_BUNDLE TRUE
-      MACOSX_BUNDLE_GUI_IDENTIFIER "com.DeepForge.InstallerDeepForge-Toolset"
-      MACOSX_BUNDLE_BUNDLE_NAME ${BUNDLE_NAME}
-      MACOSX_BUNDLE_INFO_PLIST ${MACOSX_BUNDLE_INFO_PLIST}
-      # MACOSX_BUNDLE_ICON_FILE ${MACOSX_BUNDLE_ICON}
-      MACOSX_BUNDLE_RESOURCE_DIR ${MACOSX_BUNDLE_RESOURCES}
+      BUNDLE True
+      MACOSX_BUNDLE_GUI_IDENTIFIER my.domain.style.identifier.InstallerDeepForge-Toolset
+      MACOSX_BUNDLE_BUNDLE_NAME InstallerDeepForge-Toolset
+      MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
+      MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
+      MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/com.DeepForge-UpdateManager.plist
   )
 else()
   add_executable(InstallerDeepForge-Toolset ${SOURCE_FILES})
