@@ -56,7 +56,6 @@ if(APPLE)
   add_executable(InstallerDeepForge-Toolset MACOSX_BUNDLE ${SOURCE_FILES})            
   set_target_properties(InstallerDeepForge-Toolset PROPERTIES
       BUNDLE True
-      MACOSX_BUNDLE_GUI_IDENTIFIER my.domain.style.identifier.InstallerDeepForge-Toolset
       MACOSX_BUNDLE_BUNDLE_NAME InstallerDeepForge-Toolset
       MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
       MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
@@ -67,7 +66,6 @@ else()
 endif()
 
 if (WIN32)
-  # jsoncpp
   set(LIBRARIES
     fmt::fmt 
     urlmon
@@ -79,9 +77,6 @@ if (WIN32)
 elseif(APPLE)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -lstdc++") 
   find_package(libzip REQUIRED)
-  # find_package(PkgConfig REQUIRED)
-  # pkg_check_modules(JSONCPP jsoncpp)
-
   FIND_PACKAGE(CURL)
   IF(CURL_FOUND)
     INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIR})
