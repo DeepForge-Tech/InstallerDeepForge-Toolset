@@ -260,12 +260,10 @@ namespace macOS
             // Download database Versions.db
             Download(DB_URL, NewTempFolder, true);
             database.open(&DB_PATH);
-            UploadInformation();
-            DownloadLocales();
-            // thread ThreadUploadInformation(UploadInformation);
-            // thread ThreadDownloadLocales(DownloadLocales);
-            // ThreadUploadInformation.join();
-            // ThreadDownloadLocales.join();
+            thread ThreadUploadInformation(UploadInformation);
+            thread ThreadDownloadLocales(DownloadLocales);
+            ThreadUploadInformation.join();
+            ThreadDownloadLocales.join();
             cout << "Database successfully downloaded." << endl;
             cout << InstallDelimiter << endl;
         }
