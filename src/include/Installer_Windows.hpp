@@ -51,7 +51,7 @@
 #define DB_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
 #define OS_NAME "Windows"
 #define UpdateManagerTable "UpdateManager_Windows"
-#define NameVersionTable "WindowsVersions"
+#define NameVersionTable "DeepForgeToolset_Windows"
 #define Locale_RU_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_ru.json"
 #define Locale_EN_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_en.json"
 #define PathmanURL_AMD64 "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/pathman-v0.5.2-windows-amd64.exe"
@@ -382,13 +382,16 @@ namespace Windows
         {
             try
             {
+                string NameTable = "DeepForgeToolset_" + string(OS_NAME);
                 map<string, string> ApplicationColumns = {
                     {"Name", "TEXT"},
                     {"Version", "TEXT"},
+                    {"NameTable","TEXT"}
                 };
                 map<string, string> ApplicationFields = {
                     {"Name", "DeepForge-Toolset"},
                     {"Version", version},
+                    {"NameTable",NameTable}
                 };
                 string pathFile = NewUpdateManagerFolder + "\\AppInformation.db";
                 Database AppInformationDB;

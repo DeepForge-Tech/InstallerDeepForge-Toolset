@@ -51,7 +51,7 @@
 #define DB_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
 #define OS_NAME "macOS"
 #define UpdateManagerTable "UpdateManager_macOS"
-#define NameVersionTable "macOSVersions"
+#define NameVersionTable "DeepForgeToolset_macOS"
 
 using namespace std;
 using namespace DB;

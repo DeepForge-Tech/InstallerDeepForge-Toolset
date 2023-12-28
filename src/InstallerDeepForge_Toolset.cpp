@@ -120,11 +120,11 @@ void Installer::InstallDeepForgeToolset(string channel)
         AddToPATH();
 #endif
         cout << InstallDelimiter << endl;
-        // if (Updating == true)
-        // {
-        //     InstallUpdateManager();
-        //     WriteInformation(DEEPFORGE_TOOLSET_VERSION);
-        // }
+        if (Updating == true)
+        {
+            InstallUpdateManager();
+            WriteInformation(DEEPFORGE_TOOLSET_VERSION);
+        }
     }
     catch (exception& error)
     {

@@ -49,7 +49,7 @@
 #define DB_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
 #define Locale_RU_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_ru.json"
 #define Locale_EN_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_en.json"
-#define NameVersionTable "LinuxVersions"
+#define NameVersionTable "DeepForgeToolset_Linux"
 #define UpdateManagerTable "UpdateManager_Linux"
 #define OS_NAME "Linux"
 
