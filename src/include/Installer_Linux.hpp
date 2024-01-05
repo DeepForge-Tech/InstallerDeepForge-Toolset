@@ -43,6 +43,9 @@
 #include "zip/zip.h"
 #include <cstring>
 #include <fstream>
+#include <thread>
+#include <mutex>
+
 
 #define DEEPFORGE_TOOLSET_VERSION "0.1"
 #define URL_DESKTOP_SYMLINK "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/DeepForgeToolset.desktop"
@@ -252,11 +255,16 @@ namespace Linux
             // Create temp folder
             MakeDirectory(NewTempFolder);
             MakeDirectory(LocaleDir);
-            cout << "==> Downloading database..." << endl;
+            cout << "Downloading database..." << endl;
             // Download database Versions.db
-            Download(DB_URL, NewTempFolder,true);
+            Download(DB_URL, NewTempFolder, true);
             database.open(&DB_PATH);
-            cout << "==> Database successfully downloaded." << endl;
+            thread ThreadUploadInformation(UploadInformation);
+            thread ThreadDownloadLocales(DownloadLocales);
+            ThreadUploadInformation.join();
+            ThreadDownloadLocales.join();
+            cout << "Database successfully downloaded." << endl;
+            cout << InstallDelimiter << endl;
         }
         void CommandManager();
         // void AddToPATH();
