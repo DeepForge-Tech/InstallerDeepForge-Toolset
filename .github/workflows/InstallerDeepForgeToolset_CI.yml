@@ -26,7 +26,7 @@ jobs:
       - name: Install HomeBrew
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       - name: Install libraries
-        run: brew  install clang-format googletest gcc cmake
+        run: brew  install jsoncpp sqlite3 sqlite-utils fmt clang-format curl googletest gcc zlib cmake libzip
       - name: Building project
         run: mkdir build && cd build && cmake .. && cmake --build .
   build_macOS_13:
@@ -36,6 +36,6 @@ jobs:
       - name: Install HomeBrew
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       - name: Install libraries
-        run: brew  install clang-format googletest gcc cmake
+        run: brew  install jsoncpp sqlite3 sqlite-utils fmt clang-format curl googletest gcc zlib cmake libzip
       - name: Building project
         run: mkdir build && cd build && cmake .. && cmake --build .

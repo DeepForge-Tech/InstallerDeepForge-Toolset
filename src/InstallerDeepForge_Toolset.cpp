@@ -61,9 +61,8 @@ void Installer::InstallUpdateManager()
         name = (UpdateManagerUrl.substr(UpdateManagerUrl.find_last_of("/")));
         ArchivePath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
         MakeDirectory(NewUpdateManagerFolder);
-        UnpackArchive(ArchivePath, NewUpdateManagerFolder);
         filesystem::remove(ArchivePath);
-        file_path = NewUpdateManagerFolder + "/DeepForge-UpdateManager";
+        file_path = NewUpdateManagerFolder + "/UpdateManager";
         cout << "==> ✅ UpdateManager " << version << " " << translate["Installed"].asString() << endl;
         cout << InstallDelimiter << endl;
 #if defined(_WIN32)
