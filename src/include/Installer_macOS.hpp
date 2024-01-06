@@ -44,11 +44,13 @@
 #include <fstream>
 #include <thread>
 #include <mutex>
+#include <atomic>
 
 #define DEEPFORGE_TOOLSET_VERSION "0.1"
 #define Locale_RU_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_ru.json"
 #define Locale_EN_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_en.json"
 #define DB_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
+#define SHELL_SCRIPT_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries_macOS.sh"
 #define OS_NAME "macOS"
 #define UpdateManagerTable "UpdateManager_macOS"
 #define NameVersionTable "DeepForgeToolset_macOS"
@@ -86,7 +88,6 @@ namespace macOS
     string NewTempFolder;
     string NewUpdateManagerFolder;
     string LocaleDir;
-    const string ShellScript_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries.sh";
     filesystem::path ProjectDir = filesystem::current_path().generic_string();
     string DB_PATH;
     const string TrueVarious[3] = {"yes", "y", "1"};
@@ -215,15 +216,15 @@ namespace macOS
                     switch (response)
                     {
                         case CURLE_COULDNT_CONNECT:
-                            throw domain_error("Failed to connect to host or proxy.");
+                            throw domain_error(translate["CURLE_COULDNT_CONNECT"].asCString());
                         case CURLE_COULDNT_RESOLVE_HOST:
-                            throw domain_error("Failed to resolve host. The given remote host was not allowed.");
+                            throw domain_error(translate["CURLE_COULDNT_RESOLVE_HOST"].asCString());
                         case CURLE_COULDNT_RESOLVE_PROXY:
-                            throw domain_error("Failed to resolve proxy. The given proxy host could not be resolved.");
+                            throw domain_error(translate["CURLE_COULDNT_RESOLVE_PROXY"].asCString());
                         case CURLE_UNSUPPORTED_PROTOCOL:
-                            throw domain_error("Failed to connect to the site using this protocol.");
+                            throw domain_error(translate["CURLE_UNSUPPORTED_PROTOCOL"].asCString());
                         case CURLE_SSL_CONNECT_ERROR:
-                            throw domain_error("The problem occurred during SSL/TLS handshake.");
+                            throw domain_error(translate["CURLE_SSL_CONNECT_ERROR"].asCString());
                     }
                 }
                 curl_easy_cleanup(curl);
@@ -256,7 +257,9 @@ namespace macOS
             // Create temp folder
             MakeDirectory(NewTempFolder);
             MakeDirectory(LocaleDir);
-            cout << "Downloading database..." << endl;
+            ChangeLanguage();
+            atomic_thread_fence(memory_order_release);
+            cout << "==> " << translate["DownloadingDatabase"].asCString() << endl;
             // Download database Versions.db
             Download(DB_URL, NewTempFolder, true);
             database.open(&DB_PATH);
@@ -264,7 +267,7 @@ namespace macOS
             thread ThreadDownloadLocales(DownloadLocales);
             ThreadUploadInformation.join();
             ThreadDownloadLocales.join();
-            cout << "Database successfully downloaded." << endl;
+            cout << "==> " << translate["DatabaseDownloaded"].asCString() << endl;
             cout << InstallDelimiter << endl;
         }
         void CommandManager();
@@ -277,7 +280,7 @@ namespace macOS
             string NumLang;
             cout << "1. Russian" << endl;
             cout << "2. English" << endl;
-            cout << "Choose language (default - 1):";
+            cout << "==> " << translate["ChooseLocale"].asCString();
             getline(cin, NumLang);
             cout << InstallDelimiter << endl;
             if (NumLang == "1" || NumLang.empty())
@@ -373,6 +376,19 @@ namespace macOS
                 filesystem::create_directory(fullPath);
             }
         }
+        // Method of make string to lower
+        string to_lower(string sentence)
+        {
+            string new_sentence = "";
+            for (int i = 0; i < sentence.length(); i++)
+            {
+                char ch = sentence[i];
+                // cout << ch << endl;
+                ch = tolower(ch);
+                new_sentence += ch;
+            }
+            return new_sentence;
+        }
         /*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`.
             It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`.
             After extracting the contents, the function closes the `Unzipper` object.
@@ -386,7 +402,7 @@ namespace macOS
                 struct zip *zip = zip_open(path_from.c_str(), ZIP_RDONLY, &err);
                 if (zip == nullptr)
                 {
-                    string ErrorText = "Cannot open zip archive: " + path_from;
+                    string ErrorText = "==> ❌" + translate["CannotOpenArchive"].asString() + path_from;
                     throw runtime_error(ErrorText);
                 }
 
@@ -409,7 +425,7 @@ namespace macOS
                     struct zip_file *zip_file = zip_fopen_index(zip, i, 0);
                     if (zip_file == nullptr)
                     {
-                        string ErrorText = "Cannot open file in zip archive: " + file_name;
+                        string ErrorText = "==> ❌" + translate["CannotOpenFile"].asString() + file_name;
                         zip_close(zip);
                         throw runtime_error(ErrorText);
                     }
@@ -419,7 +435,7 @@ namespace macOS
                         ofstream out_file(full_path,ios::binary);
                         if (!out_file.is_open())
                         {
-                            string ErrorText = "Cannot open file for writing: " + full_path;
+                            string ErrorText = "==> ❌" + translate["CannotWriteFile"].asString() + full_path;
                             zip_fclose(zip_file);
                             zip_close(zip);
                             throw runtime_error(ErrorText);
@@ -445,13 +461,16 @@ namespace macOS
         {
             try
             {
-                map<string,string> ApplicationColumns = {
-                    {"Name","TEXT"},
-                    {"Version","TEXT"},
+                string NameTable = "DeepForgeToolset_" + string(OS_NAME);
+                map<string, string> ApplicationColumns = {
+                    {"Name", "TEXT"},
+                    {"Version", "TEXT"},
+                    {"NameTable","TEXT"}
                 };
-                map<string,string> ApplicationFields = {
-                    {"Name","DeepForge-Toolset"},
-                    {"Version",version},
+                map<string, string> ApplicationFields = {
+                    {"Name", "DeepForge-Toolset"},
+                    {"Version", version},
+                    {"NameTable",NameTable}
                 };
                 string pathFile = NewUpdateManagerFolder + "/AppInformation.db";
                 Database AppInformationDB;
@@ -461,21 +480,20 @@ namespace macOS
                     ofstream file(pathFile);
                     file << "";
                     file.close();
-                    
                 }
                 AppInformationDB.open(&pathFile);
                 /* The bellow code is creating a table called "Applications" in the AppInformationDB database using the CreateTable method. It then inserts values into the "Applications" table using the InsertValuesToTable method. The boolean variable "exists" is used to store the result of the CreateTable method, indicating whether the table creation was successful or not. The integer variable "result" is used to store the number of rows affected by the InsertValuesToTable method. */
-                bool existsTable = AppInformationDB.CreateTable("Applications",ApplicationColumns);
-                int existsValue = AppInformationDB.ExistNameAppInTable("Applications","DeepForge-Toolset");
+                bool existsTable = AppInformationDB.CreateTable("Applications", ApplicationColumns);
+                int existsValue = AppInformationDB.ExistNameAppInTable("Applications", "DeepForge-Toolset");
                 /* The code is checking if a table called "Applications" exists in the database. If the table does not exist (existsTable == -1), it inserts values into the table using the AppInformationDB.InsertValuesToTable() method. If the table does exist, it removes an application called "DeepForge-Toolset" from the table using the AppInformationDB.RemoveApplicationFromTable() method, and then inserts values into the table using the AppInformationDB.InsertValuesToTable() method. */
-                if (existsTable == 1)
+                if (existsTable == false)
                 {
-                    int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
+                    int result = AppInformationDB.InsertValuesToTable("Applications", ApplicationFields);
                 }
                 else
                 {
-                    AppInformationDB.RemoveApplicationFromTable("Applications","DeepForge-Toolset");
-                    int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
+                    AppInformationDB.RemoveApplicationFromTable("Applications", "DeepForge-Toolset");
+                    int result = AppInformationDB.InsertValuesToTable("Applications", ApplicationFields);
                 }
             }
             catch (exception& error)
@@ -492,14 +510,12 @@ namespace macOS
         /* The `InstallLibraries()` function is responsible for downloading and executing a shell script that installs additional libraries or dependencies required by the DeepForge Toolset. */
         void InstallLibraries()
         {
-            // string name;
-            // string ShellScriptPath;
-            // string Command;
-            // Download(ShellScript_URL, NewTempFolder,false);
-            // name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
-            // ShellScriptPath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
-            // Command = "bash " + ShellScriptPath;
-            // system(Command.c_str());
+            string ShellScriptPath;
+            string Command;
+            Download(SHELL_SCRIPT_URL, NewTempFolder,false);
+            ShellScriptPath = NewTempFolder + "/" + "InstallLibraries_macOS.sh";
+            Command = "bash " + ShellScriptPath;
+            system(Command.c_str());
         }
         /* The `RebootSystem()` function is responsible for rebooting the system. It uses the `system()` function to execute the command `sudo shutdown -r now`, which instructs the system to restart immediately. */
         void RebootSystem()
@@ -509,8 +525,9 @@ namespace macOS
         // Function for check of answer
         bool CheckAnswer(string answer)
         {
-            bool status;
-            string Answer = answer;
+            bool status = false;
+            string Answer = to_lower(answer);
+            // string Answer = answer;
             for (int i = 0; i < TrueVarious->size(); i++)
             {
                 if (Answer == TrueVarious[i] || Answer.empty() || Answer == "\n" || Answer == "да" || Answer == "ДА" || Answer == "Да")
@@ -544,16 +561,16 @@ namespace macOS
                 {
                     switch (response)
                     {
-                    case CURLE_COULDNT_CONNECT:
-                        throw domain_error("Failed to connect to host or proxy.");
-                    case CURLE_COULDNT_RESOLVE_HOST:
-                        throw domain_error("Failed to resolve host. The given remote host was not allowed.");
-                    case CURLE_COULDNT_RESOLVE_PROXY:
-                        throw domain_error("Failed to resolve proxy. The given proxy host could not be resolved.");
-                    case CURLE_UNSUPPORTED_PROTOCOL:
-                        throw domain_error("Failed to connect to the site using this protocol.");
-                    case CURLE_SSL_CONNECT_ERROR:
-                        throw domain_error("The problem occurred during SSL/TLS handshake.");
+                        case CURLE_COULDNT_CONNECT:
+                            throw domain_error(translate["CURLE_COULDNT_CONNECT"].asCString());
+                        case CURLE_COULDNT_RESOLVE_HOST:
+                            throw domain_error(translate["CURLE_COULDNT_RESOLVE_HOST"].asCString());
+                        case CURLE_COULDNT_RESOLVE_PROXY:
+                            throw domain_error(translate["CURLE_COULDNT_RESOLVE_PROXY"].asCString());
+                        case CURLE_UNSUPPORTED_PROTOCOL:
+                            throw domain_error(translate["CURLE_UNSUPPORTED_PROTOCOL"].asCString());
+                        case CURLE_SSL_CONNECT_ERROR:
+                            throw domain_error(translate["CURLE_SSL_CONNECT_ERROR"].asCString());
                     }
                 }
                 curl_easy_cleanup(curl);

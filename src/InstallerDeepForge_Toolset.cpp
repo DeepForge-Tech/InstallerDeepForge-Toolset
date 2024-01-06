@@ -155,7 +155,6 @@ void Installer::CommandManager()
 {
     try
     {
-        ChangeLanguage();
         for (int i = 1;i < EnumerateChannels.size() + 1;i++)
         {
             cout << i << ". " << EnumerateChannels[i] << endl;

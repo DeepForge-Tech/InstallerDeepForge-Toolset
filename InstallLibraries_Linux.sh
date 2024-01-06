@@ -2,30 +2,30 @@
 echo "==> Installing libraries"
 # Installing libraries
 YUM_PACKAGE_NAME="make cmake gcc-c++ curl libcurl sqlite-devel openssl-devel"
-DEB_PACKAGE_NAME="g++ gcc build-essential cmake make curl libcurl4-openssl-dev libjsoncpp-dev libfmt-dev libsqlite3-dev libgtest-dev googletest google-mock libgmock-dev libtbb-dev libzip-dev zlib1g-dev"
-PACMAN_PACKAGE_NAME="jsoncpp gcc base-devel cmake  clang gtest lib32-curl libcurl-compat libcurl-gnutls curl fmt lib32-sqlite sqlite sqlite-tcl zlib"
+DEB_PACKAGE_NAME="build-essential cmake debhelper devscripts equivs fakeroot g++ gdb gnome-desktop-data gnome-icon-theme libx11-dev libx11-doc libxext-dev libxext-doc libxmu-dev libxmu-doc libxpm-dev libxpm-doc libxt-dev libxt-doc g++ gcc build-essential cmake make curl libcurl4-openssl-dev libjsoncpp-dev libfmt-dev libsqlite3-dev libgtest-dev googletest google-mock libgmock-dev libtbb-dev libzip-dev zlib1g-dev"
+PACMAN_PACKAGE_NAME="jsoncpp gcc base-devel cmake gtest lib32-curl libcurl-compat libcurl-gnutls curl fmt lib32-sqlite sqlite sqlite-tcl zlib openssl lib32-openssl openssl-1.1 libzip"
 ZYPPER_PACKAGE_NAME="libcurl-devel gcc-c++ cmake gtest gmock zlib-devel fmt-devel sqlite3-devel jsoncpp-devel"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
    DISTRO=$(grep -E '^NAME=' /etc/os-release | cut -d '"' -f2)
-   if [[ "$OS" == "CentOS Linux"* ]]; then
+   if [[ "$DISTRO" == "CentOS Linux"* ]]; then
       echo "================================================"
       echo "Installing libraries"
       echo "================================================"
       sudo yum update -y
       sudo yum install -y $YUM_PACKAGE_NAME
-   elif [[ "$OS" == "Red Hat Enterprise Linux Server"* ]]; then
+   elif [[ "$DISTRO" == "Red Hat Enterprise Linux Server"* ]]; then
       echo "================================================"
       echo "Installing libraries"
       echo "================================================"
       sudo yum update -y
       sudo yum install -y $YUM_PACKAGE_NAME
-   elif [[ "$OS" == "Fedora Linux"* ]]; then
+   elif [[ "$DISTRO" == "Fedora Linux"* ]]; then
       echo "================================================"
       echo "Installing libraries"
       echo "================================================"
       sudo yum update -y
       sudo yum install -y $YUM_PACKAGE_NAME
-   elif [[ "$OS" == "Ubuntu"* ]]; then
+   elif [[ "$DISTRO" == "Ubuntu"* ]]; then
       echo "================================================"
       echo "Installing libraries"
       echo "================================================"
@@ -46,59 +46,33 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       sudo add-apt-repository universe
       sudo apt-get update
       apt-get install -y $DEB_PACKAGE_NAME
-   elif [[ "$OS" == "Knoppix"* ]]; then
+   elif [[ "$DISTRO" == "Knoppix"* ]]; then
       echo "================================================"
       echo "Installing libraries"
       echo "================================================"
       sudo add-apt-repository universe
       sudo apt-get update
       sudo apt-get install -y $DEB_PACKAGE_NAME
-   elif [[ "$OS" == "Raspbian GNU/Linux"* ]]; then
+   elif [[ "$DISTRO" == "Raspbian GNU/Linux"* ]]; then
       echo "================================================"
       echo "Installing libraries"
       echo "================================================"
       sudo add-apt-repository universe
       sudo apt-get update
       sudo apt-get install -y $DEB_PACKAGE_NAME
-   elif [[ "$OS" == "Manjaro Linux"* ]]; then
+   elif [[ "$DISTRO" == "Manjaro Linux"* ]]; then
       echo "================================================"
       echo "Installing libraries"
       echo "================================================"
-      sudo pacman -Sy jsoncpp
-      sudo pacman -Sy gcc
-      sudo pacman -Sy base-devel
-      sudo pacman -Sy cmake
-      sudo pacman -Sy clang
-      sudo pacman -Sy gtest
-      sudo pacman -Sy lib32-curl
-      sudo pacman -Sy libcurl-compat
-      sudo pacman -Sy libcurl-gnutls
-      sudo pacman -Sy curl
-      sudo pacman -Sy fmt
-      sudo pacman -Sy lib32-sqlite
-      sudo pacman -Sy sqlite
-      sudo pacman -Sy sqlite-tcl
-      sudo pacman -Sy zlib
-   elif [[ "$OS" == "Arch Linux"* ]]; then
+      sudo pacman -Syu --noconfirm
+      sudo pacman -Sy $PACMAN_PACKAGE_NAME --noconfirm
+   elif [[ "$DISTRO" == "Arch Linux"* ]]; then
       echo "================================================"
       echo "Installing libraries"
       echo "================================================"
-      sudo pacman -Sy jsoncpp
-      sudo pacman -Sy gcc
-      sudo pacman -Sy base-devel
-      sudo pacman -Sy cmake
-      sudo pacman -Sy clang
-      sudo pacman -Sy gtest
-      sudo pacman -Sy lib32-curl
-      sudo pacman -Sy libcurl-compat
-      sudo pacman -Sy libcurl-gnutls
-      sudo pacman -Sy curl
-      sudo pacman -Sy fmt
-      sudo pacman -Sy lib32-sqlite
-      sudo pacman -Sy sqlite
-      sudo pacman -Sy sqlite-tcl
-      sudo pacman -Sy zlib
-   elif [[ "$OS" == "Kali GNU/Linux"* ]]; then
+      sudo pacman -Syu --noconfirm
+      sudo pacman -Sy $PACMAN_PACKAGE_NAME --noconfirm
+   elif [[ "$DISTRO" == "Kali GNU/Linux"* ]]; then
       echo "================================================"
       echo "Installing libraries"
       echo "================================================"

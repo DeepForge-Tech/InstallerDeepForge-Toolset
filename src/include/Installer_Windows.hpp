@@ -45,6 +45,8 @@
 #include "json/json.h"
 #include <thread>
 #include <mutex>
+#include <atomic>
+
 #pragma comment(lib, "urlmon.lib")
 
 #define DEEPFORGE_TOOLSET_VERSION "0.1"
@@ -211,9 +213,9 @@ namespace Windows
                 switch (Download)
                 {
                 case -2146697211:
-                    throw domain_error("No internet connection");
+                    throw domain_error(translate["NoInternetConnection"].asCString());
                 case -2147467260:
-                    throw domain_error("Connection reset");
+                    throw domain_error(translate["ConnectionReset"].asCString());
                 }
             }
         }
@@ -235,15 +237,17 @@ namespace Windows
             // Create temp folder
             MakeDirectory(NewTempFolder);
             MakeDirectory(LocaleDir);
-            cout << "Downloading database..." << endl;
+            thread ThreadDownloadLocales(DownloadLocales);
+            ThreadDownloadLocales.join();
+            atomic_thread_fence(memory_order_release);
+            ChangeLanguage();
+            cout << "==> " << translate["DownloadingDatabase"].asCString() << endl;
             // Download database Versions.db
             Download(DB_URL, NewTempFolder, true);
             database.open(&DB_PATH);
             thread ThreadUploadInformation(UploadInformation);
-            thread ThreadDownloadLocales(DownloadLocales);
             ThreadUploadInformation.join();
-            ThreadDownloadLocales.join();
-            cout << "Database successfully downloaded." << endl;
+            cout << "==> " << translate["DatabaseDownloaded"].asCString() << endl;
             cout << InstallDelimiter << endl;
         }
 
@@ -257,7 +261,7 @@ namespace Windows
             string NumLang;
             cout << "1. Russian" << endl;
             cout << "2. English" << endl;
-            cout << "Choose language (default - 1):";
+            cout << "==> " << translate["ChooseLocale"].asCString();
             getline(cin, NumLang);
             cout << InstallDelimiter << endl;
             if (NumLang == "1" || NumLang.empty())
@@ -331,9 +335,9 @@ namespace Windows
                 switch (Download)
                 {
                 case -2146697211:
-                    throw domain_error("No internet connection");
+                    throw domain_error(translate["NoInternetConnection"].asCString());
                 case -2147467260:
-                    throw domain_error("Connection reset");
+                    throw domain_error(translate["ConnectionReset"].asCString());
                 }
                 if (Progress == true)
                 {

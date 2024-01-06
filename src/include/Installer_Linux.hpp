@@ -45,7 +45,7 @@
 #include <fstream>
 #include <thread>
 #include <mutex>
-
+#include <atomic>
 
 #define DEEPFORGE_TOOLSET_VERSION "0.1"
 #define URL_DESKTOP_SYMLINK "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/DeepForgeToolset.desktop"
@@ -54,6 +54,10 @@
 #define Locale_EN_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_en.json"
 #define NameVersionTable "DeepForgeToolset_Linux"
 #define UpdateManagerTable "UpdateManager_Linux"
+#define PATHMAN_AMD64_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/pathman-v0.5.2-linux-amd64"
+#define PATHMAN_ARM64_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/pathman-v0.5.2-linux-armv8"
+#define SERVICE_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/DeepForge-UpdateManager.service"
+#define SHELL_SCRIPT_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries_Linux.sh"
 #define OS_NAME "Linux"
 
 using namespace std;
@@ -83,8 +87,7 @@ namespace Linux
     const string NewUpdateManagerFolder = NewOrganizationFolder + "/UpdateManager";
     const string NewTempFolder = NewApplicationFolder + "/Temp";
     const string LocaleDir = NewTempFolder + "/locale";
-    const string ShellScript_URL = "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries.sh";
-    std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
+    filesystem::path ProjectDir = filesystem::current_path().generic_string();
     string DB_PATH = NewTempFolder + "/Versions.db";
     const string TrueVarious[3] = {"yes", "y", "1"};
     string Answer;
@@ -217,16 +220,16 @@ namespace Linux
                 {
                     switch (response)
                     {
-                    case CURLE_COULDNT_CONNECT:
-                        throw domain_error("Failed to connect to host or proxy.");
-                    case CURLE_COULDNT_RESOLVE_HOST:
-                        throw domain_error("Failed to resolve host. The given remote host was not allowed.");
-                    case CURLE_COULDNT_RESOLVE_PROXY:
-                        throw domain_error("Failed to resolve proxy. The given proxy host could not be resolved.");
-                    case CURLE_UNSUPPORTED_PROTOCOL:
-                        throw domain_error("Failed to connect to the site using this protocol.");
-                    case CURLE_SSL_CONNECT_ERROR:
-                        throw domain_error("The problem occurred during SSL/TLS handshake.");
+                        case CURLE_COULDNT_CONNECT:
+                            throw domain_error(translate["CURLE_COULDNT_CONNECT"].asCString());
+                        case CURLE_COULDNT_RESOLVE_HOST:
+                            throw domain_error(translate["CURLE_COULDNT_RESOLVE_HOST"].asCString());
+                        case CURLE_COULDNT_RESOLVE_PROXY:
+                            throw domain_error(translate["CURLE_COULDNT_RESOLVE_PROXY"].asCString());
+                        case CURLE_UNSUPPORTED_PROTOCOL:
+                            throw domain_error(translate["CURLE_UNSUPPORTED_PROTOCOL"].asCString());
+                        case CURLE_SSL_CONNECT_ERROR:
+                            throw domain_error(translate["CURLE_SSL_CONNECT_ERROR"].asCString());
                     }
                 }
                 curl_easy_cleanup(curl);
@@ -246,28 +249,37 @@ namespace Linux
     public:
         Installer()
         {
-            // char *UserFolder = getenv("HOME");
-            // NewApplicationFolder = string(UserFolder) + "/DeepForge/DeepForge-Toolset";
-            // NewTempFolder = NewApplicationFolder + "/Temp";
-            // DB_PATH = NewTempFolder + "/Versions.db";
             string Command = "sudo -s chmod 777 /usr/bin/";
             system(Command.c_str());
             // Create temp folder
             MakeDirectory(NewTempFolder);
             MakeDirectory(LocaleDir);
-            cout << "Downloading database..." << endl;
+            thread ThreadDownloadLocales(DownloadLocales);
+            ThreadDownloadLocales.join();
+            atomic_thread_fence(memory_order_release);
+            ChangeLanguage();
+            cout << "==> " << translate["DownloadingDatabase"].asString() << endl;
             // Download database Versions.db
             Download(DB_URL, NewTempFolder, true);
             database.open(&DB_PATH);
             thread ThreadUploadInformation(UploadInformation);
-            thread ThreadDownloadLocales(DownloadLocales);
             ThreadUploadInformation.join();
-            ThreadDownloadLocales.join();
-            cout << "Database successfully downloaded." << endl;
+            cout << "==> " << translate["DatabaseDownloaded"].asCString() << endl;
             cout << InstallDelimiter << endl;
         }
         void CommandManager();
-        // void AddToPATH();
+        void AddToPATH()
+        {
+            string Command;
+            #if defined(__x86_64__)
+                Command = "cd " + NewTempFolder +  "&& sudo -s chmod +x pathman-v0.5.2-linux-amd64 &&  sudo -s ./pathman-v0.5.2-linux-amd64 add /bin/";
+                Download(PATHMAN_AMD64_URL,NewTempFolder,false);
+            #elif __arm__
+                 "cd " + NewTempFolder +  "&& sudo -s chmod +x pathman-v0.5.2-linux-armv8 &&  sudo -s ./pathman-v0.5.2-linux-armv8 add /bin/";
+                Download(PATHMAN_ARM64_URL,NewTempFolder,false);
+            #endif
+            system(Command.c_str());
+        }
         void InstallUpdateManager();
         void InstallDeepForgeToolset(string channel);
         void ChangeUpdating();
@@ -276,7 +288,7 @@ namespace Linux
             string NumLang;
             cout << "1. Russian" << endl;
             cout << "2. English" << endl;
-            cout << "Choose language (default - 1):";
+            cout << "==> Choose language (default - 1):";
             getline(cin, NumLang);
             cout << InstallDelimiter << endl;
             if (NumLang == "1" || NumLang.empty())
@@ -336,7 +348,7 @@ namespace Linux
         {
             char *UserFolder = getenv("HOME");
             string symlinkPath = string(UserFolder) + "/Desktop/" + nameSymlink;
-            string Command = "sudo ln -s " + filePath + " " + nameSymlink;
+            string Command = "sudo ln -s " + filePath + " " + symlinkPath;
             system(Command.c_str());
         }
         /*The `MakeDirectory` function is responsible for creating a directory (folder) in the file system.*/
@@ -382,7 +394,7 @@ namespace Linux
                 struct zip *zip = zip_open(path_from.c_str(), ZIP_RDONLY, &err);
                 if (zip == nullptr)
                 {
-                    string ErrorText = "Cannot open zip archive: " + path_from;
+                    string ErrorText = "==> ❌" + translate["CannotOpenArchive"].asString() + path_from;
                     throw runtime_error(ErrorText);
                 }
 
@@ -405,7 +417,7 @@ namespace Linux
                     struct zip_file *zip_file = zip_fopen_index(zip, i, 0);
                     if (zip_file == nullptr)
                     {
-                        string ErrorText = "Cannot open file in zip archive: " + file_name;
+                        string ErrorText = "==> ❌" + translate["CannotOpenFile"].asString() + file_name;
                         zip_close(zip);
                         throw runtime_error(ErrorText);
                     }
@@ -415,7 +427,7 @@ namespace Linux
                         ofstream out_file(full_path,ios::binary);
                         if (!out_file.is_open())
                         {
-                            string ErrorText = "Cannot open file for writing: " + full_path;
+                            string ErrorText = "==> ❌" + translate["CannotWriteFile"].asString() + full_path;
                             zip_fclose(zip_file);
                             zip_close(zip);
                             throw runtime_error(ErrorText);
@@ -432,7 +444,7 @@ namespace Linux
 
                 zip_close(zip);
             }
-            catch (exception &error)
+            catch (exception& error)
             {
                 logger.SendError(Architecture, "Empty", OS_NAME, "UnpackArchive()", error.what());
                 cerr << error.what() << endl;
@@ -442,13 +454,16 @@ namespace Linux
         {
             try
             {
-                map<string,string> ApplicationColumns = {
-                    {"Name","TEXT"},
-                    {"Version","TEXT"},
+                string NameTable = "DeepForgeToolset_" + string(OS_NAME);
+                map<string, string> ApplicationColumns = {
+                    {"Name", "TEXT"},
+                    {"Version", "TEXT"},
+                    {"NameTable","TEXT"}
                 };
-                map<string,string> ApplicationFields = {
-                    {"Name","DeepForge-Toolset"},
-                    {"Version",version},
+                map<string, string> ApplicationFields = {
+                    {"Name", "DeepForge-Toolset"},
+                    {"Version", version},
+                    {"NameTable",NameTable}
                 };
                 string pathFile = NewUpdateManagerFolder + "/AppInformation.db";
                 Database AppInformationDB;
@@ -458,21 +473,20 @@ namespace Linux
                     ofstream file(pathFile);
                     file << "";
                     file.close();
-                    
                 }
                 AppInformationDB.open(&pathFile);
                 /* The bellow code is creating a table called "Applications" in the AppInformationDB database using the CreateTable method. It then inserts values into the "Applications" table using the InsertValuesToTable method. The boolean variable "exists" is used to store the result of the CreateTable method, indicating whether the table creation was successful or not. The integer variable "result" is used to store the number of rows affected by the InsertValuesToTable method. */
-                bool existsTable = AppInformationDB.CreateTable("Applications",ApplicationColumns);
-                int existsValue = AppInformationDB.ExistNameAppInTable("Applications","DeepForge-Toolset");
+                bool existsTable = AppInformationDB.CreateTable("Applications", ApplicationColumns);
+                int existsValue = AppInformationDB.ExistNameAppInTable("Applications", "DeepForge-Toolset");
                 /* The code is checking if a table called "Applications" exists in the database. If the table does not exist (existsTable == -1), it inserts values into the table using the AppInformationDB.InsertValuesToTable() method. If the table does exist, it removes an application called "DeepForge-Toolset" from the table using the AppInformationDB.RemoveApplicationFromTable() method, and then inserts values into the table using the AppInformationDB.InsertValuesToTable() method. */
-                if (existsTable == -1)
+                if (existsTable == false)
                 {
-                    int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
+                    int result = AppInformationDB.InsertValuesToTable("Applications", ApplicationFields);
                 }
                 else
                 {
-                    AppInformationDB.RemoveApplicationFromTable("Applications","DeepForge-Toolset");
-                    int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
+                    AppInformationDB.RemoveApplicationFromTable("Applications", "DeepForge-Toolset");
+                    int result = AppInformationDB.InsertValuesToTable("Applications", ApplicationFields);
                 }
             }
             catch (exception &error)
@@ -486,17 +500,17 @@ namespace Linux
         {
             string ServicePath = NewTempFolder + "/DeepForge-UpdateManager.service";
             string Command = "sudo mv " + ServicePath + " /etc/systemd/system/DeepForge-UpdateManager.service && sudo chmod 644 /etc/systemd/system/DeepForge-UpdateManager.service && sudo systemctl enable /etc/systemd/system/DeepForge-UpdateManager.service";
+            Download(SERVICE_URL,NewTempFolder,false);
             system(Command.c_str());
         }
         /* The `InstallLibraries()` function is responsible for downloading and executing a shell script that installs additional libraries or dependencies required by the DeepForge Toolset. */
         void InstallLibraries()
         {
-            string name;
             string ShellScriptPath;
             string Command;
-            Download(ShellScript_URL, NewTempFolder,false);
-            name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
-            ShellScriptPath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
+            Download(SHELL_SCRIPT_URL, NewTempFolder,false);
+            // name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
+            ShellScriptPath = NewTempFolder + "/" + "InstallLibraries_Linux.sh";
             Command = "sudo bash " + ShellScriptPath;
             system(Command.c_str());
         }
@@ -505,11 +519,25 @@ namespace Linux
         {
             system("sudo shutdown -r now");
         }
+        // Method of make string to lower
+        string to_lower(string sentence)
+        {
+            string new_sentence = "";
+            for (int i = 0; i < sentence.length(); i++)
+            {
+                char ch = sentence[i];
+                // cout << ch << endl;
+                ch = tolower(ch);
+                new_sentence += ch;
+            }
+            return new_sentence;
+        }
         // Function for check of answer
         bool CheckAnswer(string answer)
         {
-            bool status;
-            string Answer = answer;
+            bool status = false;
+            string Answer = to_lower(answer);
+            // string Answer = answer;
             for (int i = 0; i < TrueVarious->size(); i++)
             {
                 if (Answer == TrueVarious[i] || Answer.empty() || Answer == "\n" || Answer == "да" || Answer == "ДА" || Answer == "Да")
@@ -543,16 +571,16 @@ namespace Linux
                 {
                     switch (response)
                     {
-                    case CURLE_COULDNT_CONNECT:
-                        throw domain_error("Failed to connect to host or proxy.");
-                    case CURLE_COULDNT_RESOLVE_HOST:
-                        throw domain_error("Failed to resolve host. The given remote host was not allowed.");
-                    case CURLE_COULDNT_RESOLVE_PROXY:
-                        throw domain_error("Failed to resolve proxy. The given proxy host could not be resolved.");
-                    case CURLE_UNSUPPORTED_PROTOCOL:
-                        throw domain_error("Failed to connect to the site using this protocol.");
-                    case CURLE_SSL_CONNECT_ERROR:
-                        throw domain_error("The problem occurred during SSL/TLS handshake.");
+                        case CURLE_COULDNT_CONNECT:
+                            throw domain_error(translate["CURLE_COULDNT_CONNECT"].asCString());
+                        case CURLE_COULDNT_RESOLVE_HOST:
+                            throw domain_error(translate["CURLE_COULDNT_RESOLVE_HOST"].asCString());
+                        case CURLE_COULDNT_RESOLVE_PROXY:
+                            throw domain_error(translate["CURLE_COULDNT_RESOLVE_PROXY"].asCString());
+                        case CURLE_UNSUPPORTED_PROTOCOL:
+                            throw domain_error(translate["CURLE_UNSUPPORTED_PROTOCOL"].asCString());
+                        case CURLE_SSL_CONNECT_ERROR:
+                            throw domain_error(translate["CURLE_SSL_CONNECT_ERROR"].asCString());
                     }
                 }
                 curl_easy_cleanup(curl);
@@ -573,7 +601,6 @@ namespace Linux
                     Percentage = 0;
                     TempPercentage = 0;
                 }
-                cout << InstallDelimiter << endl;
             }
             catch (exception& error)
             {
