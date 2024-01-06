@@ -49,7 +49,6 @@ int Database::CreateTable(string NameTable, map<string,string> Columns)
         i++;
     }
     SQL_COMMAND += ")";
-    cout << SQL_COMMAND << endl;
     int RESULT_SQL = sqlite3_exec(db, SQL_COMMAND.c_str(), callback, NULL, NULL);
     if (RESULT_SQL != SQLITE_OK)
         throw runtime_error("Error in CREATE TABLE command");
@@ -76,7 +75,6 @@ int Database::InsertValuesToTable(string NameTable,map<string,string> Fields)
     Columns += ")";
     Values += ")";
     SQL_COMMAND = SQL_COMMAND + Columns + " VALUES " + Values + ";";
-    cout << SQL_COMMAND << endl;
     int RESULT_SQL = sqlite3_exec(db, SQL_COMMAND.c_str(), callback, NULL, NULL);
     if (RESULT_SQL != SQLITE_OK)
         throw runtime_error("Error in INSERT command");
