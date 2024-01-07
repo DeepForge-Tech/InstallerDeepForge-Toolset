@@ -44,8 +44,8 @@
 #include <urlmon.h>
 #include "json/json.h"
 #include <thread>
-#include <mutex>
 #include <atomic>
+#include <future>
 
 #pragma comment(lib, "urlmon.lib")
 
@@ -97,7 +97,6 @@ namespace Windows
 #elif defined(_M_ARM64)
     string Architecture = "arm64";
 #endif
-    mutex mtx;
     Json::Value translate;
     // init classes
     Logger logger;
@@ -169,9 +168,8 @@ namespace Windows
 
     void UploadInformation()
     {
-        mtx.lock();
+        // std::unique_lock<std::mutex> lock(mtx, std::defer_lock);
         Channels = database.GetAllVersionsFromDB(NameVersionTable, "Channel", Architecture);
-        mtx.unlock();
         int size = (sizeof(AllChannels) / sizeof(AllChannels[0]));
         int n = 1;
         /* The code is iterating over the `AllChannels` array and checking if each channel exists in
@@ -183,14 +181,12 @@ namespace Windows
 
             if (Channels.find(AllChannels[i]) != Channels.end())
             {
-                mtx.lock();
                 EnumerateChannels.insert(pair<int, string>(n, AllChannels[i]));
                 if (AllChannels[i] == "stable")
                 {
                     defaultChannel = n;
                 }
                 n++;
-                mtx.unlock();
             }
         }
     }
@@ -237,20 +233,22 @@ namespace Windows
             // Create temp folder
             MakeDirectory(NewTempFolder);
             MakeDirectory(LocaleDir);
+            std::atomic_thread_fence(std::memory_order_acquire);
             thread ThreadDownloadLocales(DownloadLocales);
             ThreadDownloadLocales.join();
-            atomic_thread_fence(memory_order_release);
+            std::atomic_thread_fence(std::memory_order_release);
             ChangeLanguage();
             cout << "==> " << translate["DownloadingDatabase"].asCString() << endl;
             // Download database Versions.db
             Download(DB_URL, NewTempFolder, true);
             database.open(&DB_PATH);
-            thread ThreadUploadInformation(UploadInformation);
-            ThreadUploadInformation.join();
             cout << "==> " << translate["DatabaseDownloaded"].asCString() << endl;
+            std::future<void> UploadInformation_async = std::async(std::launch::async, UploadInformation);
+            UploadInformation_async.wait();
+            // thread ThreadUploadInformation(UploadInformation);
+            // ThreadUploadInformation.join();
             cout << InstallDelimiter << endl;
         }
-
         void CommandManager();
         void InstallUpdateManager();
         void InstallDeepForgeToolset(string channel);
@@ -261,7 +259,7 @@ namespace Windows
             string NumLang;
             cout << "1. Russian" << endl;
             cout << "2. English" << endl;
-            cout << "==> " << translate["ChooseLocale"].asCString();
+            cout << "==> Choose language (default - 1):";
             getline(cin, NumLang);
             cout << InstallDelimiter << endl;
             if (NumLang == "1" || NumLang.empty())

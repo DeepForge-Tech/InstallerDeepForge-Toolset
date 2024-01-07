@@ -36,7 +36,6 @@ using namespace macOS;
 #include "include/Installer_Windows.hpp"
 using namespace Windows;
 #endif
-
 Installer installer;
 
 /**

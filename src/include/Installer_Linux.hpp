@@ -44,8 +44,8 @@
 #include <cstring>
 #include <fstream>
 #include <thread>
-#include <mutex>
 #include <atomic>
+#include <future>
 
 #define DEEPFORGE_TOOLSET_VERSION "0.1"
 #define URL_DESKTOP_SYMLINK "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/DeepForgeToolset.desktop"
@@ -98,7 +98,6 @@ namespace Linux
     #elif __arm__ || __aarch64__ || _M_ARM64
         string Architecture = "arm64";
     #endif
-    mutex mtx;
     Json::Value translate;
     // init classes
     CURL *curl = curl_easy_init();
@@ -167,9 +166,7 @@ namespace Linux
     }
     void UploadInformation()
     {
-        mtx.lock();
         Channels = database.GetAllVersionsFromDB(NameVersionTable, "Channel", Architecture);
-        mtx.unlock();
         int size = (sizeof(AllChannels) / sizeof(AllChannels[0]));
         int n = 1;
         /* The code is iterating over the `AllChannels` array and checking if each channel exists in
@@ -181,14 +178,12 @@ namespace Linux
 
             if (Channels.find(AllChannels[i]) != Channels.end())
             {
-                mtx.lock();
                 EnumerateChannels.insert(pair<int, string>(n, AllChannels[i]));
                 if (AllChannels[i] == "stable")
                 {
                     defaultChannel = n;
                 }
                 n++;
-                mtx.unlock();
             }
         }
     }
@@ -254,16 +249,17 @@ namespace Linux
             // Create temp folder
             MakeDirectory(NewTempFolder);
             MakeDirectory(LocaleDir);
+            std::atomic_thread_fence(std::memory_order_acquire);
             thread ThreadDownloadLocales(DownloadLocales);
             ThreadDownloadLocales.join();
-            atomic_thread_fence(memory_order_release);
+            std::atomic_thread_fence(std::memory_order_release);
             ChangeLanguage();
             cout << "==> " << translate["DownloadingDatabase"].asString() << endl;
             // Download database Versions.db
             Download(DB_URL, NewTempFolder, true);
             database.open(&DB_PATH);
-            thread ThreadUploadInformation(UploadInformation);
-            ThreadUploadInformation.join();
+            std::future<void> UploadInformation_async = std::async(std::launch::async, UploadInformation);
+            UploadInformation_async.wait();
             cout << "==> " << translate["DatabaseDownloaded"].asCString() << endl;
             cout << InstallDelimiter << endl;
         }

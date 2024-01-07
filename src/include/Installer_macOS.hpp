@@ -43,8 +43,8 @@
 #include <cstring>
 #include <fstream>
 #include <thread>
-#include <mutex>
 #include <atomic>
+#include <future>
 
 #define DEEPFORGE_TOOLSET_VERSION "0.1"
 #define Locale_RU_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_ru.json"
@@ -93,7 +93,6 @@ namespace macOS
     const string TrueVarious[3] = {"yes", "y", "1"};
     string AllChannels[2] = {"stable", "beta"};
     string InstallDelimiter = "========================================================";
-    mutex mtx;
     Json::Value translate;
     // init classes
     Logger logger;
@@ -162,9 +161,7 @@ namespace macOS
     }
     void UploadInformation()
     {
-        mtx.lock();
         Channels = database.GetAllVersionsFromDB(NameVersionTable, "Channel", Architecture);
-        mtx.unlock();
         int size = (sizeof(AllChannels) / sizeof(AllChannels[0]));
         int n = 1;
         /* The code is iterating over the `AllChannels` array and checking if each channel exists in
@@ -176,14 +173,12 @@ namespace macOS
 
             if (Channels.find(AllChannels[i]) != Channels.end())
             {
-                mtx.lock();
                 EnumerateChannels.insert(pair<int, string>(n, AllChannels[i]));
                 if (AllChannels[i] == "stable")
                 {
                     defaultChannel = n;
                 }
                 n++;
-                mtx.unlock();
             }
         }
     }
@@ -257,16 +252,17 @@ namespace macOS
             // Create temp folder
             MakeDirectory(NewTempFolder);
             MakeDirectory(LocaleDir);
+            std::atomic_thread_fence(std::memory_order_acquire);
+            thread ThreadDownloadLocales(DownloadLocales);
+            ThreadDownloadLocales.join();
+            std::atomic_thread_fence(std::memory_order_release);
             ChangeLanguage();
-            atomic_thread_fence(memory_order_release);
             cout << "==> " << translate["DownloadingDatabase"].asCString() << endl;
             // Download database Versions.db
             Download(DB_URL, NewTempFolder, true);
             database.open(&DB_PATH);
-            thread ThreadUploadInformation(UploadInformation);
-            thread ThreadDownloadLocales(DownloadLocales);
-            ThreadUploadInformation.join();
-            ThreadDownloadLocales.join();
+            std::future<void> UploadInformation_async = std::async(std::launch::async, UploadInformation);
+            UploadInformation_async.wait();
             cout << "==> " << translate["DatabaseDownloaded"].asCString() << endl;
             cout << InstallDelimiter << endl;
         }
@@ -280,7 +276,7 @@ namespace macOS
             string NumLang;
             cout << "1. Russian" << endl;
             cout << "2. English" << endl;
-            cout << "==> " << translate["ChooseLocale"].asCString();
+            cout << "==> " << "==> Choose language (default - 1):";
             getline(cin, NumLang);
             cout << InstallDelimiter << endl;
             if (NumLang == "1" || NumLang.empty())

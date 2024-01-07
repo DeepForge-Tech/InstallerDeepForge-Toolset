@@ -9,7 +9,7 @@ set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package(Threads REQUIRED)
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_FIND_LIBRARY_SUFFIXES .a .so .dylib)
-
+include(./CompileResources.cmake)
 # fmt
 FetchContent_Declare(fmt
   GIT_REPOSITORY https://github.com/DeepForge-Technology/fmt.git
@@ -44,12 +44,12 @@ endif()
 
 #target_include_directories(InstallerDeepForge-Toolset PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/include)
+
 set(SOURCE_FILES
   ./src/InstallerDeepForge_Toolset.cpp
   ./src/DatabaseConnect.cpp
   ./src/DatabaseConnect.hpp
 )
-
 add_executable(InstallerDeepForge-Toolset ${SOURCE_FILES})
 if (WIN32)
   set(LIBRARIES

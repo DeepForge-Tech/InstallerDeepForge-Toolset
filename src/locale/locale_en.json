@@ -27,6 +27,8 @@
     "CURLE_COULDNT_RESOLVE_PROXY":"Failed to resolve proxy. The given proxy host could not be resolved.",
     "CURLE_UNSUPPORTED_PROTOCOL":"Failed to connect to the site using this protocol.",
     "CURLE_SSL_CONNECT_ERROR":"The problem occurred during SSL/TLS handshake.",
+    "DownloadingLocales":"Downloading locales...",
+    "LocalesDownloaded":"Locales successfully downloaded.",
     "DownloadingDatabase":"Downloading database...",
     "DatabaseDownloaded":"Database successfully downloaded.",
     "ChooseLocale":"Choose language (default - 1):",
@@ -40,5 +42,5 @@
     "AlreadyInstalled": "already installed",
     "in":"in",
     "RebootSystem":"Do you want to reboot the system?",
-    "Reboot":"Do you want to reboot the system?"
+    "Reboot":"Do you want to reboot your computer for all the changes to take effect?"
 }   
