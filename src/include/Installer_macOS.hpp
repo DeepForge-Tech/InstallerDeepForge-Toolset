@@ -42,8 +42,6 @@
 #include "zip/zip.h"
 #include <cstring>
 #include <fstream>
-#include <thread>
-#include <atomic>
 #include <future>
 
 #define DEEPFORGE_TOOLSET_VERSION "0.1"
@@ -252,10 +250,7 @@ namespace macOS
             // Create temp folder
             MakeDirectory(NewTempFolder);
             MakeDirectory(LocaleDir);
-            std::atomic_thread_fence(std::memory_order_acquire);
-            thread ThreadDownloadLocales(DownloadLocales);
-            ThreadDownloadLocales.join();
-            std::atomic_thread_fence(std::memory_order_release);
+            DownloadLocales();
             ChangeLanguage();
             cout << "==> " << translate["DownloadingDatabase"].asCString() << endl;
             // Download database Versions.db

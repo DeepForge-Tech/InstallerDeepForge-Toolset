@@ -43,8 +43,6 @@
 #include <fstream>
 #include <urlmon.h>
 #include "json/json.h"
-#include <thread>
-#include <atomic>
 #include <future>
 
 #pragma comment(lib, "urlmon.lib")
@@ -233,10 +231,7 @@ namespace Windows
             // Create temp folder
             MakeDirectory(NewTempFolder);
             MakeDirectory(LocaleDir);
-            std::atomic_thread_fence(std::memory_order_acquire);
-            thread ThreadDownloadLocales(DownloadLocales);
-            ThreadDownloadLocales.join();
-            std::atomic_thread_fence(std::memory_order_release);
+            DownloadLocales();
             ChangeLanguage();
             cout << "==> " << translate["DownloadingDatabase"].asCString() << endl;
             // Download database Versions.db
@@ -245,8 +240,6 @@ namespace Windows
             cout << "==> " << translate["DatabaseDownloaded"].asCString() << endl;
             std::future<void> UploadInformation_async = std::async(std::launch::async, UploadInformation);
             UploadInformation_async.wait();
-            // thread ThreadUploadInformation(UploadInformation);
-            // ThreadUploadInformation.join();
             cout << InstallDelimiter << endl;
         }
         void CommandManager();
