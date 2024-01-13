@@ -9,7 +9,7 @@ set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package(Threads REQUIRED)
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_FIND_LIBRARY_SUFFIXES .a .so .dylib)
-include(./CompileResources.cmake)
+# include(./CompileResources.cmake)
 # fmt
 FetchContent_Declare(fmt
   GIT_REPOSITORY https://github.com/DeepForge-Technology/fmt.git
