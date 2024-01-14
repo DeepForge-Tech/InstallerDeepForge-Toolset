@@ -48,7 +48,7 @@ namespace DB
         int RESULT_SQL;
         string SQL_COMMAND;
         string AnswerDB;
-        string DefaultDatabesePath = std::filesystem::current_path().generic_string() + "/DB/AppInstaller.db";
+        string DefaultDatabesePath = std::filesystem::current_path().generic_string() + "/DB/Versions.db";
         void open(string *DB_Path = nullptr)
         {
             RESULT_SQL = sqlite3_open(DB_Path != nullptr ? DB_Path->c_str() : DefaultDatabesePath.c_str(), &db);
