@@ -185,77 +185,29 @@ namespace Linux
             }
         }
     }
-    void DownloadLocales()
-    {
-        try
-        {
-            withProgress = false;
-            string Locales[2] = {Locale_RU_URL,Locale_EN_URL};
-            for (int i = 0;i < (sizeof(Locales) / sizeof(Locales[0]));i++)
-            {
-                string url = Locales[i];
-                // Get name of file from url
-                string name = (url.substr(url.find_last_of("/")));
-                string filename = LocaleDir + "/" + name.replace(name.find("/"), 1, "");
-                FILE *file = fopen(filename.c_str(), "wb");
-                CURL *curl = curl_easy_init();
-                curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-                curl_easy_setopt(curl, CURLOPT_NOPROGRESS, false);
-                curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, &CallbackProgress);
-                curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-                curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
-                curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
-                curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
-                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteData);
-                curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
-                CURLcode response = curl_easy_perform(curl);
-                if (response != CURLE_OK)
-                {
-                    switch (response)
-                    {
-                        case CURLE_COULDNT_CONNECT:
-                            throw domain_error(translate["CURLE_COULDNT_CONNECT"].asCString());
-                        case CURLE_COULDNT_RESOLVE_HOST:
-                            throw domain_error(translate["CURLE_COULDNT_RESOLVE_HOST"].asCString());
-                        case CURLE_COULDNT_RESOLVE_PROXY:
-                            throw domain_error(translate["CURLE_COULDNT_RESOLVE_PROXY"].asCString());
-                        case CURLE_UNSUPPORTED_PROTOCOL:
-                            throw domain_error(translate["CURLE_UNSUPPORTED_PROTOCOL"].asCString());
-                        case CURLE_SSL_CONNECT_ERROR:
-                            throw domain_error(translate["CURLE_SSL_CONNECT_ERROR"].asCString());
-                    }
-                }
-                curl_easy_cleanup(curl);
-                fclose(file);
-            }
-        }
-        catch (exception &error)
-        {
-            string ErrorText = "==> ❌ " + string(error.what());
-            logger.SendError(Architecture, "Empty", OS_NAME, "Download()", error.what());
-            cerr << ErrorText << endl;
-        }
-    }
     // Main class
     class Installer
     {
     public:
         Installer()
         {
-            string Command = "sudo -s chmod 777 /usr/bin/";
+            string Command;
+            Command = "sudo -s chmod 777 /usr/bin/";
             system(Command.c_str());
             // Create temp folder
             MakeDirectory(NewTempFolder);
             MakeDirectory(LocaleDir);
-            DownloadLocales();
-            ChangeLanguage();
-            cout << "==> " << translate["DownloadingDatabase"].asString() << endl;
-            // Download database Versions.db
-            Download(DB_URL, NewTempFolder, true);
+            Command = "sudo -s chmod 777 " + NewOrganizationFolder;
+            system(Command.c_str());
+            Command = "sudo -s chmod 777 " + NewOrganizationFolder + "/*";
+            system(Command.c_str());
+            Command = "sudo -s chmod 777 " + NewApplicationFolder  + "/*";
+            system(Command.c_str());
+            DownloadDependencies();
             database.open(&DB_PATH);
             std::future<void> UploadInformation_async = std::async(std::launch::async, UploadInformation);
             UploadInformation_async.wait();
-            cout << "==> " << translate["DatabaseDownloaded"].asCString() << endl;
+            
             cout << InstallDelimiter << endl;
         }
         void CommandManager();
@@ -274,6 +226,19 @@ namespace Linux
         void InstallUpdateManager();
         void InstallDeepForgeToolset(string channel);
         void ChangeUpdating();
+        void DownloadDependencies()
+        {
+            string Locales[2] = {Locale_RU_URL,Locale_EN_URL};
+            for (int i = 0;i < (sizeof(Locales) / sizeof(Locales[0]));i++)
+            {
+                Download(Locales[i],LocaleDir,false);
+            }
+            ChangeLanguage();
+            cout << "==> " << translate["DownloadingDatabase"].asString() << endl;
+            // Download database Versions.db
+            Download(DB_URL, NewTempFolder, true);
+            cout << "==> " << translate["DatabaseDownloaded"].asCString() << endl;
+        }
         void ChangeLanguage()
         {
             string NumLang;

@@ -1,10 +1,10 @@
 #!/bin/bash
 echo "==> Installing libraries"
 # Installing libraries
-YUM_PACKAGE_NAME="make cmake gcc-c++ curl libcurl sqlite-devel openssl-devel"
-DEB_PACKAGE_NAME="build-essential cmake debhelper devscripts equivs fakeroot g++ gdb gnome-desktop-data gnome-icon-theme libx11-dev libx11-doc libxext-dev libxext-doc libxmu-dev libxmu-doc libxpm-dev libxpm-doc libxt-dev libxt-doc g++ gcc build-essential cmake make curl libcurl4-openssl-dev libjsoncpp-dev libfmt-dev libsqlite3-dev libgtest-dev googletest google-mock libgmock-dev libtbb-dev libzip-dev zlib1g-dev"
-PACMAN_PACKAGE_NAME="jsoncpp gcc base-devel cmake gtest lib32-curl libcurl-compat libcurl-gnutls curl fmt lib32-sqlite sqlite sqlite-tcl zlib openssl lib32-openssl openssl-1.1 libzip"
-ZYPPER_PACKAGE_NAME="libcurl-devel gcc-c++ cmake gtest gmock zlib-devel fmt-devel sqlite3-devel jsoncpp-devel"
+YUM_PACKAGE_NAME="wget make cmake gcc-c++ curl libcurl sqlite-devel openssl-devel"
+DEB_PACKAGE_NAME="wget openssl libssl-dev g++ gcc build-essential cmake make curl libcurl4-openssl-dev libjsoncpp-dev libfmt-dev libsqlite3-dev libgtest-dev googletest google-mock libgmock-dev libtbb-dev libzip-dev zlib1g-dev"
+PACMAN_PACKAGE_NAME="wget jsoncpp gcc base-devel cmake gtest lib32-curl libcurl-compat libcurl-gnutls curl fmt lib32-sqlite sqlite sqlite-tcl zlib openssl lib32-openssl openssl-1.1 libzip"
+ZYPPER_PACKAGE_NAME="wget libcurl-devel gcc-c++ cmake gtest gmock zlib-devel fmt-devel sqlite3-devel jsoncpp-devel"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
    DISTRO=$(grep -E '^NAME=' /etc/os-release | cut -d '"' -f2)
    if [[ "$DISTRO" == "CentOS Linux"* ]]; then
