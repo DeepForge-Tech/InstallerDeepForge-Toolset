@@ -188,38 +188,6 @@ namespace Windows
             }
         }
     }
-    void DownloadLocales()
-    {
-        try
-        {
-            withProgress = false;
-            // Class for write data on windows
-            WriteData writer;
-            string Locales[2] = {Locale_RU_URL,Locale_EN_URL};
-            for (int i = 0;i < (sizeof(Locales) / sizeof(Locales[0]));i++)
-            {
-                string url = Locales[i];
-                // Get name of file from url
-                string name = (url.substr(url.find_last_of("/")));
-                string filename = LocaleDir + "/" + name.replace(name.find("/"), 1, "");
-                // Call method for download file
-                HRESULT Download = URLDownloadToFile(NULL, url.c_str(), filename.c_str(), 0, static_cast<IBindStatusCallback *>(&writer));
-                switch (Download)
-                {
-                case -2146697211:
-                    throw domain_error(translate["NoInternetConnection"].asCString());
-                case -2147467260:
-                    throw domain_error(translate["ConnectionReset"].asCString());
-                }
-            }
-        }
-        catch (exception& error)
-        {
-            string ErrorText = "==> ❌ " + string(error.what());
-            logger.SendError(Architecture, "Empty", OS_NAME, "Download()", error.what());
-            cerr << ErrorText << endl;
-        }
-    }
     // Main class
     class Installer
     {
@@ -231,13 +199,8 @@ namespace Windows
             // Create temp folder
             MakeDirectory(NewTempFolder);
             MakeDirectory(LocaleDir);
-            DownloadLocales();
-            ChangeLanguage();
-            cout << "==> " << translate["DownloadingDatabase"].asCString() << endl;
-            // Download database Versions.db
-            Download(DB_URL, NewTempFolder, true);
+            DownloadDependencies();
             database.open(&DB_PATH);
-            cout << "==> " << translate["DatabaseDownloaded"].asCString() << endl;
             std::future<void> UploadInformation_async = std::async(std::launch::async, UploadInformation);
             UploadInformation_async.wait();
             cout << InstallDelimiter << endl;
@@ -246,7 +209,19 @@ namespace Windows
         void InstallUpdateManager();
         void InstallDeepForgeToolset(string channel);
         void ChangeUpdating();
-
+        void DownloadDependencies()
+        {
+            string Locales[2] = {Locale_RU_URL,Locale_EN_URL};
+            for (int i = 0;i < (sizeof(Locales) / sizeof(Locales[0]));i++)
+            {
+                Download(Locales[i],LocaleDir,false);
+            }
+            ChangeLanguage();
+            cout << "==> " << translate["DownloadingDatabase"].asString() << endl;
+            // Download database Versions.db
+            Download(DB_URL, NewTempFolder, true);
+            cout << "==> " << translate["DatabaseDownloaded"].asCString() << endl;
+        }
         void ChangeLanguage()
         {
             string NumLang;

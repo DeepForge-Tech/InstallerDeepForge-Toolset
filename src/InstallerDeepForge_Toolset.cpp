@@ -60,6 +60,10 @@ void Installer::InstallUpdateManager()
         name = (UpdateManagerUrl.substr(UpdateManagerUrl.find_last_of("/")));
         ArchivePath = NewTempFolder + "/" + name.replace(name.find("/"), 1, "");
         MakeDirectory(NewUpdateManagerFolder);
+        #if defined(__linux__) || defined(__APPLE__)
+            Command = "sudo -s chmod 777 " + NewUpdateManagerFolder + "/*";
+            system(Command.c_str());
+        #endif
         filesystem::remove(ArchivePath);
         file_path = NewUpdateManagerFolder + "/UpdateManager";
         cout << "==> ✅ UpdateManager " << version << " " << translate["Installed"].asString() << endl;
