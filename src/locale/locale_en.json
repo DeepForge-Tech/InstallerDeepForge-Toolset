@@ -42,5 +42,5 @@
     "AlreadyInstalled": "already installed",
     "in":"in",
     "RebootSystem":"Do you want to reboot the system?",
-    "Reboot":"Do you want to reboot your computer for all the changes to take effect?"
+    "Reboot":"Do you want to reboot your computer for all the changes to take effect (default - yes)?"
 }   
