@@ -1,3 +1,5 @@
+#ifndef LOGGER_H
+#define LOGGER_H
 #include <cstdlib>
 #include <stdio.h>
 #include <iostream>
@@ -12,10 +14,10 @@
 #include <map>
 #include "json/json.h"
 #if defined(__linux__) || __APPLE__
-#include "./Client_UNIX.hpp"
+#include "Client_UNIX.hpp"
 using namespace UNIX;
 #elif _WIN32
-#include "./Client_POSIX.hpp"
+#include "Client_POSIX.hpp"
 using namespace POSIX;
 #endif
 
@@ -43,6 +45,7 @@ public:
         #endif
         if (PathFile != nullptr)
         {
+            LogPath = PathFile;
             if (MaxSize != nullptr)
             {
                 convertSize(MaxSize);
@@ -70,9 +73,95 @@ public:
     void SendError(string Architecture, string Channel, string OS_NAME, string FunctionName, string LogText);
 
 private:
+    #if defined(_WIN32)
+        /* The 'MakeDirectory' function is used to create a directory (folder) in the file system.*/
+        void MakeDirectory(string dir)
+        {
+            try
+            {
+                string currentDir;
+                string fullPath = "";
+                string delimiter = "\\";
+                size_t pos = 0;
+                while ((pos = dir.find(delimiter)) != string::npos)
+                {
+                    currentDir = dir.substr(0, pos);
+                    if (fullPath != "")
+                    {
+                        fullPath = fullPath + "\\" + currentDir;
+                        if (filesystem::exists(fullPath) == false)
+                        {
+                            CreateDirectoryA(fullPath.c_str(), NULL);
+                        }
+                    }
+                    else
+                    {
+                        fullPath = currentDir + "\\";
+                    }
+                    dir.erase(0, pos + delimiter.length());
+                }
+                if (fullPath != "")
+                {
+                    fullPath = fullPath + "\\" + dir;
+                }
+                else
+                {
+                    fullPath = dir + "\\";
+                }
+                if (filesystem::exists(fullPath) == false)
+                {
+                    CreateDirectoryA(fullPath.c_str(), NULL);
+                }
+            }
+            catch (exception &error)
+            {
+                SendError("Empty", "Empty", "Error", "Logger.MakeDirectory", error.what());
+            }
+        }
+    #else
+        /*The `MakeDirectory` function is responsible for creating a directory (folder) in the file system.*/
+        void MakeDirectory(string dir)
+        {
+            try
+            {
+                string currentDir;
+                string fullPath = "";
+                string delimiter = "/";
+                size_t pos = 0;
+                while ((pos = dir.find(delimiter)) != string::npos)
+                {
+                    currentDir = dir.substr(0, pos);
+                    if (fullPath != "")
+                    {
+                        fullPath = fullPath + "/" + currentDir;
+                        if (filesystem::exists(fullPath) == false)
+                        {
+                            filesystem::create_directory(fullPath);
+                        }
+                    }
+                    else
+                    {
+                        fullPath = "/" + currentDir;
+                    }
+                    dir.erase(0, pos + delimiter.length());
+                }
+                fullPath = fullPath + "/" + dir;
+                if (filesystem::exists(fullPath) == false)
+                {
+                    filesystem::create_directory(fullPath);
+                }
+            }
+            catch (exception &error)
+            {
+                SendError("Empty", "Empty", "Empty", "Logger.MakeDirectory", error.what());
+            }
+        }
+    #endif
     /* The `WriteFile` function is responsible for writing the `value` string to a file specified by the `filename` parameter. */
     void WriteFile(string filename, string value)
     {
+        filesystem::path dir(filename);
+        MakeDirectory(dir.parent_path().string());
         /* The line `fstream file(filename, ios::in | ios::binary | ios::out);` is creating a file stream object named `file` and opening a file specified by the `filename` parameter. The file is opened in binary mode (`ios::binary`) and both input and output operations are allowed (`ios::in | ios::out`). This means that the file can be read from and written to. */
         fstream file(filename, ios::in | ios::binary | ios::out);
         /* The line `file.seekg(0, ios::end);` is used to set the get position indicator of the file stream `file` to the end of the file. This allows us to determine the current size of the file by calling `file.tellg()`, which returns the position of the get pointer. In this case, it is used to check the current size of the file before deciding whether to overwrite the file or append to it. */
@@ -146,3 +235,4 @@ private:
         return new_sentence;
     }
 };
+#endif // LOGGER_H

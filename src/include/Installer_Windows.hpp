@@ -1,4 +1,4 @@
-/*  The MIT License (MIT)
+/*  GNU GENERAL PUBLIC LICENSE
     ============================================================================
 
     ██████╗ ███████╗███████╗██████╗ ███████╗ ██████╗ ██████╗  ██████╗ ███████╗
@@ -28,31 +28,30 @@
 #include <filesystem>
 #include <iostream>
 #include <conio.h>
+#include <winsock2.h>
 #include <Windows.h>
 #include "Progressbar.hpp"
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "../DatabaseConnect.cpp"
+#include "../DatabaseConnect.hpp"
 #include <map>
-#include <zipper/unzipper.h>
 #include <fstream>
 #include <cctype>
 #include "Logger.cpp"
 #include <fstream>
-#include <AclAPI.h>
-#include <Lmcons.h>
 #include <urlmon.h>
 #include "json/json.h"
-#pragma comment (lib, "urlmon.lib")
+#include <future>
+
+#pragma comment(lib, "urlmon.lib")
 
 #define DEEPFORGE_TOOLSET_VERSION "0.1"
 #define DB_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
 #define OS_NAME "Windows"
 #define UpdateManagerTable "UpdateManager_Windows"
-#define NameVersionTable "WindowsVersions"
+#define NameVersionTable "DeepForgeToolset_Windows"
 #define Locale_RU_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_ru.json"
 #define Locale_EN_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_en.json"
 #define PathmanURL_AMD64 "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/pathman-v0.5.2-windows-amd64.exe"
@@ -61,7 +60,6 @@
 using namespace std;
 using namespace DB;
 using namespace Bar;
-using namespace zipper;
 
 namespace Windows
 {
@@ -69,6 +67,7 @@ namespace Windows
     int result;
     int Percentage;
     int TempPercentage = 0;
+    int defaultChannel = 1;
     // bool type
     bool Updating = true;
     bool withProgress = true;
@@ -76,19 +75,24 @@ namespace Windows
     double LastSize;
     double LastTotalSize;
     double DownloadSpeed;
+    // map type
+    map<int, string> EnumerateChannels;
+    map<string, string> Channels;
     // string type
     string Answer;
+    string AllChannels[2] = {"stable", "beta"};
     const string NewOrganizationFolder = "C:\\ProgramData\\DeepForge";
     const string NewApplicationFolder = NewOrganizationFolder + "\\DeepForge-Toolset";
     const string NewUpdateManagerFolder = NewOrganizationFolder + "\\UpdateManager";
     const string NewTempFolder = NewApplicationFolder + "\\Temp";
-    std::filesystem::path ProjectDir = std::filesystem::current_path().generic_string();
+    const string LocaleDir = NewApplicationFolder + "\\locale";
+    filesystem::path ProjectDir = filesystem::current_path().generic_string();
     string DB_PATH = NewTempFolder + "\\Versions.db";
     const string TrueVarious[3] = {"yes", "y", "1"};
     string InstallDelimiter = "========================================================";
-#if defined(__x86_64__)
+#if defined(_M_AMD64)
     string Architecture = "amd64";
-#elif __arm__ || __aarch64__ || _M_ARM64
+#elif defined(_M_ARM64)
     string Architecture = "arm64";
 #endif
     Json::Value translate;
@@ -96,6 +100,8 @@ namespace Windows
     Logger logger;
     ProgressBar_v1 progressbar;
     Database database;
+
+    
 
     class WriteData : public IBindStatusCallback
     {
@@ -157,6 +163,31 @@ namespace Windows
             return S_OK;
         }
     };
+
+    void UploadInformation()
+    {
+        // std::unique_lock<std::mutex> lock(mtx, std::defer_lock);
+        Channels = database.GetAllVersionsFromDB(NameVersionTable, "Channel", Architecture);
+        int size = (sizeof(AllChannels) / sizeof(AllChannels[0]));
+        int n = 1;
+        /* The code is iterating over the `AllChannels` array and checking if each channel exists in
+        the `Channels` map. If a channel exists, it prints the channel number and name, and inserts
+        the channel into the `EnumerateChannels` map. If the channel is "stable\latest", it sets the
+        `defaultChannel` variable to the current channel number. */
+        for (int i = 0; i < size; i++)
+        {
+
+            if (Channels.find(AllChannels[i]) != Channels.end())
+            {
+                EnumerateChannels.insert(pair<int, string>(n, AllChannels[i]));
+                if (AllChannels[i] == "stable")
+                {
+                    defaultChannel = n;
+                }
+                n++;
+            }
+        }
+    }
     // Main class
     class Installer
     {
@@ -167,24 +198,38 @@ namespace Windows
             SetConsoleOutputCP(CP_UTF8);
             // Create temp folder
             MakeDirectory(NewTempFolder);
-            cout << "Downloading database..." << endl;
-            // Download database Versions.db
-            Download(DB_URL, NewTempFolder,true);
-            cout << "Database successfully downloaded." << endl;
-            cout << InstallDelimiter << endl;
+            MakeDirectory(LocaleDir);
+            DownloadDependencies();
             database.open(&DB_PATH);
+            std::future<void> UploadInformation_async = std::async(std::launch::async, UploadInformation);
+            UploadInformation_async.wait();
+            cout << InstallDelimiter << endl;
         }
         void CommandManager();
         void InstallUpdateManager();
         void InstallDeepForgeToolset(string channel);
         void ChangeUpdating();
+        void DownloadDependencies()
+        {
+            string Locales[2] = {Locale_RU_URL,Locale_EN_URL};
+            for (int i = 0;i < (sizeof(Locales) / sizeof(Locales[0]));i++)
+            {
+                Download(Locales[i],LocaleDir,false);
+            }
+            ChangeLanguage();
+            cout << "==> " << translate["DownloadingDatabase"].asString() << endl;
+            // Download database Versions.db
+            Download(DB_URL, NewTempFolder, true);
+            cout << "==> " << translate["DatabaseDownloaded"].asCString() << endl;
+        }
         void ChangeLanguage()
         {
             string NumLang;
             cout << "1. Russian" << endl;
             cout << "2. English" << endl;
-            cout << "Choose language (default - 1):";
+            cout << "==> Choose language (default - 1):";
             getline(cin, NumLang);
+            cout << InstallDelimiter << endl;
             if (NumLang == "1" || NumLang.empty())
             {
                 ReadJSON("Russian");
@@ -198,55 +243,50 @@ namespace Windows
             {
                 ChangeLanguage();
             }
-            cout << InstallDelimiter << endl;
         }
         // JSON file reading function with interface localization
-    void ReadJSON(string language)
-    {
-        try
+        void ReadJSON(string language)
         {
-            if (language == "Russian")
+            try
             {
-                string LocaleDir = NewApplicationFolder + "\\locale";
-                string LocalePath = LocaleDir + "\\locale_ru.json";
-                MakeDirectory(LocaleDir);
-                Download(Locale_RU_URL,LocaleDir,false);
-                ifstream file(LocalePath);
-                // File open check
-                if (file.is_open())
+                if (language == "Russian")
                 {
-                    // Dictionary entry with translation
-                    file >> translate;
-                    file.close();
+                    string LocalePath = LocaleDir + "\\locale_ru.json";
+                    MakeDirectory(LocaleDir);
+                    ifstream file(LocalePath);
+                    // File open check
+                    if (file.is_open())
+                    {
+                        // Dictionary entry with translation
+                        file >> translate;
+                        file.close();
+                    }
+                }
+                else if (language == "English")
+                {
+                    string LocalePath = LocaleDir + "\\locale_en.json";
+                    MakeDirectory(LocaleDir);
+                    ifstream file(LocalePath);
+                    // File open check
+                    if (file.is_open())
+                    {
+                        // Dictionary entry with translation
+                        file >> translate;
+                        file.close();
+                    }
                 }
             }
-            else if (language == "English")
+            catch (exception& error)
             {
-                string LocaleDir = NewApplicationFolder + "\\locale";
-                string LocalePath = LocaleDir + "\\locale_en.json";
-                MakeDirectory(LocaleDir);
-                Download(Locale_EN_URL,LocaleDir,false);
-                ifstream file(LocalePath);
-                // File open check
-                if (file.is_open())
-                {
-                    // Dictionary entry with translation
-                    file >> translate;
-                    file.close();
-                }
+                // Error output
+                logger.WriteError("Function: ReadJSON");
+                logger.WriteError(error.what());
+                logger.SendError(Architecture, "Empty", OS_NAME, "ReadJSON", error.what());
             }
         }
-        catch (exception &error)
-        {
-            // Error output
-            logger.WriteError("Function: ReadJSON");
-            logger.WriteError(error.what());
-            logger.SendError(Architecture,"Empty",OS_NAME,"ReadJSON",error.what());
-        }
-    }
 
     private:
-        void Download(string url, string dir,bool Progress)
+        void Download(string url, string dir, bool Progress)
         {
             try
             {
@@ -261,9 +301,9 @@ namespace Windows
                 switch (Download)
                 {
                 case -2146697211:
-                    throw domain_error("No internet connection");
+                    throw domain_error(translate["NoInternetConnection"].asCString());
                 case -2147467260:
-                    throw domain_error("Connection reset");
+                    throw domain_error(translate["ConnectionReset"].asCString());
                 }
                 if (Progress == true)
                 {
@@ -282,7 +322,7 @@ namespace Windows
                     TempPercentage = 0;
                 }
             }
-            catch (exception &error)
+            catch (exception& error)
             {
                 string ErrorText = "==> ❌ " + string(error.what());
                 logger.SendError(Architecture, "Empty", OS_NAME, "Download()", error.what());
@@ -292,11 +332,11 @@ namespace Windows
         void AddToPATH()
         {
             string Command = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe add " + NewApplicationFolder + " && del C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe";
-            #if defined(__x86_64__)
-                Download(PathmanURL_AMD64,NewTempFolder,false);
-            #elif __arm__ || __aarch64__ || _M_ARM64
-                Download(PathmanURL_ARM64,NewTempFolder,false);
-            #endif
+#if defined(_M_AMD64)
+            Download(PathmanURL_AMD64, NewTempFolder, false);
+#elif _M_ARM64
+            Download(PathmanURL_ARM64, NewTempFolder, false);
+#endif
             system(Command.c_str());
         }
         // Method for create symlink on desktop
@@ -312,13 +352,16 @@ namespace Windows
         {
             try
             {
-                map<string,string> ApplicationColumns = {
-                    {"Name","TEXT"},
-                    {"Version","TEXT"},
+                string NameTable = "DeepForgeToolset_" + string(OS_NAME);
+                map<string, string> ApplicationColumns = {
+                    {"Name", "TEXT"},
+                    {"Version", "TEXT"},
+                    {"NameTable","TEXT"}
                 };
-                map<string,string> ApplicationFields = {
-                    {"Name","DeepForge-Toolset"},
-                    {"Version",version},
+                map<string, string> ApplicationFields = {
+                    {"Name", "DeepForge-Toolset"},
+                    {"Version", version},
+                    {"NameTable",NameTable}
                 };
                 string pathFile = NewUpdateManagerFolder + "\\AppInformation.db";
                 Database AppInformationDB;
@@ -328,24 +371,23 @@ namespace Windows
                     ofstream file(pathFile);
                     file << "";
                     file.close();
-                    
                 }
                 AppInformationDB.open(&pathFile);
                 /* The bellow code is creating a table called "Applications" in the AppInformationDB database using the CreateTable method. It then inserts values into the "Applications" table using the InsertValuesToTable method. The boolean variable "exists" is used to store the result of the CreateTable method, indicating whether the table creation was successful or not. The integer variable "result" is used to store the number of rows affected by the InsertValuesToTable method. */
-                bool existsTable = AppInformationDB.CreateTable("Applications",ApplicationColumns);
-                int existsValue = AppInformationDB.ExistNameAppInTable("Applications","DeepForge-Toolset");
+                bool existsTable = AppInformationDB.CreateTable("Applications", ApplicationColumns);
+                int existsValue = AppInformationDB.ExistNameAppInTable("Applications", "DeepForge-Toolset");
                 /* The code is checking if a table called "Applications" exists in the database. If the table does not exist (existsTable == -1), it inserts values into the table using the AppInformationDB.InsertValuesToTable() method. If the table does exist, it removes an application called "DeepForge-Toolset" from the table using the AppInformationDB.RemoveApplicationFromTable() method, and then inserts values into the table using the AppInformationDB.InsertValuesToTable() method. */
-                if (existsTable == -1)
+                if (existsTable == false)
                 {
-                    int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
+                    int result = AppInformationDB.InsertValuesToTable("Applications", ApplicationFields);
                 }
                 else
                 {
-                    AppInformationDB.RemoveApplicationFromTable("Applications","DeepForge-Toolset");
-                    int result = AppInformationDB.InsertValuesToTable("Applications",ApplicationFields);
+                    AppInformationDB.RemoveApplicationFromTable("Applications", "DeepForge-Toolset");
+                    int result = AppInformationDB.InsertValuesToTable("Applications", ApplicationFields);
                 }
             }
-            catch (exception &error)
+            catch (exception& error)
             {
                 // Error output
                 logger.SendError(Architecture, "Empty", OS_NAME, "WriteInformation()", error.what());
@@ -380,7 +422,7 @@ namespace Windows
                     fullPath = fullPath + "\\" + currentDir;
                     if (filesystem::exists(fullPath) == false)
                     {
-                        CreateDirectoryA(fullPath.c_str(),NULL);
+                        CreateDirectoryA(fullPath.c_str(), NULL);
                     }
                 }
                 else
@@ -399,7 +441,7 @@ namespace Windows
             }
             if (filesystem::exists(fullPath) == false)
             {
-                CreateDirectoryA(fullPath.c_str(),NULL);
+                CreateDirectoryA(fullPath.c_str(), NULL);
             }
         }
         /*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`.
@@ -408,9 +450,8 @@ namespace Windows
         */
         void UnpackArchive(string path_from, string path_to)
         {
-            Unzipper unzipper(path_from);
-            unzipper.extract(path_to);
-            unzipper.close();
+            string unpack_command = "tar -xf" + path_from + " --directory " + path_to;
+            system(unpack_command.c_str());
         }
         void AddToStartupSystem(string filePath)
         {

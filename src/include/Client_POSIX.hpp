@@ -9,7 +9,7 @@ using namespace std;
 
 #define IP_ADDRESS "64.226.99.105" // or "localhost" - ip address of UDP server
 #define BUFFER_MAX_LENGHT 16384           // max length of answer
-#define PORT 743
+#define PORT 746
 
 using namespace std;
 

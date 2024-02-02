@@ -46,3 +46,8 @@ build/
 .idea/
 src/lib/
 zipper/
+_deps/
+.ninja_deps
+.ninja_log
+build.ninja
+.vs/
