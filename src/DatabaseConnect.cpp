@@ -16,7 +16,7 @@
        ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝╚══════╝   ╚═╝
 
     ============================================================================
-    Copyright (c) 2023 DeepForge Technology
+    Copyright (c) 2024 DeepForge Technology
     ============================================================================
     Organization: DeepForge Technology
     ============================================================================
@@ -26,12 +26,13 @@
     ============================================================================
 */
 // Importing a Header File
-#include "DatabaseConnect.hpp"
+#include <Database/DatabaseConnect.hpp>
 
-using namespace std;
-using namespace DB;
+// using namespace std;
+// using namespace DB;
 
-int Database::CreateTable(string NameTable, map<string,string> Columns)
+int DB::Database::CreateTable(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
+                        std::map<std::string, std::string> Columns)
 {
     /* The above code is creating a SQL command to create a table in a database if it does not already
     exist. It is using the variables "NameTable" and "Columns" to dynamically generate the table
@@ -51,16 +52,17 @@ int Database::CreateTable(string NameTable, map<string,string> Columns)
     SQL_COMMAND += ")";
     int RESULT_SQL = sqlite3_exec(db, SQL_COMMAND.c_str(), callback, NULL, NULL);
     if (RESULT_SQL != SQLITE_OK)
-        throw runtime_error("Error in CREATE TABLE command");
+        throw std::runtime_error("Error in CREATE TABLE command");
     return 0;
 }
-int Database::InsertValuesToTable(string NameTable,map<string,string> Fields)
+int DB::Database::InsertValuesToTable(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
+                                std::map<std::string, std::string> Fields)
 {
     /* The bellow code is constructing an SQL INSERT command. It takes a table name (stored in the
     variable NameTable) and a map of fields (stored in the variable Fields) as input. */
     SQL_COMMAND = "INSERT INTO 'main'.'" + NameTable + "' ";
-    string Columns = "(";
-    string Values = "(";
+    std::string Columns = "(";
+    std::string Values = "(";
     for (int i = 1; const auto &element:Fields)
     {
         Columns = Columns + "'" +  element.first + "'";
@@ -77,10 +79,11 @@ int Database::InsertValuesToTable(string NameTable,map<string,string> Fields)
     SQL_COMMAND = SQL_COMMAND + Columns + " VALUES " + Values + ";";
     int RESULT_SQL = sqlite3_exec(db, SQL_COMMAND.c_str(), callback, NULL, NULL);
     if (RESULT_SQL != SQLITE_OK)
-        throw runtime_error("Error in INSERT command");
+        throw std::runtime_error("Error in INSERT command");
     return 0;
 }
-int Database::ExistNameAppInTable(string NameTable, string NameApp)
+int DB::Database::ExistNameAppInTable(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
+                                std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameApp)
 {
     // Create SQL statement
     SQL_COMMAND = "SELECT Name FROM " + NameTable + " WHERE Name='" + NameApp + "'";
@@ -95,9 +98,11 @@ int Database::ExistNameAppInTable(string NameTable, string NameApp)
     sqlite3_finalize(statement);
     return 0;
 }
-string Database::GetValueFromDB(string NameTable, string NameApp, string NameColumn)
+std::string DB::Database::GetValueFromDB(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable,
+                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameApp, 
+                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn)
 {
-    string AnswerDB;
+    std::string AnswerDB;
     // Create SQL statement
     SQL_COMMAND = "SELECT " + NameColumn + " FROM " + NameTable + " WHERE Name='" + NameApp + "'";
     // Execute SQL statement
@@ -105,13 +110,13 @@ string Database::GetValueFromDB(string NameTable, string NameApp, string NameCol
     // if result of execute sql statement != SQLITE_OK, that send error
     if (RESULT_SQL != SQLITE_OK)
     {
-        throw runtime_error("Not Found");
+        throw std::runtime_error("Not Found");
     }
     // Loop through the results, a row at a time.
     while ((RESULT_SQL = sqlite3_step(statement)) == SQLITE_ROW)
     {
         // printf("%s\n", sqlite3_column_text(statement, 0));
-        AnswerDB = (string(reinterpret_cast<const char *>(
+        AnswerDB = (std::string(reinterpret_cast<const char *>(
             sqlite3_column_text(statement, 0))));
     }
     // Free the statement when done.
@@ -119,9 +124,12 @@ string Database::GetValueFromDB(string NameTable, string NameApp, string NameCol
     return AnswerDB;
 }
 
-string Database::GetVersionFromDB(string NameTable,string Channel,string NameColumn,string Architecture) 
+std::string DB::Database::GetVersionFromDB(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
+                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> Channel, 
+                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn, 
+                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> Architecture)
 {
-    string AnswerDB;
+    std::string AnswerDB;
     // Create SQL statement
     SQL_COMMAND = "SELECT " + NameColumn + " FROM " + NameTable + " WHERE Channel='" + Channel + "' AND Architecture='" + Architecture + "'";
     // Execute SQL statement
@@ -129,13 +137,13 @@ string Database::GetVersionFromDB(string NameTable,string Channel,string NameCol
     // if result of execute sql statement != SQLITE_OK, that send error
     if (RESULT_SQL != SQLITE_OK)
     {
-        throw runtime_error("Not Found");
+        throw std::runtime_error("Not Found");
     }
     // Loop through the results, a row at a time.
     while ((RESULT_SQL = sqlite3_step(statement)) == SQLITE_ROW)
     {
         // printf("%s\n", sqlite3_column_text(statement, 0));
-        AnswerDB = (string(reinterpret_cast<const char*>(
+        AnswerDB = (std::string(reinterpret_cast<const char*>(
             sqlite3_column_text(statement, 0))));
     }
     // Free the statement when done.
@@ -143,9 +151,13 @@ string Database::GetVersionFromDB(string NameTable,string Channel,string NameCol
     return AnswerDB;
 }
 
-string Database::GetApplicationURL(string NameTable,string Channel,string NameColumn,string Architecture,string Version)
+std::string DB::Database::GetApplicationURL(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
+                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> Channel, 
+                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn, 
+                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> Architecture, 
+                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> Version)
 {
-    string AnswerDB;
+    std::string AnswerDB;
     // Create SQL statement
     SQL_COMMAND = "SELECT " + NameColumn + " FROM " + NameTable + " WHERE Channel='" + Channel + "' AND Architecture='" + Architecture + "' AND Version='" + Version + "'";
     // Execute SQL statement
@@ -153,13 +165,13 @@ string Database::GetApplicationURL(string NameTable,string Channel,string NameCo
     // if result of execute sql statement != SQLITE_OK, that send error
     if (RESULT_SQL != SQLITE_OK)
     {
-        throw runtime_error("Not Found");
+        throw std::runtime_error("Not Found");
     }
     // Loop through the results, a row at a time.
     while ((RESULT_SQL = sqlite3_step(statement)) == SQLITE_ROW)
     {
         // printf("%s\n", sqlite3_column_text(statement, 0));
-        AnswerDB = (string(reinterpret_cast<const char*>(
+        AnswerDB = (std::string(reinterpret_cast<const char*>(
             sqlite3_column_text(statement, 0))));
     }
     // Free the statement when done.
@@ -167,9 +179,10 @@ string Database::GetApplicationURL(string NameTable,string Channel,string NameCo
     return AnswerDB;
 }
 
-map<string, string> Database::GetAllValuesFromDB(string NameTable, string NameColumn)
+std::map<std::string, std::string> DB::Database::GetAllValuesFromDB(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
+                                                            std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn)
 {
-    map<string, string> WriteMap;
+    std::map<std::string, std::string> WriteMap;
 
     // Create SQL statement
     SQL_COMMAND = "SELECT Name," + NameColumn + " FROM " + NameTable;
@@ -178,16 +191,16 @@ map<string, string> Database::GetAllValuesFromDB(string NameTable, string NameCo
     // if result of execute sql statement != SQLITE_OK, that send error
     if (RESULT_SQL != SQLITE_OK)
     {
-        throw runtime_error("Not Found");
+        throw std::runtime_error("Not Found");
     }
     // Loop through the results, a row at a time.
     while ((RESULT_SQL = sqlite3_step(statement)) == SQLITE_ROW)
     {
-        string Key = string(reinterpret_cast<const char *>(sqlite3_column_text(statement, 0)));
-        string Value = string(reinterpret_cast<const char *>(sqlite3_column_text(statement, 1)));
+        std::string Key = std::string(reinterpret_cast<const char *>(sqlite3_column_text(statement, 0)));
+        std::string Value = std::string(reinterpret_cast<const char *>(sqlite3_column_text(statement, 1)));
         if (Value != "Not Found")
         {
-            WriteMap.insert(pair<string, string>(Key, Value));
+            WriteMap.insert(std::pair<std::string, std::string>(Key, Value));
         }
     }
     // Free the statement when done.
@@ -196,9 +209,11 @@ map<string, string> Database::GetAllValuesFromDB(string NameTable, string NameCo
     return WriteMap;
 }
 
-map<string,string> Database::GetAllVersionsFromDB(string NameTable,string NameColumn,string Architecture)
+std::map<std::string, std::string> DB::Database::GetAllVersionsFromDB(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
+                                                                std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn, 
+                                                                std::basic_string<char, std::char_traits<char>, std::allocator<char>> Architecture)
 {
-    map<string, string> WriteMap;
+    std::map<std::string, std::string> WriteMap;
     // Create SQL statement
     SQL_COMMAND = "SELECT Channel,Version FROM " + NameTable + " WHERE Architecture='" + Architecture + "'";
     // Execute SQL statement
@@ -206,16 +221,16 @@ map<string,string> Database::GetAllVersionsFromDB(string NameTable,string NameCo
     // if result of execute sql statement != SQLITE_OK, that send error
     if (RESULT_SQL != SQLITE_OK)
     {
-        throw runtime_error("Not Found");
+        throw std::runtime_error("Not Found");
     }
     // Loop through the results, a row at a time.
     while ((RESULT_SQL = sqlite3_step(statement)) == SQLITE_ROW)
     {
-        string Key = string(reinterpret_cast<const char *>(sqlite3_column_text(statement, 0)));
-        string Value = string(reinterpret_cast<const char *>(sqlite3_column_text(statement, 1)));
+        std::string Key = std::string(reinterpret_cast<const char *>(sqlite3_column_text(statement, 0)));
+        std::string Value = std::string(reinterpret_cast<const char *>(sqlite3_column_text(statement, 1)));
         if (Value != "Empty")
         {
-            WriteMap.insert(pair<string, string>(Key, Value));
+            WriteMap.insert(std::pair<std::string, std::string>(Key, Value));
         }
     }
     // Free the statement when done.
@@ -224,9 +239,12 @@ map<string,string> Database::GetAllVersionsFromDB(string NameTable,string NameCo
     return WriteMap;
 }
 
-string Database::GetLatestVersion(string NameTable,string Channel,string NameColumn,string Architecture)
+std::string DB::Database::GetLatestVersion(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
+                                            std::basic_string<char, std::char_traits<char>, std::allocator<char>> Channel, 
+                                            std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn, 
+                                            std::basic_string<char, std::char_traits<char>, std::allocator<char>> Architecture)
 {
-    string AnswerDB;
+    std::string AnswerDB;
     // Create SQL statement
     SQL_COMMAND = "SELECT max(" + NameColumn + ") FROM " + NameTable + " WHERE Channel='" + Channel + "' AND Architecture='" + Architecture + "'";
     // Execute SQL statement
@@ -234,12 +252,12 @@ string Database::GetLatestVersion(string NameTable,string Channel,string NameCol
     // if result of execute sql statement != SQLITE_OK, that send error
     if (RESULT_SQL != SQLITE_OK)
     {
-        throw runtime_error("Not Found");
+        throw std::runtime_error("Not Found");
     }
     // Loop through the results, a row at a time.
     while ((RESULT_SQL = sqlite3_step(statement)) == SQLITE_ROW)
     {
-        AnswerDB = (string(reinterpret_cast<const char*>(
+        AnswerDB = (std::string(reinterpret_cast<const char*>(
             sqlite3_column_text(statement, 0))));
     }
     // Free the statement when done.
@@ -248,9 +266,10 @@ string Database::GetLatestVersion(string NameTable,string Channel,string NameCol
     return AnswerDB;
 }
 
-map<string, string> Database::GetDevPackFromDB(string NameTable, string NameColumn)
+std::map<std::string, std::string> DB::Database::GetDevPackFromDB(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
+                                                            std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn)
 {
-    map<string, string> WriteMap;
+    std::map<std::string, std::string> WriteMap;
     // Create SQL statement
     SQL_COMMAND = "SELECT Number," + NameColumn + " FROM " + NameTable;
     // SQL_COMMAND = "SELECT Number,Language FROM DevelopmentPacks";
@@ -259,17 +278,17 @@ map<string, string> Database::GetDevPackFromDB(string NameTable, string NameColu
     // if result of execute sql statement != SQLITE_OK, that send error
     if (RESULT_SQL != SQLITE_OK)
     {
-        throw runtime_error("Not Found");
+        throw std::runtime_error("Not Found");
     }
     int i = 0;
     // Loop through the results, a row at a time.
     while ((RESULT_SQL = sqlite3_step(statement)) == SQLITE_ROW)
     {
-        string Key = string(reinterpret_cast<const char *>(sqlite3_column_text(statement, 0)));
-        string Value = string(reinterpret_cast<const char *>(sqlite3_column_text(statement, 1)));
+        std::string Key = std::string(reinterpret_cast<const char *>(sqlite3_column_text(statement, 0)));
+        std::string Value = std::string(reinterpret_cast<const char *>(sqlite3_column_text(statement, 1)));
         if (Value != "Not Found")
         {
-            WriteMap.insert(pair<string, string>(Key, Value));
+            WriteMap.insert(std::pair<std::string, std::string>(Key, Value));
         }
         i++;
     }
@@ -279,7 +298,8 @@ map<string, string> Database::GetDevPackFromDB(string NameTable, string NameColu
     return WriteMap;
 }
 
-int Database::GetArraySize(string NameTable, string NameColumn)
+int DB::Database::GetArraySize(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
+                                std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn)
 {
     // Create SQL statement
     SQL_COMMAND = "SELECT count(" + NameColumn + ") " + " FROM " + NameTable;
@@ -289,7 +309,7 @@ int Database::GetArraySize(string NameTable, string NameColumn)
     // if result of execute sql statement != SQLITE_OK, that send error
     if (RESULT_SQL != SQLITE_OK)
     {
-        throw runtime_error("Not Found");
+        throw std::runtime_error("Not Found");
     }
     // Loop through the results, a row at a time.
     while ((RESULT_SQL = sqlite3_step(statement)) == SQLITE_ROW)
@@ -302,7 +322,11 @@ int Database::GetArraySize(string NameTable, string NameColumn)
     return ArraySize;
 }
 
-int Database::InsertApplicationsToTable(string NameTable, string NameApp, string WindowsCommand, string macOSCommand, string LinuxCommand)
+int DB::Database::InsertApplicationsToTable(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
+                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameApp, 
+                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> WindowsCommand, 
+                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> macOSCommand, 
+                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> LinuxCommand)
 {
     /* The bellow code is constructing an SQL INSERT command to insert data into a table. The command is
     dynamically generated based on the values of variables `NameTable`, `NameApp`, `WindowsCommand`,
@@ -311,11 +335,12 @@ int Database::InsertApplicationsToTable(string NameTable, string NameApp, string
     SQL_COMMAND = "INSERT INTO 'main'.'" + NameTable + "' ('Name', 'Windows', 'macOS', 'Linux') VALUES ('" + NameApp + "', '" + WindowsCommand + "', '" + macOSCommand + "', '" + LinuxCommand + "');";
     int RESULT_SQL = sqlite3_exec(db, SQL_COMMAND.c_str(), callback, NULL, NULL);
     if (RESULT_SQL != SQLITE_OK)
-        throw runtime_error("Error in INSERT command");
+        throw std::runtime_error("Error in INSERT command");
     return 0;
 }
 
-int Database::RemoveApplicationFromTable(string NameTable, string NameApp)
+int DB::Database::RemoveApplicationFromTable(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
+                                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameApp)
 {
     /* The bellow code is constructing a SQL command to delete a row from a table in a database. The
     table name is stored in the variable "NameTable" and the row to be deleted is specified by the
@@ -324,16 +349,16 @@ int Database::RemoveApplicationFromTable(string NameTable, string NameApp)
     SQL_COMMAND = "DELETE FROM " + NameTable + " WHERE Name='" + NameApp + "'";
     int RESULT_SQL = sqlite3_exec(db, SQL_COMMAND.c_str(), callback, NULL, NULL);
     if (RESULT_SQL != SQLITE_OK)
-        throw runtime_error("Error in DELETE command");
+        throw std::runtime_error("Error in DELETE command");
     return 0;
 }
 
-int Database::AddApplications(string Tables[])
+int DB::Database::AddApplications(std::string Tables[])
 {
-    string NameApp;
-    string Windows_Command;
-    string macOS_Command;
-    string Linux_Command;
+    std::string NameApp;
+    std::string Windows_Command;
+    std::string macOS_Command;
+    std::string Linux_Command;
     int RESULT_COMMAND;
 
     /* The bellow code is checking if the size of the "Tables" vector is greater than or equal to 1. If
@@ -344,36 +369,36 @@ int Database::AddApplications(string Tables[])
     the application was added to the corresponding table. */
     if (Tables->size() >= 1)
     {
-        cout << "Name:";
-        getline(cin, NameApp);
-        cout << "Windows:";
-        getline(cin, Windows_Command);
-        cout << "macOS:";
-        getline(cin, macOS_Command);
-        cout << "Linux:";
-        getline(cin, Linux_Command);
+        std::cout << "Name:";
+        std::getline(std::cin, NameApp);
+        std::cout << "Windows:";
+        std::getline(std::cin, Windows_Command);
+        std::cout << "macOS:";
+        std::getline(std::cin, macOS_Command);
+        std::cout << "Linux:";
+        std::getline(std::cin, Linux_Command);
         for (int i = 0; i < Tables->size(); i++)
         {
             RESULT_COMMAND = InsertApplicationsToTable(Tables[i], NameApp, Windows_Command, macOS_Command, Linux_Command);
             if (RESULT_COMMAND == 0)
             {
-                cout << NameApp << " successfully added to " << Tables[i] << endl;
+                std::cout << NameApp << " successfully added to " << Tables[i] << std::endl;
             }
         }
     }
     else
     {
-        throw logic_error("Array is empty");
+        throw std::logic_error("Array is empty");
     }
     return 0;
 }
 
-int Database::RemoveApplications(string Tables[])
+int DB::Database::RemoveApplications(std::string Tables[])
 {
-    string NameApp;
-    string Windows_Command;
-    string macOS_Command;
-    string Linux_Command;
+    std::string NameApp;
+    std::string Windows_Command;
+    std::string macOS_Command;
+    std::string Linux_Command;
     int RESULT_COMMAND;
 
     /* The bellow code is checking if the size of the "Tables" object is greater than or equal to 1. If
@@ -381,26 +406,31 @@ int Database::RemoveApplications(string Tables[])
     macOS, and Linux. */
     if (Tables->size() >= 1)
     {
-        cout << "Name:";
-        getline(cin, NameApp);
-        cout << "Windows:";
-        getline(cin, Windows_Command);
-        cout << "macOS:";
-        getline(cin, macOS_Command);
-        cout << "Linux:";
-        getline(cin, Linux_Command);
+        std::cout << "Name:";
+        std::getline(std::cin, NameApp);
+        std::cout << "Windows:";
+        std::getline(std::cin, Windows_Command);
+        std::cout << "macOS:";
+        std::getline(std::cin, macOS_Command);
+        std::cout << "Linux:";
+        std::getline(std::cin, Linux_Command);
 
         for (int i = 0; i < Tables->size(); i++)
         {
             RESULT_COMMAND = RemoveApplicationFromTable(Tables[i], NameApp);
             if (RESULT_COMMAND == 0)
-                cout << NameApp << " successfully removed to " << Tables[i] << endl;
+                std::cout << NameApp << " successfully removed to " << Tables[i] << std::endl;
         }
     }
     return 0;
 }
 
-int Database::InsertLogInformationToTable(string NameTable,string Architecture,string OS_NAME,string Channel,string FunctionName,string LogText)
+int DB::Database::InsertLogInformationToTable(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
+                                            std::basic_string<char, std::char_traits<char>, std::allocator<char>> Architecture, 
+                                            std::basic_string<char, std::char_traits<char>, std::allocator<char>> OS_NAME, 
+                                            std::basic_string<char, std::char_traits<char>, std::allocator<char>> Channel, 
+                                            std::basic_string<char, std::char_traits<char>, std::allocator<char>> FunctionName, 
+                                            std::basic_string<char, std::char_traits<char>, std::allocator<char>> LogText)
 {
     /* The bellow code is constructing an SQL INSERT statement. It is creating a command to insert data
     into a table named 'NameTable' in the 'main' database. The data being inserted includes values
@@ -409,6 +439,6 @@ int Database::InsertLogInformationToTable(string NameTable,string Architecture,s
     SQL_COMMAND = "INSERT INTO 'main'.'" + NameTable + "' ('Architecture', 'Channel', 'LogText', 'OS_NAME','FunctionName') VALUES ('" + Architecture + "', '" + Channel + "', '" + LogText + "', '" + OS_NAME + "', '" + FunctionName + "');";
     int RESULT_SQL = sqlite3_exec(db, SQL_COMMAND.c_str(), callback, NULL, NULL);
     if (RESULT_SQL != SQLITE_OK)
-        throw runtime_error("Error in INSERT command");
+        throw std::runtime_error("Error in INSERT command");
     return 0;
 }

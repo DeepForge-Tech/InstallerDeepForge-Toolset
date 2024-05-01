@@ -90,7 +90,11 @@
 			"typeindex": "cpp",
 			"xhash": "cpp",
 			"xtree": "cpp",
-			"future": "cpp"
+			"future": "cpp",
+			"regex": "cpp",
+			"unordered_set": "cpp",
+			"numeric": "cpp",
+			"random": "cpp"
 		}
 	}
 }

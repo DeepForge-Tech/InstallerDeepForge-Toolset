@@ -1,10 +1,10 @@
 #!/bin/bash
 echo "==> Installing libraries"
 # Installing libraries
-YUM_PACKAGE_NAME="wget make cmake gcc-c++ curl libcurl sqlite-devel openssl-devel"
-DEB_PACKAGE_NAME="wget openssl libssl-dev g++ gcc build-essential cmake make curl libcurl4-openssl-dev libjsoncpp-dev libfmt-dev libsqlite3-dev libgtest-dev googletest google-mock libgmock-dev libtbb-dev libzip-dev zlib1g-dev"
-PACMAN_PACKAGE_NAME="wget jsoncpp gcc base-devel cmake gtest lib32-curl libcurl-compat libcurl-gnutls curl fmt lib32-sqlite sqlite sqlite-tcl zlib openssl lib32-openssl openssl-1.1 libzip"
-ZYPPER_PACKAGE_NAME="wget libcurl-devel gcc-c++ cmake gtest gmock zlib-devel fmt-devel sqlite3-devel jsoncpp-devel"
+YUM_PACKAGE_NAME="xterm wget make cmake gcc-c++ curl libcurl sqlite-devel openssl-devel"
+DEB_PACKAGE_NAME="xterm wget openssl libssl-dev g++ gcc build-essential cmake make curl libcurl4-openssl-dev libjsoncpp-dev libfmt-dev libsqlite3-dev libgtest-dev googletest google-mock libgmock-dev libtbb-dev libzip-dev zlib1g-dev"
+PACMAN_PACKAGE_NAME="xterm wget jsoncpp gcc base-devel cmake gtest lib32-curl libcurl-compat libcurl-gnutls curl fmt lib32-sqlite sqlite sqlite-tcl zlib openssl lib32-openssl openssl-1.1 libzip"
+ZYPPER_PACKAGE_NAME="xterm wget libcurl-devel gcc-c++ cmake gtest gmock zlib-devel fmt-devel sqlite3-devel jsoncpp-devel"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
    DISTRO=$(grep -E '^NAME=' /etc/os-release | cut -d '"' -f2)
    if [[ "$DISTRO" == "CentOS Linux"* ]]; then
@@ -13,7 +13,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       echo "================================================"
       sudo yum update -y
       sudo yum install -y $YUM_PACKAGE_NAME
-   elif [[ "$DISTRO" == "Red Hat Enterprise Linux Server"* ]]; then
+   elif [["$DISTRO"=="Red Hat Enterprise Linux Server"*]];then
       echo "================================================"
       echo "Installing libraries"
       echo "================================================"
@@ -84,5 +84,6 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       exit 1;
    fi
 fi
+export PATH=$PATH:/snap/bin
 echo "==> Libraries successfully installed"
 exit 0
