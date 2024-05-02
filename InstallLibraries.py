@@ -36,8 +36,6 @@ class Linux:
             "Arch Linux": "pacman",
             "Kali GNU/Linux": "apt"
         }
-        print(self.architecture)
-        print(self.distribution)
 
     def start():
         command = self.INSTALLERS[self.distribution] + " install" + "sudo"
@@ -60,3 +58,4 @@ platforms = {"Linux": Linux, "Windows": Windows, "Darwin": macOS}
 
 if __name__ == "__main__":
     checker = platforms[platform.system()]()
+    checker.start()
