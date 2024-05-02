@@ -37,7 +37,7 @@ class Linux:
             "Kali GNU/Linux": "apt"
         }
 
-    def start():
+    def start(self):
         command = self.INSTALLERS[self.distribution] + " install" + "sudo"
         os.system(command)
         for package in self.PACKAGES[self.distribution].split():
