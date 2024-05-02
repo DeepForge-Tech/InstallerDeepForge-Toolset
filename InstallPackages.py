@@ -44,7 +44,6 @@ class Linux:
         os.system(command)
         success_installed = 0
         failed_packages = []
-        print(self.PACKAGES[self.distribution].split())
         packages = self.PACKAGES[self.distribution].split()
         for package in packages:
             command = "sudo -s " + self.INSTALLERS[self.distribution] + " install " + package + " -y"
@@ -55,11 +54,12 @@ class Linux:
                 failed_packages.append(package)
         print(delimiter)
         print(f"Successfully installed: {success_installed} package(s)\nFailed to install: {len(packages) - success_installed} package(s)")    
-        print("Reinstall the packages:")
-        i = 1
-        for package in failed_packages:
-            print(f"{i}.{package}")
-            i += 1
+        if len(failed_packages) > 0:
+            print("Reinstall the packages:")
+            i = 1
+            for package in failed_packages:
+                print(f"{i}.{package}")
+                i += 1
         return 502
                                 
 class Windows:
