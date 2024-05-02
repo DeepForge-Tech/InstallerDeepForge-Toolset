@@ -1,6 +1,8 @@
 import platform
 import os
 
+delimiter = "========================================================"
+
 class Linux:
     def __init__(self):
         self.YUM_PACKAGES = "xterm wget make cmake gcc-c++ curl libcurl sqlite-devel openssl-devel"
@@ -37,30 +39,63 @@ class Linux:
             "Kali GNU/Linux": "apt"
         }
 
-    def start(self):
-        command = self.INSTALLERS[self.distribution] + " install " + "sudo"
-        os.system(command)
-        for package in self.PACKAGES[self.distribution].split():
-            command = "sudo -s " + self.INSTALLERS[self.distribution] + " install " + package
-            os.system(command)
+    def start(self) -> int:
+        command = self.INSTALLERS[self.distribution] + " install " + "sudo -y"
+        result = os.system(command)
+        if result == 0:
+            success_installed = 0
+            failed_packages = []
+            print(self.PACKAGES[self.distribution].split())
+            packages = self.PACKAGES[self.distribution].split()
+            for package in packages:
+                command = "sudo -s " + self.INSTALLERS[self.distribution] + " install " + package + " -y"
+                install_result = os.system(command)
+                if install_result == 0:
+                    success_installed += 1
+                else:
+                    failed_packages.append(package)
+            print(delimiter)
+            print(f"Successfully installed: {success_installed} package(s)\nFailed to install: {len(packages) - success_installed} package(s)")    
+            print("Reinstall the packages:")
+            i = 1
+            for package in failed_packages:
+                print(f"{i}.{package}")
+                i += 1
+        return 502
                                 
-        
-        
-
 class Windows:
     def __init__(self):
-        pass
+        self.architecture = platform.architecture()[0]
 
-    def start(self):
+    def start(self) -> int:
         command = "powershell -noprofile -executionpolicy bypass -File .\InstallWinGet.ps1"
-        os.system(command)
+        result = os.system(command)
+        if result != 0:
+            print(delimiter)
+            print("Failed to install WinGet")
+            return 502
+        return result
 
 class macOS:
     def __init__(self):
-        pass
+        self.architecture = platform.architecture()[0]
+
+    def start(self) -> int:
+        command = "/bin/bash -c '$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)'"
+        result = os.system(command)
+        if result != 0:
+            print(delimiter)
+            print("Failed to install Homebrew")
+            return 502
+        command = "brew install jsoncpp sqlite3 sqlite-utils fmt clang-format curl googletest gcc zlib cmake libzip openssl wget"
+        result = os.system(command)
+        return result
 
 platforms = {"Linux": Linux, "Windows": Windows, "Darwin": macOS}
 
 if __name__ == "__main__":
     checker = platforms[platform.system()]()
-    checker.start()
+    result = checker.start()
+    if result != 502:
+        print(delimiter)
+        print("All packages installed successfully")
