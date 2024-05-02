@@ -38,10 +38,10 @@ class Linux:
         }
 
     def start(self):
-        command = self.INSTALLERS[self.distribution] + " install" + "sudo"
+        command = self.INSTALLERS[self.distribution] + " install " + "sudo"
         os.system(command)
         for package in self.PACKAGES[self.distribution].split():
-            os.system("sudo -s " + self.INSTALLERS[self.distribution] + " install" + package)
+            os.system("sudo -s " + self.INSTALLERS[self.distribution] + " install " + package)
                                 
         
         
