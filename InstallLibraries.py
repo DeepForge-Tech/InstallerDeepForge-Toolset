@@ -41,7 +41,8 @@ class Linux:
         command = self.INSTALLERS[self.distribution] + " install " + "sudo"
         os.system(command)
         for package in self.PACKAGES[self.distribution].split():
-            os.system("sudo -s " + self.INSTALLERS[self.distribution] + " install " + package)
+            command = "sudo -s " + self.INSTALLERS[self.distribution] + " install " + package
+            os.system(command)
                                 
         
         
@@ -49,6 +50,10 @@ class Linux:
 class Windows:
     def __init__(self):
         pass
+
+    def start(self):
+        command = "powershell -noprofile -executionpolicy bypass -File .\InstallWinGet.ps1"
+        os.system(command)
 
 class macOS:
     def __init__(self):
