@@ -31,47 +31,49 @@
     It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`.
     After extracting the contents, the function closes the `Unzipper` object.
 */
-void macOS::Installer::UnpackArchive(const std::string path_from, const std::string path_to)
+void macOS::Installer::UnpackArchive(std::string path_from, std::string path_to)
 {
     try
     {
         MakeDirectory(path_to);
 
-        mz_zip_archive zip_archive = {};
-        if (mz_zip_reader_init_file(&zip_archive, path_from.c_str(), 0)!=MZ_TRUE)
-        {
-            throw std::runtime_error("Failed to initialize zip archive");
-        }
+        mz_zip_archive zip_archive;
+        memset(&zip_archive, 0, sizeof(zip_archive));
+
+        mz_zip_reader_init_file(&zip_archive, path_from.c_str(), 0);
 
         for (int i = 0; i < mz_zip_reader_get_num_files(&zip_archive); i++)
         {
             mz_zip_archive_file_stat file_stat;
-            if (mz_zip_reader_file_stat(&zip_archive, i, &file_stat)!= MZ_TRUE)
-            {
-                throw std::runtime_error("Failed to get file stat");
-            }
+            mz_zip_reader_file_stat(&zip_archive, i, &file_stat);
 
             std::string output_path = path_to + "/" + file_stat.m_filename;
             std::filesystem::path path(output_path);
             std::filesystem::create_directories(path.parent_path());
-
-            std::ofstream out(output_path, std::ios::binary);
-            if (!out)
+            if (endsWith(output_path, "/"))
             {
-                throw std::runtime_error("Failed to create file: " + output_path);
+                MakeDirectory(output_path);
             }
-
-            size_t fileSize = file_stat.m_uncomp_size;
-            void *fileData = mz_zip_reader_extract_to_heap(&zip_archive, file_stat.m_file_index, &fileSize, 0);
-            if (!fileData)
+            else
             {
-                throw std::runtime_error("Failed to extract file: " + std::string(file_stat.m_filename));
+                std::ofstream out(output_path, std::ios::binary);
+                if (!out)
+                {
+                    std::cerr << "Failed to create file: " << output_path << std::endl;
+                    continue;
+                }
+                size_t fileSize = file_stat.m_uncomp_size;
+                void *fileData = mz_zip_reader_extract_to_heap(&zip_archive, file_stat.m_file_index, &fileSize, 0);
+                if (!fileData)
+                {
+                    throw std::runtime_error("Failed to extract file: " + std::string(file_stat.m_filename));
+                }
+
+                out.write(static_cast<const char *>(fileData), fileSize);
+                mz_free(fileData);
+
+                out.close();
             }
-
-            out.write(static_cast<const char *>(fileData), fileSize);
-            mz_free(fileData);
-
-            out.close();
         }
 
         mz_zip_reader_end(&zip_archive);

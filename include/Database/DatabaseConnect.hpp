@@ -62,66 +62,37 @@ namespace DB
         {
             sqlite3_close(db);
         }
-        int CreateTable(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
-                        std::map<std::string, std::string> Columns);
+        int CreateTable(const std::string &NameTable, std::map<std::string, std::string> Columns);
 
-        int InsertValuesToTable(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
-                                std::map<std::string, std::string> Fields);
+        int InsertValuesToTable(const std::string &NameTable, std::map<std::string, std::string> Fields);
 
-        int ExistNameAppInTable(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
-                                std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameApp);
+        int ExistNameAppInTable(const std::string &NameTable,const std::string &NameApp);
 
-        std::string GetValueFromDB(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable,
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameApp, 
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn);
+        std::string GetValueFromDB(const std::string &NameTable,const std::string &NameApp,const std::string &NameColumn);
 
-        std::string GetVersionFromDB(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> Channel, 
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn, 
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> Architecture);
+        std::string GetVersionFromDB(const std::string &NameTable,const std::string &Channel,const std::string &NameColumn,const std::string &Architecture);
 
-        std::map<std::string, std::string> GetAllVersionsFromDB(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
-                                                                std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn, 
-                                                                std::basic_string<char, std::char_traits<char>, std::allocator<char>> Architecture);
+        std::map<std::string, std::string> GetAllVersionsFromDB(const std::string &NameTable,const std::string &Architecture);
 
-        std::string GetLatestVersion(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> Channel, 
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn, 
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> Architecture);
+        std::string GetLatestVersion(const std::string &NameTable,const std::string &Channel,const std::string &NameColumn,const std::string &Architecture);
 
-        std::string GetApplicationURL(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> Channel, 
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn, 
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> Architecture, 
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> Version);
+        std::string GetApplicationURL(const std::string &NameTable,const std::string &Channel,const std::string &NameColumn,const std::string &Architecture,const std::string &Version);
 
-        std::map<std::string, std::string> GetAllValuesFromDB(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
-                                                            std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn);
+        std::map<std::string, std::string> GetAllValuesFromDB(const std::string &NameTable,const std::string &NameColumn);
 
-        std::map<std::string, std::string> GetDevPackFromDB(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
-                                                            std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn);
+        std::map<std::string, std::string> GetDevPackFromDB(const std::string &NameTable,const std::string &NameColumn);
 
-        int InsertApplicationsToTable(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameApp, 
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> WindowsCommand, 
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> macOSCommand, 
-                                    std::basic_string<char, std::char_traits<char>, std::allocator<char>> LinuxCommand);
+        int InsertApplicationsToTable(const std::string &NameTable,const std::string &NameApp,const std::string &WindowsCommand,const std::string &macOSCommand,const std::string &LinuxCommand);
 
-        int RemoveApplicationFromTable(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
-                                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameApp);
+        int RemoveApplicationFromTable(const std::string &NameTable,const std::string &NameApp);
 
-        int AddApplications(std::string Tables[]);
+        int AddApplications(const std::string Tables[]);
 
-        int RemoveApplications(std::string Tables[]);
+        int RemoveApplications(const std::string Tables[]);
 
-        int InsertLogInformationToTable(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
-                                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> Architecture, 
-                                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> OS_NAME, 
-                                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> Channel, 
-                                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> FunctionName, 
-                                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> LogText);
+        int InsertLogInformationToTable(const std::string &NameTable, const std::string &Architecture,const std::string &OS_NAME,const std::string &Channel,const std::string &FunctionName,const std::string &LogText);
         // Method of make string to upper
-        std::string to_upper(std::basic_string<char, std::char_traits<char>, std::allocator<char>> sentence)
+        std::string to_upper(const std::string &sentence)
         {
             std::string new_sentence = "";
             for (int i = 0; i < sentence.length(); i++)
@@ -135,8 +106,7 @@ namespace DB
         }
 
     private:
-        int GetArraySize(std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameTable, 
-                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> NameColumn);
+        int GetArraySize(const std::string &NameTable,const std::string &NameColumn);
 
         static int callback(void *data, int argc, char **argv, char **azColName)
         {

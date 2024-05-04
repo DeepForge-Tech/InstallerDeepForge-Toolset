@@ -42,61 +42,59 @@ using namespace Windows;
 class Application : public Installer
 {
 public:
-    void SetLanguage();
-    void DownloadDependencies();
-    void InstallUpdateManager();
-    void InstallDeepForgeToolset(std::string channel);
-    void ChangeUpdating();
-    void CommandManager();
-    // JSON file reading function with interface localization
-    void ReadJSON(std::string language);
-    Application()
-    {
+        void SetLanguage();
+        void DownloadDependencies();
+        void InstallUpdateManager();
+        void InstallDeepForgeToolset(std::string channel);
+        void ChangeUpdating();
+        void CommandManager();
+        // JSON file reading function with interface localization
+        void ReadJSON(std::string language);
+        Application()
+        {
 #if defined(_WIN32)
-        // Set console code page to UTF-8 so console known how to interpret string data
-        SetConsoleOutputCP(CP_UTF8);
-        // Create temp folder
-        MakeDirectory(TempFolder);
-        MakeDirectory(LocaleDir);
+                // Set console code page to UTF-8 so console known how to interpret string data
+                SetConsoleOutputCP(CP_UTF8);
+                // Create temp folder
+                MakeDirectory(TempFolder);
+                MakeDirectory(LocaleDir);
 #elif defined(__APPLE__)
-        std::string Command;
-        Command = "sudo -s chmod 777 " + std::string(UserFolder) + "/Library/Containers/";
-        system(Command.c_str());
-        // Create temp folder
-        MakeDirectory(TempFolder);
-        MakeDirectory(LocaleDir);
-        Command = "sudo -s chmod 777 " + OrganizationFolder;
-        system(Command.c_str());
-        Command = "sudo -s chmod 777 " + OrganizationFolder + "/*";
-        system(Command.c_str());
-        Command = "sudo -s chmod 777 " + ApplicationDir + "/*";
-        system(Command.c_str());
+                std::string Command;
+                Command = "sudo -s chmod 777 " + std::string(UserFolder) + "/Library/Containers/";
+                system(Command.c_str());
+                // Create temp folder
+                MakeDirectory(TempFolder);
+                MakeDirectory(LocaleDir);
+                Command = "sudo -s chmod 777 " + OrganizationFolder;
+                system(Command.c_str());
+                Command = "sudo -s chmod 777 " + OrganizationFolder + "/*";
+                system(Command.c_str());
+                Command = "sudo -s chmod 777 " + ApplicationDir + "/*";
+                system(Command.c_str());
 #elif __linux__
-        std::string Command;
-        Command = "sudo -s chmod 777 /usr/bin/";
-        system(Command.c_str());
-        // Create temp folder
-        MakeDirectory(TempFolder);
-        MakeDirectory(LocaleDir);
-        Command = "sudo -s chmod 777 " + OrganizationFolder;
-        system(Command.c_str());
-        Command = "sudo -s chmod 777 " + OrganizationFolder + "/*";
-        system(Command.c_str());
-        Command = "sudo -s chmod 777 " + ApplicationDir + "/*";
-        system(Command.c_str());
-        // mkdir(OrganizationFolder.c_str(),0777);
-        // mkdir(ApplicationDir.c_str(),0777);
-        mkdir(TempFolder.c_str(), 0777);
-        mkdir(LocaleDir.c_str(), 0777);
+                std::string Command;
+                Command = "sudo -s chmod 777 /usr/bin/";
+                system(Command.c_str());
+                // Create temp folder
+                MakeDirectory(TempFolder);
+                MakeDirectory(LocaleDir);
+                Command = "sudo -s chmod 777 " + OrganizationFolder;
+                system(Command.c_str());
+                Command = "sudo -s chmod 777 " + OrganizationFolder + "/*";
+                system(Command.c_str());
+                Command = "sudo -s chmod 777 " + ApplicationDir + "/*";
+                system(Command.c_str());
+                // mkdir(OrganizationFolder.c_str(),0777);
+                // mkdir(ApplicationDir.c_str(),0777);
+                mkdir(TempFolder.c_str(), 0777);
+                mkdir(LocaleDir.c_str(), 0777);
 #endif
-        std::cout << "1" << std::endl;
-        DownloadDependencies();
-        std::cout << "2" << std::endl;
-        database.open(&DatabasePath);
-        std::future<void> UploadInformation_async = std::async(std::launch::async, UploadInformation);
-        UploadInformation_async.wait();
-        std::cout << InstallDelimiter << std::endl;
-    }
+                DownloadDependencies();
+                database.open(&DatabasePath);
+                // std::future<void> UploadInformation_async = std::async(std::launch::async, UploadInformation);
+                // UploadInformation_async.wait();
+                std::cout << InstallDelimiter << std::endl;
+        }
 
 private:
 };

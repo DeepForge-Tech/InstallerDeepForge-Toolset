@@ -95,7 +95,7 @@ void Application::ReadJSON(std::string language)
             }
         }
     }
-    catch (std::exception& error)
+    catch (std::exception &error)
     {
         // Error output
         std::string logText = "Function: ReadJSON." + std::string(error.what());
@@ -125,38 +125,42 @@ void Application::InstallUpdateManager()
 {
     try
     {
-        std::string version;
+        std::string latestVersion;
         std::string UpdateManagerUrl;
         std::string name;
         std::string filename;
         std::string ArchivePath;
         std::string Command;
         std::string file_path;
-        version = database.GetLatestVersion(UpdateManagerTable, "stable", "Version", Architecture);
-        UpdateManagerUrl = database.GetApplicationURL(UpdateManagerTable, "stable", "Url", Architecture, version);
-        std::cout << translate["Installing"].asString() << " UpdateManager..." << std::endl;
-        Download(UpdateManagerUrl, TempFolder, true);
-        name = (UpdateManagerUrl.substr(UpdateManagerUrl.find_last_of("/")));
-        ArchivePath = TempFolder + "/" + name.replace(name.find("/"), 1, "");
-        MakeDirectory(UpdateManagerFolder);
-        #if defined(__linux__) || defined(__APPLE__)
+        latestVersion = database.GetLatestVersion(UpdateManagerTable, "stable", "Version", Architecture);
+        if (latestVersion != "")
+        {
+            UpdateManagerUrl = database.GetApplicationURL(UpdateManagerTable, "stable", "Url", Architecture, latestVersion);
+            std::cout << translate["Installing"].asString() << " UpdateManager..." << std::endl;
+            Download(UpdateManagerUrl, TempFolder, true);
+            name = (UpdateManagerUrl.substr(UpdateManagerUrl.find_last_of("/")));
+            ArchivePath = TempFolder + "/" + name.replace(name.find("/"), 1, "");
+            MakeDirectory(UpdateManagerFolder);
+#if defined(__linux__) || defined(__APPLE__)
             Command = "sudo -s chmod 777 " + UpdateManagerFolder + "/*";
             system(Command.c_str());
-        #endif
-        std::filesystem::remove(ArchivePath);
-        file_path = UpdateManagerFolder + "/UpdateManager";
-        std::cout << "==> ✅ UpdateManager " << version << " " << translate["Installed"].asString() << std::endl;
-        std::cout << InstallDelimiter << std::endl;
-#if defined(_WIN32)
-        AddToStartupSystem(file_path);
-#else
-        AddToStartupSystem();
 #endif
+            std::filesystem::remove(ArchivePath);
+            file_path = UpdateManagerFolder + "/UpdateManager";
+            std::cout << "==> ✅ UpdateManager " << latestVersion << " " << translate["Installed"].asString() << std::endl;
+            std::cout << InstallDelimiter << std::endl;
+#if defined(_WIN32)
+            AddToStartupSystem(file_path);
+#else
+            AddToStartupSystem();
+#endif
+            WriteInformation(DEEPFORGE_TOOLSET_VERSION);
+        }
     }
-    catch (std::exception& error)
+    catch (std::exception &error)
     {
         std::string logText = "==> ❌ " + std::string(error.what());
-        logger.sendError(NameProgram,Architecture, __channel__, OS_NAME, "InstallUpdateManager()", error.what());
+        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "InstallUpdateManager()", error.what());
         std::cerr << logText << std::endl;
     }
 }
@@ -182,21 +186,21 @@ void Application::InstallDeepForgeToolset(std::string channel)
         std::string file_path;
         std::cout << InstallDelimiter << std::endl;
         std::cout << translate["Installing"].asString() << " DeepForge Toolset..." << std::endl;
-        ApplicationURL = database.GetApplicationURL(NameVersionTable, channel, "Url", Architecture, __version__);
+        ApplicationURL = database.GetApplicationURL(NameVersionTable, channel, "Url", Architecture, DEEPFORGE_TOOLSET_VERSION);
         Download(ApplicationURL, TempFolder, true);
         name = (ApplicationURL.substr(ApplicationURL.find_last_of("/")));
         ArchivePath = TempFolder + "/" + name.replace(name.find("/"), 1, "");
         MakeDirectory(ApplicationDir);
         UnpackArchive(ArchivePath, ApplicationDir);
-#if defined(__linux__)
-        InstallLibraries();
-#elif __APPLE__
-        InstallLibraries();
-#endif
+        // #if defined(__linux__)
+        //         InstallLibraries();
+        // #elif __APPLE__
+        //         InstallLibraries();
+        // #endif
         file_path = ApplicationDir + "/DeepForgeToolset";
-        CreateSymlink("DeepForgeToolset", file_path);
+        CreateSymlink("DeepForge-Toolset", file_path);
         std::filesystem::remove(ArchivePath);
-        std::cout << "==> ✅ DeepForge Toolset " << __version__ << " " << translate["Installed"].asString() << std::endl;
+        std::cout << "==> ✅ DeepForge Toolset " << DEEPFORGE_TOOLSET_VERSION << " " << translate["Installed"].asString() << std::endl;
 #if defined(_WIN32)
         AddToPATH();
 #endif
@@ -204,20 +208,18 @@ void Application::InstallDeepForgeToolset(std::string channel)
         if (Updating == true)
         {
             InstallUpdateManager();
-            WriteInformation(__version__);
         }
     }
-    catch (std::exception& error)
+    catch (std::exception &error)
     {
         std::string logText = "==> ❌ " + std::string(error.what());
-        logger.sendError(NameProgram,Architecture, __channel__, OS_NAME, "InstallDeepForgeToolset()", error.what());
+        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "InstallDeepForgeToolset()", error.what());
         std::cerr << logText << std::endl;
     }
 }
 
 void Application::ChangeUpdating()
 {
-    std::cout << InstallDelimiter << std::endl;
     std::cout << translate["ChangeUpdating"].asString();
     getline(std::cin, Answer);
     if (Answer.empty())
@@ -237,33 +239,35 @@ void Application::CommandManager()
 {
     try
     {
-        for (int i = 1;i < EnumerateChannels.size() + 1;i++)
-        {
-            std::cout << i << ". " << EnumerateChannels[i] << std::endl;
-        }
-        // std::cout << defaultChannel << ". " << AllChannels[defaultChannel] << std::endl;
-        std::cout << translate["ChangeStability"].asString() << defaultChannel << "):";
-        getline(std::cin, Answer);
-        /* This code block is responsible for handling user input to select a version of the DeepForge
-        Toolset to install. */
-        if (Answer.empty())
-        {
-            ChangeUpdating();
-            InstallDeepForgeToolset(EnumerateChannels[defaultChannel]);
-        }
-        else
-        {
-            int TempAnswer = stoi(Answer);
-            if (EnumerateChannels.find(TempAnswer) != EnumerateChannels.end())
-            {
-                ChangeUpdating();
-                InstallDeepForgeToolset(EnumerateChannels[TempAnswer]);
-            }
-            else
-            {
-                CommandManager();
-            }
-        }
+        // for (int i = 1;i < EnumerateChannels.size() + 1;i++)
+        // {
+        //     std::cout << i << ". " << EnumerateChannels[i] << std::endl;
+        // }
+        // // std::cout << defaultChannel << ". " << AllChannels[defaultChannel] << std::endl;
+        // std::cout << translate["ChangeStability"].asString() << defaultChannel << "):";
+        // getline(std::cin, Answer);
+        // /* This code block is responsible for handling user input to select a version of the DeepForge
+        // Toolset to install. */
+        // if (Answer.empty())
+        // {
+        //     ChangeUpdating();
+        //     InstallDeepForgeToolset(EnumerateChannels[defaultChannel]);
+        // }
+        // else
+        // {
+        //     int TempAnswer = stoi(Answer);
+        //     if (EnumerateChannels.find(TempAnswer) != EnumerateChannels.end())
+        //     {
+        //         ChangeUpdating();
+        //         InstallDeepForgeToolset(EnumerateChannels[TempAnswer]);
+        //     }
+        //     else
+        //     {
+        //         CommandManager();
+        //     }
+        // }
+        ChangeUpdating();
+        InstallDeepForgeToolset(DEEPFORGE_TOOLSET_CHANNEL);
         std::cout << translate["Reboot"].asString();
         getline(std::cin, Answer);
         if (Answer.empty() || CheckAnswer(Answer) == true)
@@ -271,7 +275,7 @@ void Application::CommandManager()
             RebootSystem();
         }
     }
-    catch (std::exception& error)
+    catch (std::exception &error)
     {
         CommandManager();
     }

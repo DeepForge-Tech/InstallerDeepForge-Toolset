@@ -75,6 +75,8 @@
 #include "shlobj.h"
 #endif
 
+#define DEEPFORGE_TOOLSET_VERSION "0.1"
+#define DEEPFORGE_TOOLSET_CHANNEL "stable"
 #define NameProgram "InstallerDeepForge-Toolset"
 #define __version__ "0.1"
 #define __channel__ "stable\\latest"
@@ -162,11 +164,10 @@ bool Install;
 
 #if defined(__APPLE__)
 char *UserFolder = getenv("HOME");
-std::string Architecture;
-#if defined(_M_AMD64)
-Architecture = "amd64";
+#if defined(_M_AMD64) || defined(__x86_64__)
+std::string Architecture = "amd64";
 #elif __arm__ || __aarch64__ || _M_ARM64
-Architecture = "arm64";
+std::string Architecture = "arm64";
 #endif
 std::string OrganizationFolder;
 std::string DesktopPath;
@@ -260,30 +261,6 @@ void WriteInformation(std::string version)
     }
 }
 
-void UploadInformation()
-{
-    Channels = database.GetAllVersionsFromDB(NameVersionTable, "Channel", Architecture);
-    int size = (sizeof(AllChannels) / sizeof(AllChannels[0]));
-    int n = 1;
-    /* The code is iterating over the `AllChannels` array and checking if each channel exists in
-    the `Channels` map. If a channel exists, it prints the channel number and name, and inserts
-    the channel into the `EnumerateChannels` map. If the channel is "stable\latest", it sets the
-    `defaultChannel` variable to the current channel number. */
-    for (int i = 0; i < size; i++)
-    {
-
-        if (Channels.find(AllChannels[i]) != Channels.end())
-        {
-            EnumerateChannels.insert(std::pair<int, std::string>(n, AllChannels[i]));
-            if (AllChannels[i] == "stable")
-            {
-                defaultChannel = n;
-            }
-            n++;
-        }
-    }
-}
-
 #if defined(__APPLE__) || defined(__linux__)
 /**
  * The function `CallbackProgress` is a callback function used to track the progress of a download
@@ -344,6 +321,12 @@ size_t WriteData(void *ptr, size_t size, size_t nmemb, FILE *stream)
     return WriteProcess;
 }
 #endif
+
+bool endsWith(const std::string& s, const std::string& suffix)
+{
+    return s.rfind(suffix) == (s.size() - suffix.size());
+}
+
 
 // Function to create a string with two application names
 std::string NewString(std::string sentence)
