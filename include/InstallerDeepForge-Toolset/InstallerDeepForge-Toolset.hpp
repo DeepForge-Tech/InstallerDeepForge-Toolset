@@ -60,16 +60,10 @@ public:
         MakeDirectory(LocaleDir);
 #elif defined(__APPLE__)
         std::string Command;
-        OrganizationFolder = string(UserFolder) + "/Library/Containers/DeepForge";
-        ApplicationDir = NewOrganizationFolder + "/DeepForge-Toolset";
-        TempFolder = NewApplicationFolder + "/Temp";
-        UpdateManagerFolder = NewOrganizationFolder + "/UpdateManager";
-        LocaleDir = NewApplicationFolder + "/locale";
-        DB_PATH = NewTempFolder + "/Versions.db";
-        Command = "sudo -s chmod 777 " + string(UserFolder) + "/Library/Containers/";
+        Command = "sudo -s chmod 777 " + std::string(UserFolder) + "/Library/Containers/";
         system(Command.c_str());
         // Create temp folder
-        MakeDirectory(NewTempFolder);
+        MakeDirectory(TempFolder);
         MakeDirectory(LocaleDir);
         Command = "sudo -s chmod 777 " + OrganizationFolder;
         system(Command.c_str());
@@ -95,7 +89,9 @@ public:
         mkdir(TempFolder.c_str(), 0777);
         mkdir(LocaleDir.c_str(), 0777);
 #endif
+        std::cout << "1" << std::endl;
         DownloadDependencies();
+        std::cout << "2" << std::endl;
         database.open(&DatabasePath);
         std::future<void> UploadInformation_async = std::async(std::launch::async, UploadInformation);
         UploadInformation_async.wait();

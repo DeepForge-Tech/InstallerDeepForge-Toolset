@@ -53,9 +53,9 @@ class Linux:
             else:
                 failed_packages.append(package)
         print(delimiter)
-        print(f"Successfully installed: {success_installed} package(s)\nFailed to install: {len(packages) - success_installed} package(s)")    
+        print(f"==> Successfully installed: {success_installed} package(s)\nFailed to install: {len(packages) - success_installed} package(s)")    
         if len(failed_packages) > 0:
-            print("Reinstall the packages:")
+            print("==> Reinstall the packages:")
             i = 1
             for package in failed_packages:
                 print(f"{i}.{package}")
@@ -71,7 +71,7 @@ class Windows:
         result = os.system(command)
         if result != 0:
             print(delimiter)
-            print("Failed to install WinGet")
+            print("==> Failed to install WinGet")
             return 502
         return result
 
@@ -80,11 +80,11 @@ class macOS:
         self.architecture = platform.architecture()[0]
 
     def start(self) -> int:
-        command = "/bin/bash -c '$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)'"
+        command = '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
         result = os.system(command)
         if result != 0:
             print(delimiter)
-            print("Failed to install Homebrew")
+            print("==> Failed to install Homebrew")
             return 502
         command = "brew install jsoncpp sqlite3 sqlite-utils fmt clang-format curl googletest gcc zlib cmake libzip openssl wget"
         result = os.system(command)
@@ -94,7 +94,8 @@ platforms = {"Linux": Linux, "Windows": Windows, "Darwin": macOS}
 
 if __name__ == "__main__":
     checker = platforms[platform.system()]()
+    print("==> Installing packages...")
     result = checker.start()
     if result != 502:
         print(delimiter)
-        print("All packages installed successfully")
+        print("==> All packages installed successfully")

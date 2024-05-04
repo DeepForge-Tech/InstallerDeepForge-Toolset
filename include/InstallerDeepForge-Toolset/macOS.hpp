@@ -34,6 +34,15 @@ namespace macOS
     class Installer
     {
         public:
+            Installer()
+            {
+                OrganizationFolder = std::string(UserFolder) + "/Library/Containers/DeepForge";
+                ApplicationDir = OrganizationFolder + "/DeepForge-Toolset";
+                TempFolder = ApplicationDir + "/Temp";
+                UpdateManagerFolder = OrganizationFolder + "/UpdateManager";
+                LocaleDir = ApplicationDir + "/locale";
+                DatabasePath = TempFolder + "/Versions.db";
+            }
         protected:
         void Download(std::string url, std::string dir, bool Progress);
         /* The `CreateSymlink` function is creating a symbolic link (symlink) in the `/Applications` directory. It takes two parameters: `nameSymlink` which is the name of the symlink, and `filePath` which is the path to the file or directory that the symlink will point to.*/

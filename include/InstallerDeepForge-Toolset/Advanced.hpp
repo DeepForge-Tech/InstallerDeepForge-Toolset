@@ -86,7 +86,7 @@
 
 #if defined(__linux__)
 #define URL_DESKTOP_SYMLINK "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/DeepForgeToolset.desktop"
-#define NameVersionTable "DeepForgeToolset_Linux"
+#define NameVersionTable "LinuxVersions"
 #define UpdateManagerTable "UpdateManager_Linux"
 #define PATHMAN_AMD64_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/pathman-v0.5.2-linux-amd64"
 #define PATHMAN_ARM64_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/pathman-v0.5.2-linux-armv8"
@@ -98,14 +98,14 @@
 
 #define OS_NAME "macOS"
 #define UpdateManagerTable "UpdateManager_macOS"
-#define NameVersionTable "DeepForgeToolset_macOS"
+#define NameVersionTable "macOSVersions"
 #define SHELL_SCRIPT_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries_macOS.sh"
 
 #elif _WIN32
 
 #define OS_NAME "Windows"
 #define UpdateManagerTable "UpdateManager_Windows"
-#define NameVersionTable "DeepForgeToolset_Windows"
+#define NameVersionTable "WindowsVersions"
 #define PathmanURL_AMD64 "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/pathman-v0.5.2-windows-amd64.exe"
 #define PathmanURL_ARM64 "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/pathman-v0.5.2-windows-amd64.exe"
 
@@ -176,7 +176,6 @@ std::string LocaleDir;
 std::string UpdateManagerFolder;
 std::string DatabasePath;
 std::string LogPath;
-const std::string UpdateManagerFolder = OrganizationFolder + "/UpdateManager";
 #elif __linux__
 std::string Architecture;
 #if defined(_M_AMD64)
