@@ -77,8 +77,9 @@ void Windows::Installer::UnpackArchive(std::string path_from, std::string path_t
     }
     catch (std::exception &error)
     {
+        std::string logText = "==> ❌ " + std::string(error.what());
         logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "UnpackArchive()", error.what());
-        std::cerr << error.what() << std::endl;
+        std::cerr << logText << std::endl;
     }
 }
 
@@ -120,9 +121,9 @@ void Windows::Installer::Download(std::string url, std::string dir, bool Progres
     }
     catch (std::exception &error)
     {
-        std::string ErrorText = "==> ❌ " + std::string(error.what());
+        std::string logText = "==> ❌ " + std::string(error.what());
         logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "Download()", error.what());
-        std::cerr << ErrorText << std::endl;
+        std::cerr << logText << std::endl;
     }
 }
 
@@ -188,8 +189,9 @@ void Windows::Installer::MakeDirectory(std::string dir)
     }
     catch (std::exception &error)
     {
+        std::string logText = "==> ❌ " + std::string(error.what());
         logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "MakeDirectory()", error.what());
-        std::cerr << error.what() << std::endl;
+        std::cerr << logText << std::endl;
     }
 }
 

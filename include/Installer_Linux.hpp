@@ -291,7 +291,7 @@ namespace Linux
                     }
                 }
             }
-            catch (exception &error)
+            catch (exception& error)
             {
                 // Error output
                 logger.WriteError("Function: ReadJSON");
@@ -445,7 +445,7 @@ namespace Linux
                     int result = AppInformationDB.InsertValuesToTable("Applications", ApplicationFields);
                 }
             }
-            catch (exception &error)
+            catch (exception& error)
             {
                 // Error output
                 logger.SendError(Architecture, "Empty", OS_NAME, "WriteInformation", error.what());

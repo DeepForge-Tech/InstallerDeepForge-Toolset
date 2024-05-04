@@ -52,3 +52,4 @@ _deps/
 build.ninja
 .vs/
 */cmake_install.cmake
+build_linux/

@@ -1,4 +1,4 @@
-/*  The MIT License (MIT)
+/*  GNU GENERAL PUBLIC LICENSE
     ============================================================================
 
     ██████╗ ███████╗███████╗██████╗ ███████╗ ██████╗ ██████╗  ██████╗ ███████╗
@@ -58,26 +58,45 @@ public:
         // Create temp folder
         MakeDirectory(TempFolder);
         MakeDirectory(LocaleDir);
+#elif defined(__APPLE__)
+        std::string Command;
+        OrganizationFolder = string(UserFolder) + "/Library/Containers/DeepForge";
+        ApplicationDir = NewOrganizationFolder + "/DeepForge-Toolset";
+        TempFolder = NewApplicationFolder + "/Temp";
+        UpdateManagerFolder = NewOrganizationFolder + "/UpdateManager";
+        LocaleDir = NewApplicationFolder + "/locale";
+        DB_PATH = NewTempFolder + "/Versions.db";
+        Command = "sudo -s chmod 777 " + string(UserFolder) + "/Library/Containers/";
+        system(Command.c_str());
+        // Create temp folder
+        MakeDirectory(NewTempFolder);
+        MakeDirectory(LocaleDir);
+        Command = "sudo -s chmod 777 " + OrganizationFolder;
+        system(Command.c_str());
+        Command = "sudo -s chmod 777 " + OrganizationFolder + "/*";
+        system(Command.c_str());
+        Command = "sudo -s chmod 777 " + ApplicationDir + "/*";
+        system(Command.c_str());
 #elif __linux__
         std::string Command;
         Command = "sudo -s chmod 777 /usr/bin/";
-        std::cout << Command << std::endl;
         system(Command.c_str());
         // Create temp folder
         MakeDirectory(TempFolder);
         MakeDirectory(LocaleDir);
-        // Command = "sudo -s chmod 777 " + OrganizationFolder;
-        // system(Command.c_str());
-        // Command = "sudo -s chmod 777 " + OrganizationFolder + "/*";
-        // system(Command.c_str());
-        // Command = "sudo -s chmod 777 " + ApplicationDir + "/*";
-        // system(Command.c_str());
+        Command = "sudo -s chmod 777 " + OrganizationFolder;
+        system(Command.c_str());
+        Command = "sudo -s chmod 777 " + OrganizationFolder + "/*";
+        system(Command.c_str());
+        Command = "sudo -s chmod 777 " + ApplicationDir + "/*";
+        system(Command.c_str());
+        // mkdir(OrganizationFolder.c_str(),0777);
+        // mkdir(ApplicationDir.c_str(),0777);
+        mkdir(TempFolder.c_str(), 0777);
+        mkdir(LocaleDir.c_str(), 0777);
 #endif
-        std::cout << "1" << std::endl;
         DownloadDependencies();
-        std::cout << "2" << std::endl;
         database.open(&DatabasePath);
-        std::cout << "3" << std::endl;
         std::future<void> UploadInformation_async = std::async(std::launch::async, UploadInformation);
         UploadInformation_async.wait();
         std::cout << InstallDelimiter << std::endl;

@@ -108,7 +108,7 @@ void Application::DownloadDependencies()
     std::string Locales[2] = {Locale_RU_URL, Locale_EN_URL};
     for (int i = 0; i < (sizeof(Locales) / sizeof(Locales[0])); i++)
     {
-        Download(Locales[i], LocaleDir, true);
+        Download(Locales[i], LocaleDir, false);
     }
     SetLanguage();
     std::cout << translate["DownloadingDatabase"].asString() << std::endl;
@@ -138,13 +138,13 @@ void Application::InstallUpdateManager()
         Download(UpdateManagerUrl, TempFolder, true);
         name = (UpdateManagerUrl.substr(UpdateManagerUrl.find_last_of("/")));
         ArchivePath = TempFolder + "/" + name.replace(name.find("/"), 1, "");
-        MakeDirectory(NewUpdateManagerFolder);
+        MakeDirectory(UpdateManagerFolder);
         #if defined(__linux__) || defined(__APPLE__)
-            Command = "sudo -s chmod 777 " + NewUpdateManagerFolder + "/*";
+            Command = "sudo -s chmod 777 " + UpdateManagerFolder + "/*";
             system(Command.c_str());
         #endif
         std::filesystem::remove(ArchivePath);
-        file_path = NewUpdateManagerFolder + "/UpdateManager";
+        file_path = UpdateManagerFolder + "/UpdateManager";
         std::cout << "==> ✅ UpdateManager " << version << " " << translate["Installed"].asString() << std::endl;
         std::cout << InstallDelimiter << std::endl;
 #if defined(_WIN32)
@@ -155,9 +155,9 @@ void Application::InstallUpdateManager()
     }
     catch (std::exception& error)
     {
-        std::string ErrorText = "==> ❌ " + std::string(error.what());
+        std::string logText = "==> ❌ " + std::string(error.what());
         logger.sendError(NameProgram,Architecture, __channel__, OS_NAME, "InstallUpdateManager()", error.what());
-        std::cerr << ErrorText << std::endl;
+        std::cerr << logText << std::endl;
     }
 }
 
@@ -209,9 +209,9 @@ void Application::InstallDeepForgeToolset(std::string channel)
     }
     catch (std::exception& error)
     {
-        std::string ErrorText = "==> ❌ " + std::string(error.what());
+        std::string logText = "==> ❌ " + std::string(error.what());
         logger.sendError(NameProgram,Architecture, __channel__, OS_NAME, "InstallDeepForgeToolset()", error.what());
-        std::cerr << ErrorText << std::endl;
+        std::cerr << logText << std::endl;
     }
 }
 

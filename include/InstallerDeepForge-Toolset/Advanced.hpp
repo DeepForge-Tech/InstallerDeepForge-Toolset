@@ -1,4 +1,4 @@
-/*  The MIT License (MIT)
+/*  GNU GENERAL PUBLIC LICENSE
     ============================================================================
 
     ██████╗ ███████╗███████╗██████╗ ███████╗ ██████╗ ██████╗  ██████╗ ███████╗
@@ -82,6 +82,7 @@
 #define DB_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
 #define Locale_RU_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_ru.json"
 #define Locale_EN_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/locale_en.json"
+#define MODE "DEV"
 
 #if defined(__linux__)
 #define URL_DESKTOP_SYMLINK "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/DeepForgeToolset.desktop"
@@ -96,6 +97,9 @@
 #elif __APPLE__
 
 #define OS_NAME "macOS"
+#define UpdateManagerTable "UpdateManager_macOS"
+#define NameVersionTable "DeepForgeToolset_macOS"
+#define SHELL_SCRIPT_URL "https://github.com/DeepForge-Technology/DeepForge-Toolset/releases/download/InstallerUtils/InstallLibraries_macOS.sh"
 
 #elif _WIN32
 
@@ -153,11 +157,11 @@ std::string InstallDelimiter = "================================================
 std::string Language;
 std::string SelectPackages;
 std::string Answer;
-std::string MODE = "DEV";
 // Boolean type
 bool Install;
 
 #if defined(__APPLE__)
+char *UserFolder = getenv("HOME");
 std::string Architecture;
 #if defined(_M_AMD64)
 Architecture = "amd64";
@@ -172,7 +176,7 @@ std::string LocaleDir;
 std::string UpdateManagerFolder;
 std::string DatabasePath;
 std::string LogPath;
-const std::string NewUpdateManagerFolder = OrganizationFolder + "/UpdateManager";
+const std::string UpdateManagerFolder = OrganizationFolder + "/UpdateManager";
 #elif __linux__
 std::string Architecture;
 #if defined(_M_AMD64)
@@ -184,13 +188,13 @@ std::string NameDistribution;
 std::string PackageManager;
 char *UserFolder = getenv("USER");
 const std::string DesktopPath = std::string(UserFolder) + "/Desktop";
-const std::string OrganizationFolder = "/usr/bin/DeepForge";
-const std::string ApplicationDir = OrganizationFolder + "/DeepForge-Toolset";
+std::string OrganizationFolder = "/usr/bin/DeepForge";
+std::string ApplicationDir = OrganizationFolder + "/DeepForge-Toolset";
 const std::string UpdateManagerFolder = OrganizationFolder + "/UpdateManager";
 std::string TempFolder = ApplicationDir + "/Temp";
-const std::string LocaleDir = ApplicationDir + "/locale";
+std::string LocaleDir = ApplicationDir + "/locale";
 std::string DatabasePath = TempFolder + "/Versions.db";
-const std::string NewUpdateManagerFolder = OrganizationFolder + "/UpdateManager";
+// const std::string NewUpdateManagerFolder = OrganizationFolder + "/UpdateManager";
 #elif _WIN32
 #if defined(_M_AMD64)
 std::string Architecture = "amd64";
@@ -225,7 +229,7 @@ void WriteInformation(std::string version)
             {"Name", "DeepForge-Toolset"},
             {"Version", version},
             {"NameTable", NameTable}};
-        std::string pathFile = NewUpdateManagerFolder + "\\AppInformation.db";
+        std::string pathFile = UpdateManagerFolder + "/AppInformation.db";
         DB::Database AppInformationDB;
         /* The bellow code is checking if a file exists at the specified path. If the file does not exist, it creates a new file and writes an empty string to it. Then, it opens a database connection using the file as the database path. It checks if a table named "Applications" exists in the database. If the table does not exist, it creates the table with the specified columns. Finally, it inserts values into the "Applications" table. */
         if (std::filesystem::exists(pathFile) == false)
@@ -251,15 +255,14 @@ void WriteInformation(std::string version)
     }
     catch (std::exception &error)
     {
-        // Error output
+        std::string logText = "==> ❌ " + std::string(error.what());
         logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "WriteInformation()", error.what());
-        std::cerr << error.what() << std::endl;
+        std::cerr << logText << std::endl;
     }
 }
 
 void UploadInformation()
 {
-    // std::unique_lock<std::mutex> lock(mtx, std::defer_lock);
     Channels = database.GetAllVersionsFromDB(NameVersionTable, "Channel", Architecture);
     int size = (sizeof(AllChannels) / sizeof(AllChannels[0]));
     int n = 1;
@@ -304,23 +307,23 @@ int CallbackProgress(void *ptr, double TotalToDownload, double NowDownloaded, do
     {
         return 0;
     }
-    // if (withProgress == true)
-    // {
-    // double DownloadSpeed;
-    Percentage = static_cast<float>(NowDownloaded) / static_cast<float>(TotalToDownload) * 100;
-    /* The bellow code is checking if the `TempPercentage` is not equal to `Percentage` and is less
-    than or equal to 100. If this condition is true, it retrieves the download speed using
-    `curl_easy_getinfo` and updates a progress bar using the `progressbar.Update` function. It
-    also updates some variables (`LastDownloadSpeed`, `LastSize`, `LastTotalSize`, and
-    `TempPercentage`) with the current values. */
-    if (TempPercentage != Percentage && TempPercentage <= 100)
+    if (withProgress == true)
     {
-        progressbar.Update(NowDownloaded, TotalToDownload);
-        LastSize = NowDownloaded;
-        LastTotalSize = TotalToDownload;
-        TempPercentage = Percentage;
+        // double DownloadSpeed;
+        Percentage = static_cast<float>(NowDownloaded) / static_cast<float>(TotalToDownload) * 100;
+        /* The bellow code is checking if the `TempPercentage` is not equal to `Percentage` and is less
+        than or equal to 100. If this condition is true, it retrieves the download speed using
+        `curl_easy_getinfo` and updates a progress bar using the `progressbar.Update` function. It
+        also updates some variables (`LastDownloadSpeed`, `LastSize`, `LastTotalSize`, and
+        `TempPercentage`) with the current values. */
+        if (TempPercentage != Percentage && TempPercentage <= 100)
+        {
+            progressbar.Update(NowDownloaded, TotalToDownload);
+            LastSize = NowDownloaded;
+            LastTotalSize = TotalToDownload;
+            TempPercentage = Percentage;
+        }
     }
-    // }
     return 0;
 }
 /**

@@ -94,7 +94,14 @@
 			"regex": "cpp",
 			"unordered_set": "cpp",
 			"numeric": "cpp",
-			"random": "cpp"
+			"random": "cpp",
+			"*.tcc": "cpp",
+			"codecvt": "cpp",
+			"cwctype": "cpp",
+			"memory_resource": "cpp",
+			"numbers": "cpp",
+			"semaphore": "cpp",
+			"cinttypes": "cpp"
 		}
 	}
 }
