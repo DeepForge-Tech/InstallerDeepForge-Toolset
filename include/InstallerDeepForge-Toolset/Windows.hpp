@@ -81,9 +81,9 @@ namespace Windows
             if (withProgress == true)
             {
                 Percentage = static_cast<float>(ulProgress) / static_cast<float>(ulProgressMax) * 100;
-                if (TempPercentage != Percentage && TempPercentage <= 97)
+                if (TempPercentage != Percentage && TempPercentage <= 100)
                 {
-                    progressbar.Update((double)(ulProgress), (double)(ulProgressMax));
+                    progressbar.update((double)(ulProgress), (double)(ulProgressMax));
                     LastSize = (double)(ulProgress);
                     LastTotalSize = (double)(ulProgressMax);
                     TempPercentage = Percentage;

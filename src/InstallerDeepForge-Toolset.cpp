@@ -192,11 +192,11 @@ void Application::InstallDeepForgeToolset(std::string channel)
         ArchivePath = TempFolder + "/" + name.replace(name.find("/"), 1, "");
         MakeDirectory(ApplicationDir);
         UnpackArchive(ArchivePath, ApplicationDir);
-        // #if defined(__linux__)
-        //         InstallLibraries();
-        // #elif __APPLE__
-        //         InstallLibraries();
-        // #endif
+        #if defined(__linux__)
+                InstallLibraries();
+        #elif __APPLE__
+                InstallLibraries();
+        #endif
         file_path = ApplicationDir + "/DeepForgeToolset";
         CreateSymlink("DeepForge-Toolset", file_path);
         std::filesystem::remove(ArchivePath);

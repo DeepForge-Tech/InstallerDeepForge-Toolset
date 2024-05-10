@@ -131,18 +131,15 @@ void Linux::Installer::Download(std::string url, std::string dir, bool Progress)
                 break;
             }
         }
-        // If the progress bar is not completely filled in, then paint over manually
         if (Progress == true)
         {
-            if (Bar::Process < 100 && Bar::Process != Percentage)
+            // If the progress bar is not completely filled in, then paint over manually
+            for (int i = progressbar.progress; i < 100; i++)
             {
-                for (int i = (Bar::Process - 1); i < 99; i++)
-                {
-                    progressbar.Update(LastSize, LastTotalSize);
-                }
+                progressbar.update(LastSize, LastTotalSize);
             }
             // Reset all variables and preferences
-            progressbar.ResetAll();
+            progressbar.resetAll();
             Percentage = 0;
             TempPercentage = 0;
         }

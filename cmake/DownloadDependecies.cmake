@@ -34,3 +34,15 @@ FetchContent_Declare(miniz
   GIT_TAG master
 )
 FetchContent_MakeAvailable(miniz)
+
+FetchContent_Declare(Progressbar
+  GIT_REPOSITORY https://github.com/DeepForge-Tech/Progressbar.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(Progressbar)
+
+FetchContent_Declare(DatabaseAPI
+  GIT_REPOSITORY https://github.com/DeepForge-Tech/DatabaseAPI.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(DatabaseAPI)

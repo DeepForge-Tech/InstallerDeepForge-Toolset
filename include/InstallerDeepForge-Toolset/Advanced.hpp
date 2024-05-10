@@ -38,7 +38,7 @@
 #include <sys/stat.h>
 #include <cstdio>
 #include <cstdlib>
-#include <Progressbar.hpp>
+#include <Progressbar/Progressbar.hpp>
 #include <cctype>
 #include <fstream>
 #include <functional>
@@ -47,12 +47,13 @@
 #include <cstdint>
 #include <chrono>
 #include <vector>
-#include <Database/DatabaseConnect.hpp>
+#include <Database/DatabaseAPI.hpp>
 #define FMT_HEADER_ONLY
 #include <fmt/format.h>
 #include <Logger/Logger.hpp>
 #include <future>
 #include <miniz/miniz.h>
+
 // Checking the name of the operating system and importing the necessary libraries for this system
 #if defined(__linux__)
 #include <curl/curl.h>
@@ -178,11 +179,10 @@ std::string UpdateManagerFolder;
 std::string DatabasePath;
 std::string LogPath;
 #elif __linux__
-std::string Architecture;
 #if defined(_M_AMD64)
-Architecture = "amd64";
+std::string Architecture = "amd64";
 #elif __arm__ || __aarch64__ || _M_ARM64
-Architecture = "arm64";
+std::string Architecture = "arm64";
 #endif
 std::string NameDistribution;
 std::string PackageManager;
@@ -208,7 +208,7 @@ std::string ApplicationDir = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset";
 std::string TempFolder = ApplicationDir + "\\Temp";
 std::string DatabasePath = TempFolder + "\\Versions.db";
 std::string LocaleDir = ApplicationDir + "\\locale";
-const std::string NewUpdateManagerFolder = OrganizationFolder + "\\UpdateManager";
+const std::string UpdateManagerFolder = OrganizationFolder + "\\UpdateManager";
 #endif
 // init classes
 Logger::Logging logger;
@@ -294,7 +294,7 @@ int CallbackProgress(void *ptr, double TotalToDownload, double NowDownloaded, do
         `TempPercentage`) with the current values. */
         if (TempPercentage != Percentage && TempPercentage <= 100)
         {
-            progressbar.Update(NowDownloaded, TotalToDownload);
+            progressbar.update(NowDownloaded, TotalToDownload);
             LastSize = NowDownloaded;
             LastTotalSize = TotalToDownload;
             TempPercentage = Percentage;

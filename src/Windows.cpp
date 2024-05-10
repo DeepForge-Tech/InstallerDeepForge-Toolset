@@ -60,7 +60,7 @@ void Windows::Installer::UnpackArchive(std::string path_from, std::string path_t
                 continue;
             }
 
-            void* fileData = mz_zip_reader_extract_to_heap(&zip_archive, file_stat.m_file_index, &file_stat.m_uncomp_size, 0); // You can adjust the flags parameter as needed
+            void *fileData = mz_zip_reader_extract_to_heap(&zip_archive, file_stat.m_file_index, &file_stat.m_uncomp_size, 0); // You can adjust the flags parameter as needed
             if (!fileData)
             {
                 std::cerr << "Failed to extract file: " << file_stat.m_filename << std::endl;
@@ -105,16 +105,12 @@ void Windows::Installer::Download(std::string url, std::string dir, bool Progres
         if (Progress == true)
         {
             // If the progress bar is not completely filled in, then paint over manually
-            if (Bar::Process < 100 && Bar::Process != Percentage)
+            for (int i = progressbar.progress; i < 100; i++)
             {
-                for (int i = (Bar::Process - 1); i < 98; i++)
-                {
-                    progressbar.Update(LastSize, LastTotalSize);
-                }
-                progressbar.Update(LastTotalSize, LastTotalSize);
+                progressbar.update(LastSize, LastTotalSize);
             }
             // Reset all variables and preferences
-            progressbar.ResetAll();
+            progressbar.resetAll();
             Percentage = 0;
             TempPercentage = 0;
         }
@@ -143,7 +139,6 @@ void Windows::Installer::CreateSymlink(std::string nameSymlink, std::string file
 {
     nameSymlink = nameSymlink + ".exe";
     filePath = filePath + ".exe";
-    char *UserFolder = getenv("USERPROFILE");
     std::string symlinkPath = std::string(UserFolder) + "\\Desktop\\" + nameSymlink;
     CreateHardLinkA(symlinkPath.c_str(), filePath.c_str(), NULL);
 }
@@ -194,8 +189,6 @@ void Windows::Installer::MakeDirectory(std::string dir)
         std::cerr << logText << std::endl;
     }
 }
-
-
 
 void Windows::Installer::AddToStartupSystem(std::string filePath)
 {
