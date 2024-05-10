@@ -26,6 +26,8 @@ class Linux:
             "Manjaro Linux": self.PACMAN_PACKAGES,
             "Arch Linux": self.PACMAN_PACKAGES,
             "Kali GNU/Linux": self.DEB_PACKAGES,
+            "openSUSE Leap": self.ZYPPER_PACKAGES,
+            "openSUSE Tumbleweed": self.ZYPPER_PACKAGES
         }
         self.installer = ""
         self.INSTALLERS = {
@@ -40,6 +42,8 @@ class Linux:
             "Manjaro Linux": "pacman",
             "Arch Linux": "pacman",
             "Kali GNU/Linux": "apt",
+            "openSUSE Leap": "zypper",
+            "openSUSE Tumbleweed": "zypper"
         }
 
     def start(self) -> int:
