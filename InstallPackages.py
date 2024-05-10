@@ -50,20 +50,33 @@ class Linux:
         if self.distribution == "CentOS Linux":
             command = "cd /etc/yum.repos.d/ && sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*"
             os.system(command)
-        command = self.INSTALLERS[self.distribution] + " install " + "sudo -y"
-        os.system(command)
+        if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[self.distribution] == "apt" or self.INSTALLERS[self.distribution] == "pacman":
+            command = self.INSTALLERS[self.distribution] + " install " + "sudo -y"
+            os.system(command)
+        else:
+            command = self.INSTALLERS[self.distribution] + " install " + "sudo"
+            os.system(command)
         success_installed = 0
         failed_packages = []
         packages = self.PACKAGES[self.distribution].split()
         for package in packages:
-            command = (
-                "sudo -s "
-                + self.INSTALLERS[self.distribution]
-                + " install "
-                + package
-                + " -y"
-            )
-            install_result = os.system(command)
+            if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[self.distribution] == "apt" or self.INSTALLERS[self.distribution] == "pacman":
+                command = (
+                    "sudo -s "
+                    + self.INSTALLERS[self.distribution]
+                    + " install "
+                    + package
+                    + " -y"
+                )
+                install_result = os.system(command)
+            else:
+                command = (
+                    "sudo -s "
+                    + self.INSTALLERS[self.distribution]
+                    + " install "
+                    + package
+                )
+                install_result = os.system(command)
             if install_result == 0:
                 success_installed += 1
             else:
