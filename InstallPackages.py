@@ -5,6 +5,7 @@ delimiter = "========================================================"
 
 
 class Linux:
+
     def __init__(self):
         self.YUM_PACKAGES = (
             "boost-devel xterm wget make cmake gcc-c++ curl libcurl sqlite-devel openssl-devel"
@@ -50,33 +51,34 @@ class Linux:
         if self.distribution == "CentOS Linux":
             command = "cd /etc/yum.repos.d/ && sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*"
             os.system(command)
-        # if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[self.distribution] == "apt" or self.INSTALLERS[self.distribution] == "pacman":
-            command = self.INSTALLERS[self.distribution] + " install " + "sudo -y"
+        if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[
+                self.distribution] == "apt":
+            command = self.INSTALLERS[
+                self.distribution] + " install " + "sudo -y"
             os.system(command)
-        # else:
-        #     command = self.INSTALLERS[self.distribution] + " install " + "sudo"
-        #     os.system(command)
+            command = self.INSTALLERS[self.distribution] + " update " + "-y"
+            os.system(command)
+        elif self.INSTALLERS[self.distribution] == "pacman":
+            command = self.INSTALLERS[self.distribution] + "-Sy" + "sudo"
+            os.system(command)
+            command = self.INSTALLERS[self.distribution] + " -Suy "
+            os.system(command)
         success_installed = 0
         failed_packages = []
         packages = self.PACKAGES[self.distribution].split()
         for package in packages:
-            # if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[self.distribution] == "apt" or self.INSTALLERS[self.distribution] == "pacman":
-            command = (
-                "sudo -s "
-                + self.INSTALLERS[self.distribution]
-                + " install "
-                + package
-                + " -y"
-            )
-            install_result = os.system(command)
-            # else:
-            #     command = (
-            #         "sudo -s "
-            #         + self.INSTALLERS[self.distribution]
-            #         + " install "
-            #         + package
-            #     )
-            #     install_result = os.system(command)
+            if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[self.distribution] == "apt":
+                command = ("sudo -s " + self.INSTALLERS[self.distribution] +
+                        " install " + package + " -y")
+                install_result = os.system(command)
+            elif self.INSTALLERS[self.distribution] == "pacman":
+                command = (
+                    "sudo -s "
+                    + self.INSTALLERS[self.distribution]
+                    + " -Sy "
+                    + package
+                )
+                install_result = os.system(command)
             if install_result == 0:
                 success_installed += 1
             else:
@@ -110,7 +112,7 @@ class Windows:
                 if os.path.isdir(os.path.join(vs_path, obj)) and obj.startswith("20"):
                     for distribution in distributions:
                         if distribution in os.listdir(os.path.join(vs_path, obj)):
-                                return len(os.listdir(os.path.join(vs_path, obj, distribution))) > 0
+                            return len(os.listdir(os.path.join(vs_path, obj, distribution))) > 0
         elif os.path.exists(msbuild_path):
             for obj in os.listdir(msbuild_path):
                 if os.path.isdir(os.path.join(msbuild_path, obj)) and obj.startswith("20"):
