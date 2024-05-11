@@ -76,7 +76,7 @@ class Linux:
                     "sudo -s "
                     + self.INSTALLERS[self.distribution]
                     + " -Sy "
-                    + package
+                    + package + " --noconfirm"
                 )
                 install_result = os.system(command)
             if install_result == 0:
