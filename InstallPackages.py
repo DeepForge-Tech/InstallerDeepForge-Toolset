@@ -59,7 +59,7 @@ class Linux:
             command = self.INSTALLERS[self.distribution] + " update " + "-y"
             os.system(command)
         elif self.INSTALLERS[self.distribution] == "pacman":
-            command = self.INSTALLERS[self.distribution] + "-Sy" + "sudo"
+            command = self.INSTALLERS[self.distribution] + " -Sy " + "sudo"
             os.system(command)
             command = self.INSTALLERS[self.distribution] + " -Suy "
             os.system(command)
