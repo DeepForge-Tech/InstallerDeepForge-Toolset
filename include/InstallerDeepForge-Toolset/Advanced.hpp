@@ -164,6 +164,7 @@ std::string Answer;
 bool Install;
 
 #if defined(__APPLE__)
+
 char *UserFolder = getenv("HOME");
 #if defined(_M_AMD64) || defined(__x86_64__)
 std::string Architecture = "amd64";
@@ -179,11 +180,11 @@ std::string UpdateManagerFolder;
 std::string DatabasePath;
 std::string LogPath;
 #elif __linux__
+
 #if defined(_M_AMD64) || defined(__x86_64__)
-std::string Architecture;
-Architecture = "amd64";
+std::string Architecture = "amd64";
 #elif __arm__ || __aarch64__ || _M_ARM64
-Architecture = "arm64";
+std::string Architecture = "arm64";
 #endif
 std::string NameDistribution;
 std::string PackageManager;
@@ -197,6 +198,7 @@ std::string LocaleDir = ApplicationDir + "/locale";
 std::string DatabasePath = TempFolder + "/Versions.db";
 // const std::string NewUpdateManagerFolder = OrganizationFolder + "/UpdateManager";
 #elif _WIN32
+
 #if defined(_M_AMD64) || defined(__x86_64__)
 std::string Architecture = "amd64";
 #elif __arm__ || __aarch64__ || _M_ARM64
