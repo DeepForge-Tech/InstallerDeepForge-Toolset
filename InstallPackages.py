@@ -67,17 +67,14 @@ class Linux:
         failed_packages = []
         packages = self.PACKAGES[self.distribution].split()
         for package in packages:
-            if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[self.distribution] == "apt":
+            if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[
+                    self.distribution] == "apt":
                 command = ("sudo -s " + self.INSTALLERS[self.distribution] +
-                        " install " + package + " -y")
+                           " install " + package + " -y")
                 install_result = os.system(command)
             elif self.INSTALLERS[self.distribution] == "pacman":
-                command = (
-                    "sudo -s "
-                    + self.INSTALLERS[self.distribution]
-                    + " -Sy "
-                    + package + " --noconfirm"
-                )
+                command = ("sudo -s " + self.INSTALLERS[self.distribution] +
+                           " -Sy " + package + " --noconfirm")
                 install_result = os.system(command)
             if install_result == 0:
                 success_installed += 1
@@ -85,6 +82,9 @@ class Linux:
                 failed_packages.append(package)
         if self.INSTALLERS[self.distribution] == "apt":
             command = "sudo apt autoremove -y"
+            os.system(command)
+        elif self.INSTALLERS[self.distribution] == "pacman":
+            command = "sudo pacman -Scc"
             os.system(command)
         print(delimiter)
         print(
