@@ -76,7 +76,7 @@ elseif(APPLE)
 elseif(UNIX)
   set(LIBRARIES
     fmt::fmt 
-    jsoncpp
+    jsoncpp_static
     libcurl_static
     SQLite
     miniz
