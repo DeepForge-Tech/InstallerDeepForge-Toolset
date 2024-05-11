@@ -179,7 +179,7 @@ std::string UpdateManagerFolder;
 std::string DatabasePath;
 std::string LogPath;
 #elif __linux__
-#if defined(_M_AMD64 || __amd64__ || __x86_64__)
+#if defined(_M_AMD64 || __x86_64__)
 std::string Architecture;
 Architecture = "amd64";
 #elif __arm__ || __aarch64__ || _M_ARM64
