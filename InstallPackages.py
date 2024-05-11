@@ -25,6 +25,8 @@ class Linux:
             "Knoppix": self.DEB_PACKAGES,
             "Raspbian GNU/Linux": self.DEB_PACKAGES,
             "Manjaro Linux": self.PACMAN_PACKAGES,
+            "Manjaro ARM": self.PACMAN_PACKAGES,
+            "Manjaro AMD64": self.PACMAN_PACKAGES,
             "Arch Linux": self.PACMAN_PACKAGES,
             "Kali GNU/Linux": self.DEB_PACKAGES,
             # "openSUSE Leap": self.ZYPPER_PACKAGES,
@@ -43,6 +45,8 @@ class Linux:
             "Manjaro Linux": "pacman",
             "Arch Linux": "pacman",
             "Kali GNU/Linux": "apt",
+            "Manjaro ARM": "pacman",
+            "Manjaro AMD64": "pacman",
             # "openSUSE Leap": "zypper",
             # "openSUSE Tumbleweed": "zypper"
         }
