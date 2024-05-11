@@ -126,7 +126,7 @@ void Windows::Installer::Download(std::string url, std::string dir, bool Progres
 void Windows::Installer::AddToPATH()
 {
     std::string Command = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe add " + ApplicationDir + " && del C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe";
-#if defined(_M_AMD64)
+#if defined(_M_AMD64) || defined(__x86_64__)
     Download(PathmanURL_AMD64, TempFolder, false);
 #elif _M_ARM64
     Download(PathmanURL_ARM64, NewTempFolder, false);

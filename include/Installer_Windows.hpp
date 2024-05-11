@@ -90,7 +90,7 @@ namespace Windows
     string DB_PATH = NewTempFolder + "\\Versions.db";
     const string TrueVarious[3] = {"yes", "y", "1"};
     string InstallDelimiter = "========================================================";
-#if defined(_M_AMD64)
+#if defined(_M_AMD64) || defined(__x86_64__)
     string Architecture = "amd64";
 #elif defined(_M_ARM64)
     string Architecture = "arm64";
@@ -308,7 +308,7 @@ namespace Windows
         void AddToPATH()
         {
             string Command = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe add " + NewApplicationFolder + " && del C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe";
-#if defined(_M_AMD64)
+#if defined(_M_AMD64) || defined(__x86_64__)
             Download(PathmanURL_AMD64, NewTempFolder, false);
 #elif _M_ARM64
             Download(PathmanURL_ARM64, NewTempFolder, false);
