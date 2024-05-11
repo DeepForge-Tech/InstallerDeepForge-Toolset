@@ -10,14 +10,11 @@ find_package(Threads REQUIRED)
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_FIND_LIBRARY_SUFFIXES .a .so .dylib)
 
-if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64") # for desktop
-    set(architecture "x64")
-elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "AMD64")
-    set(architecture "x64")
-elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64") # for tx2
-    set(architecture "arm64")
+if (WIN32)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 endif()
-set(CMAKE_BINARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build/${architecture}/${CMAKE_BUILD_TYPE}")
+
+set(CMAKE_BINARY_DIR "${CMAKE_BINARY_DIR}/bin/")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Download dependecies
