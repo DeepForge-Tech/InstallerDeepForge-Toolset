@@ -180,9 +180,10 @@ std::string DatabasePath;
 std::string LogPath;
 #elif __linux__
 #if defined(_M_AMD64)
-std::string Architecture = "amd64";
+std::string Architecture;
+Architecture = "amd64";
 #elif __arm__ || __aarch64__ || _M_ARM64
-std::string Architecture = "arm64";
+Architecture = "arm64";
 #endif
 std::string NameDistribution;
 std::string PackageManager;

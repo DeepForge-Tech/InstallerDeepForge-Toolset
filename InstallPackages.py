@@ -11,7 +11,7 @@ class Linux:
         )
         self.DEB_PACKAGES = "libboost-all-dev libasio-dev xterm wget openssl libssl-dev g++ gcc build-essential cmake make curl libcurl4-openssl-dev libjsoncpp-dev libfmt-dev libsqlite3-dev libgtest-dev googletest google-mock libgmock-dev libtbb-dev libzip-dev zlib1g-dev"
         self.PACMAN_PACKAGES = "boost boost-libs-dev asio xterm wget jsoncpp gcc base-devel cmake gtest lib32-curl libcurl-compat libcurl-gnutls curl fmt lib32-sqlite sqlite sqlite-tcl zlib openssl lib32-openssl openssl-1.1 libzip"
-        self.ZYPPER_PACKAGES = "asio xterm wget libcurl-devel gcc-c++ cmake gtest gmock zlib-devel fmt-devel sqlite3-devel jsoncpp-devel"
+        # self.ZYPPER_PACKAGES = "xterm wget libcurl-devel gcc-c++ cmake gtest gmock zlib-devel fmt-devel sqlite3-devel jsoncpp-devel"
         self.distribution = platform.freedesktop_os_release()["NAME"]
         self.architecture = platform.architecture()[0]
         self.PACKAGES = {
@@ -26,8 +26,8 @@ class Linux:
             "Manjaro Linux": self.PACMAN_PACKAGES,
             "Arch Linux": self.PACMAN_PACKAGES,
             "Kali GNU/Linux": self.DEB_PACKAGES,
-            "openSUSE Leap": self.ZYPPER_PACKAGES,
-            "openSUSE Tumbleweed": self.ZYPPER_PACKAGES
+            # "openSUSE Leap": self.ZYPPER_PACKAGES,
+            # "openSUSE Tumbleweed": self.ZYPPER_PACKAGES
         }
         self.installer = ""
         self.INSTALLERS = {
@@ -42,41 +42,41 @@ class Linux:
             "Manjaro Linux": "pacman",
             "Arch Linux": "pacman",
             "Kali GNU/Linux": "apt",
-            "openSUSE Leap": "zypper",
-            "openSUSE Tumbleweed": "zypper"
+            # "openSUSE Leap": "zypper",
+            # "openSUSE Tumbleweed": "zypper"
         }
 
     def start(self) -> int:
         if self.distribution == "CentOS Linux":
             command = "cd /etc/yum.repos.d/ && sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*"
             os.system(command)
-        if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[self.distribution] == "apt" or self.INSTALLERS[self.distribution] == "pacman":
+        # if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[self.distribution] == "apt" or self.INSTALLERS[self.distribution] == "pacman":
             command = self.INSTALLERS[self.distribution] + " install " + "sudo -y"
             os.system(command)
-        else:
-            command = self.INSTALLERS[self.distribution] + " install " + "sudo"
-            os.system(command)
+        # else:
+        #     command = self.INSTALLERS[self.distribution] + " install " + "sudo"
+        #     os.system(command)
         success_installed = 0
         failed_packages = []
         packages = self.PACKAGES[self.distribution].split()
         for package in packages:
-            if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[self.distribution] == "apt" or self.INSTALLERS[self.distribution] == "pacman":
-                command = (
-                    "sudo -s "
-                    + self.INSTALLERS[self.distribution]
-                    + " install "
-                    + package
-                    + " -y"
-                )
-                install_result = os.system(command)
-            else:
-                command = (
-                    "sudo -s "
-                    + self.INSTALLERS[self.distribution]
-                    + " install "
-                    + package
-                )
-                install_result = os.system(command)
+            # if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[self.distribution] == "apt" or self.INSTALLERS[self.distribution] == "pacman":
+            command = (
+                "sudo -s "
+                + self.INSTALLERS[self.distribution]
+                + " install "
+                + package
+                + " -y"
+            )
+            install_result = os.system(command)
+            # else:
+            #     command = (
+            #         "sudo -s "
+            #         + self.INSTALLERS[self.distribution]
+            #         + " install "
+            #         + package
+            #     )
+            #     install_result = os.system(command)
             if install_result == 0:
                 success_installed += 1
             else:
