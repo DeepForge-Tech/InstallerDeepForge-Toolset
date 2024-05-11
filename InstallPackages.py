@@ -84,7 +84,7 @@ class Linux:
             command = "sudo apt autoremove -y"
             os.system(command)
         elif self.INSTALLERS[self.distribution] == "pacman":
-            command = "sudo pacman -Scc"
+            command = "sudo pacman -Scc --noconfirm"
             os.system(command)
         print(delimiter)
         print(
