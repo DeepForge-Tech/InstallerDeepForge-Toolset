@@ -65,7 +65,7 @@ class Linux:
         elif self.INSTALLERS[self.distribution] == "pacman":
             # command = self.INSTALLERS[self.distribution] + " -Sy " + "sudo"
             # os.system(command)
-            command = "sudo " + self.INSTALLERS[self.distribution] + " -Suy "
+            command = "sudo " + self.INSTALLERS[self.distribution] + " -Suy --noconfirm"
             os.system(command)
         success_installed = 0
         failed_packages = []
