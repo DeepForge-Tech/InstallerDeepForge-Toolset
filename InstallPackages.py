@@ -8,7 +8,7 @@ class Linux:
 
     def __init__(self):
         self.YUM_PACKAGES = (
-            "boost-devel xterm wget make cmake gcc-c++ curl libcurl sqlite-devel openssl-devel"
+            "boost-devel xterm wget make cmake gcc-c++ curl libcurl sqlite-devel openssl-devel gtest-devel gtest gmock gmock-devel"
         )
         self.DEB_PACKAGES = "libboost-all-dev libasio-dev xterm wget openssl libssl-dev g++ gcc build-essential cmake make curl libcurl4-openssl-dev libjsoncpp-dev libfmt-dev libsqlite3-dev libgtest-dev googletest google-mock libgmock-dev libtbb-dev libzip-dev zlib1g-dev"
         self.PACMAN_PACKAGES = "boost asio xterm wget jsoncpp gcc base-devel cmake gtest libcurl-compat libcurl-gnutls curl fmt sqlite sqlite-tcl zlib openssl libzip"
