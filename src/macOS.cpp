@@ -212,8 +212,8 @@ void macOS::Installer::InstallLibraries()
     std::string ShellScriptPath;
     std::string Command;
     Download(SHELL_SCRIPT_URL, TempFolder, false);
-    ShellScriptPath = TempFolder + "/" + "InstallPackages.py";
-    Command = "python3 " + ShellScriptPath;
+    ShellScriptPath = TempFolder + "/" + "InstallPackages.sh";
+    Command = "bash " + ShellScriptPath;
     system(Command.c_str());
 }
 /* The `RebootSystem()` function is responsible for rebooting the system. It uses the `system()` function to execute the command `sudo shutdown -r now`, which instructs the system to restart immediately. */

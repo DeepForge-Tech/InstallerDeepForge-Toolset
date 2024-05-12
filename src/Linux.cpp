@@ -211,8 +211,8 @@ void Linux::Installer::InstallLibraries()
     std::string Command;
     Download(SHELL_SCRIPT_URL, TempFolder, false);
     // name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
-    ShellScriptPath = TempFolder + "/" + "InstallLibraries_Linux.sh";
-    Command = "sudo bash " + ShellScriptPath;
+    ShellScriptPath = TempFolder + "/" + "InstallPackages.sh";
+    Command = "python3 " + ShellScriptPath;
     system(Command.c_str());
 }
 
@@ -224,12 +224,13 @@ void Linux::Installer::RebootSystem()
 void Linux::Installer::AddToPATH()
 {
     std::string Command;
-#if defined(__x86_64__)
-    Command = "cd " + TempFolder + "&& sudo -s chmod +x pathman-v0.5.2-linux-amd64 &&  sudo -s ./pathman-v0.5.2-linux-amd64 add /bin/";
-    Download(PATHMAN_AMD64_URL, TempFolder, false);
-#elif __arm__
-    "cd " + TempFolder + "&& sudo -s chmod +x pathman-v0.5.2-linux-armv8 &&  sudo -s ./pathman-v0.5.2-linux-armv8 add /bin/";
-    Download(PATHMAN_ARM64_URL, TempFolder, false);
-#endif
+    Command = "export PATH='" + ApplicationDir + ":$PATH'"
+// #if defined(__x86_64__)
+//     Command = "cd " + TempFolder + "&& sudo -s chmod +x pathman-v0.5.2-linux-amd64 &&  sudo -s ./pathman-v0.5.2-linux-amd64 add /bin/";
+//     Download(PATHMAN_AMD64_URL, App, false);
+// #elif __arm__
+//     "cd " + TempFolder + "&& sudo -s chmod +x pathman-v0.5.2-linux-armv8 &&  sudo -s ./pathman-v0.5.2-linux-armv8 add /bin/";
+//     Download(PATHMAN_ARM64_URL, TempFolder, false);
+// #endif
     system(Command.c_str());
 }
