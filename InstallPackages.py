@@ -55,8 +55,7 @@ class Linux:
         if self.distribution == "CentOS Linux":
             command = "cd /etc/yum.repos.d/ && sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*"
             os.system(command)
-        if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[
-                self.distribution] == "apt":
+        if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[self.distribution] == "apt":
             command = self.INSTALLERS[
                 self.distribution] + " install " + "sudo -y"
             os.system(command)
@@ -71,8 +70,7 @@ class Linux:
         failed_packages = []
         packages = self.PACKAGES[self.distribution].split()
         for package in packages:
-            if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[
-                    self.distribution] == "apt":
+            if self.INSTALLERS[self.distribution] == "yum" or self.INSTALLERS[self.distribution] == "apt":
                 command = ("sudo -s " + self.INSTALLERS[self.distribution] +
                            " install " + package + " -y")
                 install_result = os.system(command)
@@ -104,6 +102,7 @@ class Linux:
 
 
 class Windows:
+
     def __init__(self):
         self.architecture = platform.architecture()[0]
 
@@ -113,16 +112,26 @@ class Windows:
         msbuild_path = "C:\\Program Files (x86)\\Microsoft Visual Studio\\"
         if os.path.exists(vs_path):
             for obj in os.listdir(vs_path):
-                if os.path.isdir(os.path.join(vs_path, obj)) and obj.startswith("20"):
+                if os.path.isdir(os.path.join(vs_path,
+                                              obj)) and obj.startswith("20"):
                     for distribution in distributions:
-                        if distribution in os.listdir(os.path.join(vs_path, obj)):
-                            return len(os.listdir(os.path.join(vs_path, obj, distribution))) > 0
+                        if distribution in os.listdir(
+                                os.path.join(vs_path, obj)):
+                            return len(
+                                os.listdir(
+                                    os.path.join(vs_path, obj,
+                                                 distribution))) > 0
         elif os.path.exists(msbuild_path):
             for obj in os.listdir(msbuild_path):
-                if os.path.isdir(os.path.join(msbuild_path, obj)) and obj.startswith("20"):
+                if os.path.isdir(os.path.join(msbuild_path,
+                                              obj)) and obj.startswith("20"):
                     for distribution in distributions:
-                        if distribution in os.listdir(os.path.join(msbuild_path, obj)):
-                            return len(os.listdir(os.path.join(msbuild_path, obj, distribution))) > 0
+                        if distribution in os.listdir(
+                                os.path.join(msbuild_path, obj)):
+                            return len(
+                                os.listdir(
+                                    os.path.join(msbuild_path, obj,
+                                                 distribution))) > 0
 
     def installVCpkg(self) -> int:
         check_command = "vcpkg --help"
@@ -138,8 +147,11 @@ class Windows:
         return result
 
     def installCMake(self) -> int:
-        Command = "winget install -e --id Kitware.CMake"
-        result = os.system(Command)
+        check_command = "cmake --help"
+        result = os.system(check_command)
+        if result != 0:
+            install_command = "winget install -e --id Kitware.CMake"
+            result = os.system(install_command)
         return result
 
     def installCrow(self) -> int:
@@ -181,8 +193,13 @@ class Windows:
 
 
 class macOS:
+
     def __init__(self):
         self.architecture = platform.architecture()[0]
+
+    def checkXcodeCommandLineToolset(self) -> bool:
+        path = "/Library/Developer/CommandLineTools//usr/bin/"
+        return os.path.exists(path) and len(os.listdir(path)) > 0
 
     def start(self) -> int:
         command = '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
@@ -193,7 +210,11 @@ class macOS:
             return 502
         command = "brew install jsoncpp sqlite3 sqlite-utils fmt clang-format curl googletest gcc zlib cmake libzip openssl wget boost asio"
         result = os.system(command)
-        return result
+        check_build_tools = self.checkXcodeCommandLineToolset()
+        if check_build_tools == True:
+            return result
+        else:
+           return 502
 
 if __name__ == "__main__":
     platforms = {"Linux": Linux, "Windows": Windows, "Darwin": macOS}
