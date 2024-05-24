@@ -21,7 +21,7 @@ namespace Bar
         std::string outputStr;
         int progress;
 
-        void update(double DownloadedSize = 0.0, double TotalSize = 0.0);
+        void update(double downloadedSize = 0.0, double TotalSize = 0.0);
         void resetAll();
         void setMaxSymbols(int max);
         void setProgress(int Progress);

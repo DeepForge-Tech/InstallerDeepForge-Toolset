@@ -10,15 +10,11 @@ find_package(Threads REQUIRED)
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_FIND_LIBRARY_SUFFIXES .a .so .dylib)
 
-if (WIN32)
-  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
-endif()
-
 set(CMAKE_BINARY_DIR "${CMAKE_BINARY_DIR}/bin/")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-# Download dependecies
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DownloadDependecies.cmake)
+# download dependecies
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/downloadDependecies.cmake)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS_DEBUG
@@ -43,8 +39,8 @@ set(SOURCE_FILES
 )
 add_executable(InstallerDeepForge-Toolset ${SOURCE_FILES})
 if (WIN32)
-  set(USE_WINDOWS_SSPI ON)
-  set(USE_SCHANNEL ON)
+  # set(USE_WINDOWS_SSPI ON)
+  # set(USE_SCHANNEL ON)
   set(LIBRARIES
     fmt::fmt 
     urlmon

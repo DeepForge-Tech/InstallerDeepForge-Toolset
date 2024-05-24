@@ -56,8 +56,8 @@ namespace Logger {
                         std::basic_string<char, std::char_traits<char>, std::allocator<char>> log_text);
 
     private:
-        /* The 'MakeDirectory' function is used to create a directory (folder) in the file system.*/
-        void MakeDirectory(std::string dir);
+        /* The 'makeDirectory' function is used to create a directory (folder) in the file system.*/
+        void makeDirectory(std::string dir);
         /* The `convertSize` function is used to convert a given size string into bytes. */
         void convertSize(std::string size);
 

@@ -549,7 +549,7 @@ typedef enum {
   CURLE_RANGE_ERROR,             /* 33 - RANGE "command" didn't work */
   CURLE_HTTP_POST_ERROR,         /* 34 */
   CURLE_SSL_CONNECT_ERROR,       /* 35 - wrong when connecting with SSL */
-  CURLE_BAD_DOWNLOAD_RESUME,     /* 36 - couldn't resume download */
+  CURLE_BAD_download_RESUME,     /* 36 - couldn't resume download */
   CURLE_FILE_COULDNT_READ_FILE,  /* 37 */
   CURLE_LDAP_CANNOT_BIND,        /* 38 */
   CURLE_LDAP_SEARCH_FAILED,      /* 39 */
@@ -692,7 +692,7 @@ typedef enum {
 #define CURLE_HTTP_PORT_FAILED CURLE_INTERFACE_FAILED
 #define CURLE_FTP_COULDNT_STOR_FILE CURLE_UPLOAD_FAILED
 #define CURLE_FTP_PARTIAL_FILE CURLE_PARTIAL_FILE
-#define CURLE_FTP_BAD_DOWNLOAD_RESUME CURLE_BAD_DOWNLOAD_RESUME
+#define CURLE_FTP_BAD_download_RESUME CURLE_BAD_download_RESUME
 #define CURLE_LDAP_INVALID_URL CURLE_OBSOLETE62
 #define CURLE_CONV_REQD CURLE_OBSOLETE76
 #define CURLE_CONV_FAILED CURLE_OBSOLETE75
@@ -2854,14 +2854,14 @@ typedef enum {
   CURLINFO_SIZE_UPLOAD CURL_DEPRECATED(7.55.0, "Use CURLINFO_SIZE_UPLOAD_T")
                             = CURLINFO_DOUBLE + 7,
   CURLINFO_SIZE_UPLOAD_T    = CURLINFO_OFF_T  + 7,
-  CURLINFO_SIZE_DOWNLOAD
-                       CURL_DEPRECATED(7.55.0, "Use CURLINFO_SIZE_DOWNLOAD_T")
+  CURLINFO_SIZE_download
+                       CURL_DEPRECATED(7.55.0, "Use CURLINFO_SIZE_download_T")
                             = CURLINFO_DOUBLE + 8,
-  CURLINFO_SIZE_DOWNLOAD_T  = CURLINFO_OFF_T  + 8,
-  CURLINFO_SPEED_DOWNLOAD
-                       CURL_DEPRECATED(7.55.0, "Use CURLINFO_SPEED_DOWNLOAD_T")
+  CURLINFO_SIZE_download_T  = CURLINFO_OFF_T  + 8,
+  CURLINFO_SPEED_download
+                       CURL_DEPRECATED(7.55.0, "Use CURLINFO_SPEED_download_T")
                             = CURLINFO_DOUBLE + 9,
-  CURLINFO_SPEED_DOWNLOAD_T = CURLINFO_OFF_T  + 9,
+  CURLINFO_SPEED_download_T = CURLINFO_OFF_T  + 9,
   CURLINFO_SPEED_UPLOAD
                        CURL_DEPRECATED(7.55.0, "Use CURLINFO_SPEED_UPLOAD_T")
                             = CURLINFO_DOUBLE + 10,
@@ -2871,11 +2871,11 @@ typedef enum {
   CURLINFO_SSL_VERIFYRESULT = CURLINFO_LONG   + 13,
   CURLINFO_FILETIME         = CURLINFO_LONG   + 14,
   CURLINFO_FILETIME_T       = CURLINFO_OFF_T  + 14,
-  CURLINFO_CONTENT_LENGTH_DOWNLOAD
+  CURLINFO_CONTENT_LENGTH_download
                        CURL_DEPRECATED(7.55.0,
-                                      "Use CURLINFO_CONTENT_LENGTH_DOWNLOAD_T")
+                                      "Use CURLINFO_CONTENT_LENGTH_download_T")
                             = CURLINFO_DOUBLE + 15,
-  CURLINFO_CONTENT_LENGTH_DOWNLOAD_T = CURLINFO_OFF_T  + 15,
+  CURLINFO_CONTENT_LENGTH_download_T = CURLINFO_OFF_T  + 15,
   CURLINFO_CONTENT_LENGTH_UPLOAD
                        CURL_DEPRECATED(7.55.0,
                                        "Use CURLINFO_CONTENT_LENGTH_UPLOAD_T")

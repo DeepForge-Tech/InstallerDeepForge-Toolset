@@ -53,6 +53,7 @@
 #include <Logger/Logger.hpp>
 #include <future>
 #include <miniz/miniz.h>
+#include <sstream>
 
 // Checking the name of the operating system and importing the necessary libraries for this system
 #if defined(__linux__)
@@ -85,7 +86,9 @@
 #define DB_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
 #define Locale_RU_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/locale_ru.json"
 #define Locale_EN_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/locale_en.json"
-#define MODE "DEV"
+#define RELEASE_MODE 1
+#define DEBUG_MODE 0
+#define MODE DEBUG_MODE
 
 #if defined(__linux__)
 #define URL_DESKTOP_SYMLINK "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/DeepForgeToolset.desktop"
@@ -102,7 +105,11 @@
 #define OS_NAME "macOS"
 #define UpdateManagerTable "UpdateManager_macOS"
 #define NameVersionTable "macOSVersions"
+#define PATHMAN_AMD64_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/pathman-v0.6.0-darwin-amd64_v2.zip"
+#define PATHMAN_ARM64_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/pathman-v0.6.0-darwin-arm64.zip"
 #define SHELL_SCRIPT_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/InstallPackages.sh"
+#define UPDATE_MANAGER_PLIST_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/com.DeepForge.UpdateManager.plist"
+#define ADD_TO_STARTUP_SH_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/AddToStartup.sh"
 
 #elif _WIN32
 
@@ -133,13 +140,13 @@ bool withProgress = true;
 // double type
 double LastSize;
 double LastTotalSize;
-double DownloadSpeed;
+double downloadSpeed;
 // map type
 std::map<int, std::string> EnumerateChannels;
 std::map<std::string, std::string> Channels;
 
 /* The `replaceAll` function is a utility function that replaces all occurrences of a substring `from` with another substring `to` in a given string `str`. */
-std::string replaceAll(std::string str, const std::string &from, const std::string &to)
+std::string ReplaceAll(std::string str, const std::string &from, const std::string &to)
 {
     size_t start_pos = 0;
     while ((start_pos = str.find(from, start_pos)) != std::string::npos)
@@ -151,7 +158,7 @@ std::string replaceAll(std::string str, const std::string &from, const std::stri
 }
 // string type
 std::string AllChannels[2] = {"stable", "beta"};
-const std::string TrueVarious[3] = {"yes", "y", "1"};
+const std::string TrueVarious[4] = {"yes", "y", "1","да"};
 std::string ProjectDir = std::filesystem::current_path().generic_string();
 std::string haveString = "";
 std::string new_sentence;
@@ -173,7 +180,7 @@ std::string Architecture = "arm64";
 #endif
 std::string OrganizationFolder;
 std::string DesktopPath;
-std::string ApplicationDir;
+std::string ApplicationFolder;
 std::string TempFolder;
 std::string LocaleDir;
 std::string UpdateManagerFolder;
@@ -191,10 +198,10 @@ std::string PackageManager;
 char *UserFolder = getenv("USER");
 const std::string DesktopPath = std::string(UserFolder) + "/Desktop";
 std::string OrganizationFolder = "/usr/bin/DeepForge";
-std::string ApplicationDir = OrganizationFolder + "/DeepForge-Toolset";
+std::string ApplicationFolder = OrganizationFolder + "/DeepForge-Toolset";
 const std::string UpdateManagerFolder = OrganizationFolder + "/UpdateManager";
-std::string TempFolder = ApplicationDir + "/Temp";
-std::string LocaleDir = ApplicationDir + "/locale";
+std::string TempFolder = ApplicationFolder + "/Temp";
+std::string LocaleDir = ApplicationFolder + "/locale";
 std::string DatabasePath = TempFolder + "/Versions.db";
 // const std::string NewUpdateManagerFolder = OrganizationFolder + "/UpdateManager";
 #elif _WIN32
@@ -207,10 +214,10 @@ std::string Architecture = "arm64";
 char *UserFolder = getenv("USERPROFILE");
 const std::string OrganizationFolder = "C:\\ProgramData\\DeepForge";
 const std::string DesktopPath = std::string(UserFolder) + "\\Desktop";
-std::string ApplicationDir = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset";
-std::string TempFolder = ApplicationDir + "\\Temp";
+std::string ApplicationFolder = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset";
+std::string TempFolder = ApplicationFolder + "\\Temp";
 std::string DatabasePath = TempFolder + "\\Versions.db";
-std::string LocaleDir = ApplicationDir + "\\locale";
+std::string LocaleFolder = ApplicationFolder + "\\locale";
 const std::string UpdateManagerFolder = OrganizationFolder + "\\UpdateManager";
 #endif
 // init classes
@@ -223,7 +230,6 @@ void WriteInformation(std::string version)
 {
     try
     {
-        std::string NameTable = "DeepForgeToolset_" + std::string(OS_NAME);
         std::map<std::string, std::string> ApplicationColumns = {
             {"Name", "TEXT"},
             {"Version", "TEXT"},
@@ -231,7 +237,7 @@ void WriteInformation(std::string version)
         std::map<std::string, std::string> ApplicationFields = {
             {"Name", "DeepForge-Toolset"},
             {"Version", version},
-            {"NameTable", NameTable}};
+            {"NameTable", NameVersionTable}};
         std::string pathFile = UpdateManagerFolder + "/AppInformation.db";
         DB::Database AppInformationDB;
         /* The bellow code is checking if a file exists at the specified path. If the file does not exist, it creates a new file and writes an empty string to it. Then, it opens a database connection using the file as the database path. It checks if a table named "Applications" exists in the database. If the table does not exist, it creates the table with the specified columns. Finally, it inserts values into the "Applications" table. */
@@ -243,10 +249,10 @@ void WriteInformation(std::string version)
         }
         AppInformationDB.open(&pathFile);
         /* The bellow code is creating a table called "Applications" in the AppInformationDB database using the CreateTable method. It then inserts values into the "Applications" table using the InsertValuesToTable method. The boolean variable "exists" is used to store the result of the CreateTable method, indicating whether the table creation was successful or not. The integer variable "result" is used to store the number of rows affected by the InsertValuesToTable method. */
-        bool existsTable = AppInformationDB.CreateTable("Applications", ApplicationColumns);
-        int existsValue = AppInformationDB.ExistNameAppInTable("Applications", "DeepForge-Toolset");
+        AppInformationDB.CreateTable("Applications", ApplicationColumns);
+        bool existsValue = AppInformationDB.ExistValueInTable("Applications","Name", "DeepForge-Toolset");
         /* The code is checking if a table called "Applications" exists in the database. If the table does not exist (existsTable == -1), it inserts values into the table using the AppInformationDB.InsertValuesToTable() method. If the table does exist, it removes an application called "DeepForge-Toolset" from the table using the AppInformationDB.RemoveApplicationFromTable() method, and then inserts values into the table using the AppInformationDB.InsertValuesToTable() method. */
-        if (existsTable == false)
+        if (!existsValue)
         {
             result = AppInformationDB.InsertValuesToTable("Applications", ApplicationFields);
         }
@@ -272,34 +278,34 @@ void WriteInformation(std::string version)
  * @param ptr The `ptr` parameter is a pointer to user-defined data that can be passed to the
  * callback function. It allows you to pass additional information or context to the callback
  * function if needed.
- * @param TotalToDownload The total size of the file to be downloaded in bytes.
- * @param NowDownloaded The amount of data that has been downloaded so far.
+ * @param TotalTodownload The total size of the file to be downloaded in bytes.
+ * @param Nowdownloaded The amount of data that has been downloaded so far.
  * @param TotalToUpload The total size of the data to be uploaded in bytes.
  * @param NowUploaded The parameter "NowUploaded" represents the amount of data that has been
  * uploaded so far. It is a double data type.
  *
  * @return an integer value of 0.
  */
-int CallbackProgress(void *ptr, double TotalToDownload, double NowDownloaded, double TotalToUpload, double NowUploaded)
+int CallbackProgress(void *ptr, double TotalTodownload, double Nowdownloaded, double TotalToUpload, double NowUploaded)
 {
-    if (TotalToDownload <= 0.0)
+    if (TotalTodownload <= 0.0)
     {
         return 0;
     }
     if (withProgress == true)
     {
-        // double DownloadSpeed;
-        Percentage = static_cast<float>(NowDownloaded) / static_cast<float>(TotalToDownload) * 100;
+        // double downloadSpeed;
+        Percentage = static_cast<float>(Nowdownloaded) / static_cast<float>(TotalTodownload) * 100;
         /* The bellow code is checking if the `TempPercentage` is not equal to `Percentage` and is less
         than or equal to 100. If this condition is true, it retrieves the download speed using
         `curl_easy_getinfo` and updates a progress bar using the `progressbar.Update` function. It
-        also updates some variables (`LastDownloadSpeed`, `LastSize`, `LastTotalSize`, and
+        also updates some variables (`LastdownloadSpeed`, `LastSize`, `LastTotalSize`, and
         `TempPercentage`) with the current values. */
         if (TempPercentage != Percentage && TempPercentage <= 100)
         {
-            progressbar.update(NowDownloaded, TotalToDownload);
-            LastSize = NowDownloaded;
-            LastTotalSize = TotalToDownload;
+            progressbar.update(Nowdownloaded, TotalTodownload);
+            LastSize = Nowdownloaded;
+            LastTotalSize = TotalTodownload;
             TempPercentage = Percentage;
         }
     }
@@ -365,21 +371,38 @@ std::string to_lower(std::string sentence)
     return new_sentence;
 }
 // Function for check of answer
-bool CheckAnswer(std::string answer)
+bool CheckAnswer(std::string &answer)
 {
-    bool status;
-    // string Answer = to_lower(answer);
-
-    std::string Answer = answer;
+    bool status = false;
     for (int i = 0; i < TrueVarious->size(); i++)
     {
-        if (Answer == TrueVarious[i] || Answer.empty() || Answer == "\n" || Answer == "да" || Answer == "ДА" || Answer == "Да")
+        answer = to_lower(answer);
+        if (answer == TrueVarious[i] || answer.empty())
         {
             status = true;
             break;
         }
     }
     return status;
+}
+
+bool CheckStringInFile(const std::string& filename, const std::string& target) {
+    std::fstream file(filename,std::ios::in || std::ios::out || std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return false;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.find(target) != std::string::npos) {
+            file.close();
+            return true;
+        }
+    }
+
+    file.close();
+    return false;
 }
 
 #endif

@@ -38,7 +38,7 @@ namespace DB
 
         int InsertValuesToTable(const std::string &NameTable, std::map<std::string, std::string> Fields);
 
-        int ExistNameAppInTable(const std::string &NameTable,const std::string &NameApp);
+        bool ExistValueInTable(const std::string &NameTable,const std::string &NameColumn,const std::string &Value);
 
         std::string GetValueFromDB(const std::string &NameTable,const std::string &NameApp,const std::string &NameColumn);
 

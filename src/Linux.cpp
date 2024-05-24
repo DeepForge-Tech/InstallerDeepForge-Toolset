@@ -27,14 +27,12 @@
 */
 #include <InstallerDeepForge-Toolset/Linux.hpp>
 
-/*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`.
+/*  The `unpackArchive` function takes two parameters: `path_from` and `path_to`.
     It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`.
     After extracting the contents, the function closes the `Unzipper` object.
 */
 void Linux::Installer::UnpackArchive(std::string path_from, std::string path_to)
 {
-    // std::string unpack_command = "tar -xf" + path_from + " --directory " + path_to;
-    // system(unpack_command.c_str());
     try
     {
         MakeDirectory(path_to);
@@ -56,14 +54,14 @@ void Linux::Installer::UnpackArchive(std::string path_from, std::string path_to)
             std::ofstream out(output_path, std::ios::binary);
             if (!out)
             {
-                std::cerr << "Failed to create file: " << output_path << std::endl;
+                std::cerr << translate["LOG_ERROR_CREATE_FILE"].asCString() << output_path << std::endl;
                 continue;
             }
 
             void *fileData = mz_zip_reader_extract_to_heap(&zip_archive, file_stat.m_file_index, &file_stat.m_uncomp_size, 0); // You can adjust the flags parameter as needed
             if (!fileData)
             {
-                std::cerr << "Failed to extract file: " << file_stat.m_filename << std::endl;
+                std::cerr << translate["LOG_ERROR_EXTRACT_FILE"].asCString() << file_stat.m_filename << std::endl;
                 continue;
             }
 
@@ -77,13 +75,13 @@ void Linux::Installer::UnpackArchive(std::string path_from, std::string path_to)
     }
     catch (std::exception &error)
     {
-        std::string logText = "==> ❌ " + std::string(error.what());
+        std::string logText = "==> ❌ Function: UnpackArchive." + std::string(error.what());
         logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "UnpackArchive()", error.what());
         std::cerr << logText << std::endl;
     }
 }
 
-void Linux::Installer::Download(std::string url, std::string dir, bool Progress)
+void Linux::Installer::download(std::string url, std::string dir, bool Progress)
 {
     try
     {
@@ -147,13 +145,13 @@ void Linux::Installer::Download(std::string url, std::string dir, bool Progress)
     catch (std::exception &error)
     {
         std::string logText = "==> ❌ " + std::string(error.what());
-        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "Download()", error.what());
+        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "download()", error.what());
         std::cerr << logText << std::endl;
     }
 }
 
-/*The `MakeDirectory` function is responsible for creating a directory (folder) in the file system.*/
-void Linux::Installer::MakeDirectory(std::string dir)
+/*The `makeDirectory` function is responsible for creating a directory (folder) in the file system.*/
+void Linux::Installer::makeDirectory(std::string dir)
 {
     try
     {
@@ -186,51 +184,42 @@ void Linux::Installer::MakeDirectory(std::string dir)
     }
     catch (std::exception &error)
     {
-        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "MakeDirectory()", error.what());
+        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "makeDirectory()", error.what());
     }
 }
-void Linux::Installer::CreateSymlink(std::string nameSymlink, std::string filePath)
+void Linux::Installer::createSymlink(std::string nameSymlink, std::string filePath)
 {
     // char *UserFolder = getenv("HOME");
     std::string symlinkPath = std::string(UserFolder) + "/Desktop/" + nameSymlink;
-    std::string Command = "sudo ln -s " + filePath + " " + symlinkPath;
-    system(Command.c_str());
+    std::string command = "sudo ln -s " + filePath + " " + symlinkPath;
+    system(command.c_str());
 }
 
-void Linux::Installer::AddToStartupSystem()
+void Linux::Installer::addToStartupSystem()
 {
     std::string ServicePath = TempFolder + "/DeepForge-UpdateManager.service";
-    std::string Command = "sudo mv " + ServicePath + " /etc/systemd/system/DeepForge-UpdateManager.service && sudo chmod 644 /etc/systemd/system/DeepForge-UpdateManager.service && sudo systemctl enable /etc/systemd/system/DeepForge-UpdateManager.service";
-    Download(SERVICE_URL, TempFolder, false);
-    system(Command.c_str());
+    std::string command = "sudo mv " + ServicePath + " /etc/systemd/system/DeepForge-UpdateManager.service && sudo chmod 644 /etc/systemd/system/DeepForge-UpdateManager.service && sudo systemctl enable /etc/systemd/system/DeepForge-UpdateManager.service";
+    download(SERVICE_URL, TempFolder, false);
+    system(command.c_str());
 }
 
-void Linux::Installer::InstallLibraries()
+void Linux::Installer::installLibraries()
 {
     std::string ShellScriptPath;
-    std::string Command;
-    Download(SHELL_SCRIPT_URL, TempFolder, false);
+    std::string command;
+    download(SHELL_SCRIPT_URL, TempFolder, false);
     // name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
     ShellScriptPath = TempFolder + "/" + "InstallPackages.sh";
-    Command = "python3 " + ShellScriptPath;
-    system(Command.c_str());
+    command = "python3 " + ShellScriptPath;
+    system(command.c_str());
 }
 
-void Linux::Installer::RebootSystem()
+void Linux::Installer::rebootSystem()
 {
     system("sudo shutdown -r now");
 }
 
-void Linux::Installer::AddToPATH()
+vvoid Linux::Installer::addPath()
 {
-    std::string Command;
-    Command = "export PATH='" + ApplicationDir + ":$PATH'"
-// #if defined(__x86_64__)
-//     Command = "cd " + TempFolder + "&& sudo -s chmod +x pathman-v0.5.2-linux-amd64 &&  sudo -s ./pathman-v0.5.2-linux-amd64 add /bin/";
-//     Download(PATHMAN_AMD64_URL, App, false);
-// #elif __arm__
-//     "cd " + TempFolder + "&& sudo -s chmod +x pathman-v0.5.2-linux-armv8 &&  sudo -s ./pathman-v0.5.2-linux-armv8 add /bin/";
-//     Download(PATHMAN_ARM64_URL, TempFolder, false);
-// #endif
-    system(Command.c_str());
+    system("export PATH=\"$PATH:" + ApplicationFolder + '"');
 }

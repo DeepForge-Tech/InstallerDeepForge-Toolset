@@ -57,35 +57,35 @@ public:
                 SetConsoleOutputCP(CP_UTF8);
                 // Create temp folder
                 MakeDirectory(TempFolder);
-                MakeDirectory(LocaleDir);
+                MakeDirectory(LocaleFolder);
 #elif defined(__APPLE__)
-                std::string Command;
-                Command = "sudo -s chmod 777 " + std::string(UserFolder) + "/Library/Containers/";
-                system(Command.c_str());
+                std::string command;
+                command = "sudo -s chmod +x " + std::string(UserFolder) + "/Library/Containers/";
+                system(command.c_str());
                 // Create temp folder
                 MakeDirectory(TempFolder);
                 MakeDirectory(LocaleDir);
-                Command = "sudo -s chmod 777 " + OrganizationFolder;
-                system(Command.c_str());
-                Command = "sudo -s chmod 777 " + OrganizationFolder + "/*";
-                system(Command.c_str());
-                Command = "sudo -s chmod 777 " + ApplicationDir + "/*";
-                system(Command.c_str());
+                command = "sudo -s chmod +x " + OrganizationFolder;
+                system(command.c_str());
+                command = "sudo -s chmod +x " + OrganizationFolder + "/*";
+                system(command.c_str());
+                command = "sudo -s chmod +x " + ApplicationFolder + "/*";
+                system(command.c_str());
 #elif __linux__
-                std::string Command;
-                Command = "sudo -s chmod 777 /usr/bin/";
-                system(Command.c_str());
+                std::string command;
+                command = "sudo -s chmod +x /usr/bin/";
+                system(command.c_str());
                 // Create temp folder
                 MakeDirectory(TempFolder);
                 MakeDirectory(LocaleDir);
-                Command = "sudo -s chmod 777 " + OrganizationFolder;
-                system(Command.c_str());
-                Command = "sudo -s chmod 777 " + OrganizationFolder + "/*";
-                system(Command.c_str());
-                Command = "sudo -s chmod 777 " + ApplicationDir + "/*";
-                system(Command.c_str());
+                command = "sudo -s chmod +x " + OrganizationFolder;
+                system(command.c_str());
+                command = "sudo -s chmod +x " + OrganizationFolder + "/*";
+                system(command.c_str());
+                command = "sudo -s chmod +x " + ApplicationFolder + "/*";
+                system(command.c_str());
                 // mkdir(OrganizationFolder.c_str(),0777);
-                // mkdir(ApplicationDir.c_str(),0777);
+                // mkdir(ApplicationFolder.c_str(),0777);
                 mkdir(TempFolder.c_str(), 0777);
                 mkdir(LocaleDir.c_str(), 0777);
 #endif

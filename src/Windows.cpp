@@ -27,7 +27,7 @@
 */
 #include <InstallerDeepForge-Toolset/Windows.hpp>
 
-/*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`.
+/*  The `unpackArchive` function takes two parameters: `path_from` and `path_to`.
             It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`.
             After extracting the contents, the function closes the `Unzipper` object.
         */
@@ -94,8 +94,8 @@ void Windows::Installer::Download(std::string url, std::string dir, bool Progres
         std::string name = (url.substr(url.find_last_of("/")));
         std::string filename = dir + "/" + name.replace(name.find("/"), 1, "");
         // Call method for download file
-        HRESULT Download = URLDownloadToFile(NULL, url.c_str(), filename.c_str(), 0, static_cast<IBindStatusCallback *>(&writer));
-        switch (Download)
+        HRESULT download = URLDownloadToFile(NULL, url.c_str(), filename.c_str(), 0, static_cast<IBindStatusCallback *>(&writer));
+        switch (download)
         {
         case -2146697211:
             throw std::domain_error(translate["NoInternetConnection"].asCString());
@@ -118,14 +118,14 @@ void Windows::Installer::Download(std::string url, std::string dir, bool Progres
     catch (std::exception &error)
     {
         std::string logText = "==> ❌ " + std::string(error.what());
-        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "Download()", error.what());
+        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "download()", error.what());
         std::cerr << logText << std::endl;
     }
 }
 
-void Windows::Installer::AddToPATH()
+void Windows::Installer::AddPath()
 {
-    std::string Command = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe add " + ApplicationDir + " && del C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe";
+    std::string Command = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe add " + ApplicationFolder + " && del C:\\ProgramData\\DeepForge\\DeepForge-Toolset\\Temp\\pathman-v0.5.2-windows-amd64.exe";
 #if defined(_M_AMD64) || defined(__x86_64__)
     Download(PathmanURL_AMD64, TempFolder, false);
 #elif _M_ARM64
@@ -143,7 +143,7 @@ void Windows::Installer::CreateSymlink(std::string nameSymlink, std::string file
     CreateHardLinkA(symlinkPath.c_str(), filePath.c_str(), NULL);
 }
 
-/* The 'MakeDirectory' function is used to create a directory (folder) in the file system.*/
+/* The 'makeDirectory' function is used to create a directory (folder) in the file system.*/
 void Windows::Installer::MakeDirectory(std::string dir)
 {
     try

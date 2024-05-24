@@ -100,17 +100,17 @@ namespace Windows
         void Download(std::string url, std::string dir, bool Progress);
         void AddToStartupSystem(std::string filePath);
         void RebootSystem();
-        void AddToPATH();
+        void AddPath();
         // Method for create symlink on desktop
         void CreateSymlink(std::string nameSymlink, std::string filePath);
-        /* The 'MakeDirectory' function is used to create a directory (folder) in the file system.*/
+        /* The 'makeDirectory' function is used to create a directory (folder) in the file system.*/
         void MakeDirectory(std::string dir);
         void UnpackArchive(std::string path_from, std::string path_to);
-        /*  The `UnpackArchive` function takes two parameters: `path_from` and `path_to`.
+        /*  The `unpackArchive` function takes two parameters: `path_from` and `path_to`.
             It uses the `Unzipper` class to extract the contents of an archive file located at `path_from` and saves them to the directory specified by `path_to`.
             After extracting the contents, the function closes the `Unzipper` object.
         */
-        // void UnpackArchive(std::string path_from, std::string path_to);
+        // void unpackArchive(std::string path_from, std::string path_to);
     };
 }
 

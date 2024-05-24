@@ -38,9 +38,9 @@ namespace Linux
         void Download(std::string url, std::string dir, bool Progress);
         void AddToStartupSystem();
         void InstallLibraries();
-        /* The 'MakeDirectory' function is used to create a directory (folder) in the file system.*/
+        /* The 'makeDirectory' function is used to create a directory (folder) in the file system.*/
         void MakeDirectory(std::string dir);
-        void AddToPATH();
+        void AddPath();
         void CreateSymlink(std::string nameSymlink, std::string filePath);
         void UnpackArchive(std::string path_from, std::string path_to);
         void RebootSystem();

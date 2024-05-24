@@ -72,7 +72,7 @@ void Application::ReadJSON(std::string language)
     {
         if (language == "Russian")
         {
-            std::string LocalePath = LocaleDir + "/locale_ru.json";
+            std::string LocalePath = LocaleFolder + "/locale_ru.json";
             std::ifstream file(LocalePath);
             // File open check
             if (file.is_open())
@@ -84,7 +84,7 @@ void Application::ReadJSON(std::string language)
         }
         else if (language == "English")
         {
-            std::string LocalePath = LocaleDir + "/locale_en.json";
+            std::string LocalePath = LocaleFolder + "/locale_en.json";
             std::ifstream file(LocalePath);
             // File open check
             if (file.is_open())
@@ -98,7 +98,7 @@ void Application::ReadJSON(std::string language)
     catch (std::exception &error)
     {
         // Error output
-        std::string logText = "Function: ReadJSON." + std::string(error.what());
+        std::string logText = "Function: ReadJSON()." + std::string(error.what());
         logger.writeLog("Error", logText);
         logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "ReadJSON", error.what());
     }
@@ -108,11 +108,11 @@ void Application::DownloadDependencies()
     std::string Locales[2] = {Locale_RU_URL, Locale_EN_URL};
     for (int i = 0; i < (sizeof(Locales) / sizeof(Locales[0])); i++)
     {
-        Download(Locales[i], LocaleDir, false);
+        Download(Locales[i], LocaleFolder, false);
     }
     SetLanguage();
     std::cout << translate["DownloadingDatabase"].asString() << std::endl;
-    // Download database Versions.db
+    // download database Versions.db
     Download(DB_URL, TempFolder, true);
     std::cout << translate["DatabaseDownloaded"].asCString() << std::endl;
 }
@@ -129,8 +129,8 @@ void Application::InstallUpdateManager()
         std::string UpdateManagerUrl;
         std::string name;
         std::string filename;
-        std::string ArchivePath;
-        std::string Command;
+        std::string archivePath;
+        std::string command;
         std::string file_path;
         latestVersion = database.GetLatestVersion(UpdateManagerTable, "stable", "Version", Architecture);
         if (latestVersion != "")
@@ -139,20 +139,21 @@ void Application::InstallUpdateManager()
             std::cout << translate["Installing"].asString() << " UpdateManager..." << std::endl;
             Download(UpdateManagerUrl, TempFolder, true);
             name = (UpdateManagerUrl.substr(UpdateManagerUrl.find_last_of("/")));
-            ArchivePath = TempFolder + "/" + name.replace(name.find("/"), 1, "");
+            archivePath = TempFolder + "/" + name.replace(name.find("/"), 1, "");
             MakeDirectory(UpdateManagerFolder);
+            UnpackArchive(archivePath,UpdateManagerFolder);
 #if defined(__linux__) || defined(__APPLE__)
-            Command = "sudo -s chmod 777 " + UpdateManagerFolder + "/*";
-            system(Command.c_str());
+            command = "sudo -s chmod 777 " + UpdateManagerFolder + "/*";
+            system(command.c_str());
 #endif
-            std::filesystem::remove(ArchivePath);
+            std::filesystem::remove(archivePath);
             file_path = UpdateManagerFolder + "/UpdateManager";
             std::cout << "==> ✅ UpdateManager " << latestVersion << " " << translate["Installed"].asString() << std::endl;
             std::cout << InstallDelimiter << std::endl;
 #if defined(_WIN32)
             AddToStartupSystem(file_path);
 #else
-            AddToStartupSystem();
+            addToStartupSystem();
 #endif
             WriteInformation(DEEPFORGE_TOOLSET_VERSION);
         }
@@ -181,29 +182,29 @@ void Application::InstallDeepForgeToolset(std::string channel)
         std::string ApplicationURL;
         std::string name;
         std::string filename;
-        std::string ArchivePath;
-        std::string Command;
+        std::string archivePath;
+        std::string command;
         std::string file_path;
         std::cout << InstallDelimiter << std::endl;
         std::cout << translate["Installing"].asString() << " DeepForge Toolset..." << std::endl;
         ApplicationURL = database.GetApplicationURL(NameVersionTable, channel, "Url", Architecture, DEEPFORGE_TOOLSET_VERSION);
         Download(ApplicationURL, TempFolder, true);
         name = (ApplicationURL.substr(ApplicationURL.find_last_of("/")));
-        ArchivePath = TempFolder + "/" + name.replace(name.find("/"), 1, "");
-        MakeDirectory(ApplicationDir);
-        UnpackArchive(ArchivePath, ApplicationDir);
-        #if defined(__linux__)
-                InstallLibraries();
-        #elif __APPLE__
-                InstallLibraries();
-        #endif
-        file_path = ApplicationDir + "/DeepForgeToolset";
+        archivePath = TempFolder + "/" + name.replace(name.find("/"), 1, "");
+        MakeDirectory(ApplicationFolder);
+        UnpackArchive(archivePath, ApplicationFolder);
+        // #if defined(__linux__)
+        //         installLibraries();
+        // #elif __APPLE__
+        //         installLibraries();
+        // #endif
+        file_path = ApplicationFolder + "/DeepForgeToolset";
         CreateSymlink("DeepForge-Toolset", file_path);
-        std::filesystem::remove(ArchivePath);
+        std::filesystem::remove(archivePath);
         std::cout << "==> ✅ DeepForge Toolset " << DEEPFORGE_TOOLSET_VERSION << " " << translate["Installed"].asString() << std::endl;
-#if defined(_WIN32)
-        AddToPATH();
-#endif
+// #if defined(_WIN32)
+        AddPath();
+// #endif
         std::cout << InstallDelimiter << std::endl;
         if (Updating == true)
         {
@@ -281,8 +282,12 @@ void Application::CommandManager()
     }
 }
 
-int main()
+int main(int argc, char **argv)
 {
+    #if defined(__APPLE__)
+        std::filesystem::path current_dir = argv[0];
+        std::filesystem::current_path(current_dir.parent_path().generic_string());
+    #endif
     Application app;
     app.CommandManager();
     return 0;
