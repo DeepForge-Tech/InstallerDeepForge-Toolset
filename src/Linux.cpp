@@ -149,7 +149,7 @@ void Linux::Installer::Download(std::string url, std::string dir, bool Progress)
     }
     catch (std::exception &error)
     {
-        std::string logText = "==> ❌ " + std::string(error.what());
+        std::string logText = "==> ❌ Function: Download." + std::string(error.what());
         logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "Download()", error.what());
         std::cerr << logText << std::endl;
     }

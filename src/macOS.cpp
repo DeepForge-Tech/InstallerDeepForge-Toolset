@@ -149,8 +149,8 @@ void macOS::Installer::Download(std::string url, std::string dir, bool Progress)
     }
     catch (std::exception &error)
     {
-        std::string logText = "==> ❌ " + std::string(error.what());
-        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "download()", error.what());
+        std::string logText = "==> ❌ Function: Download." + std::string(error.what());
+        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "Download()", error.what());
         std::cerr << logText << std::endl;
     }
 }
@@ -213,6 +213,8 @@ void macOS::Installer::AddToStartupSystem()
     std::string name_sh;
     std::string plistPath;
     std::string scriptPath;
+    int result;
+
     url = UPDATE_MANAGER_PLIST_URL;
     url_sh = ADD_TO_STARTUP_SH_URL;
     name = (url.substr(url.find_last_of("/")));
@@ -257,7 +259,7 @@ void macOS::Installer::AddPath()
     Download(url, TempFolder, false);
 #elif __arm__ || __aarch64__ || _M_ARM64
     url = PATHMAN_ARM64_URL;
-    download(url, TempFolder, false);
+    Download(url, TempFolder, false);
 #endif
     name = (url.substr(url.find_last_of("/")));
     archivePath = TempFolder + "/" + name.replace(name.find("/"), 1, "");

@@ -89,7 +89,7 @@
 #define Locale_EN_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/locale_en.json"
 #define RELEASE_MODE 1
 #define DEBUG_MODE 0
-#define MODE DEBUG_MODE
+#define MODE RELEASE_MODE
 
 #if defined(__linux__)
 #define URL_DESKTOP_SYMLINK "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/DeepForgeToolset.desktop"
@@ -126,7 +126,7 @@
 // int type
 int Percentage;
 int TempPercentage = 0;
-int result;
+// int result;
 int output_func;
 int defaultChannel = 1;
 // enum classes
@@ -241,6 +241,7 @@ void WriteInformation(std::string version)
             {"NameTable", NameVersionTable}};
         std::string pathFile = UpdateManagerFolder + "/AppInformation.db";
         DB::Database AppInformationDB;
+        int result;
         /* The bellow code is checking if a file exists at the specified path. If the file does not exist, it creates a new file and writes an empty string to it. Then, it opens a database connection using the file as the database path. It checks if a table named "Applications" exists in the database. If the table does not exist, it creates the table with the specified columns. Finally, it inserts values into the "Applications" table. */
         if (std::filesystem::exists(pathFile) == false)
         {
