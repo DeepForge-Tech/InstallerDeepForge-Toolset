@@ -14,7 +14,7 @@ set(CMAKE_BINARY_DIR "${CMAKE_BINARY_DIR}/bin/")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # download dependecies
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/downloadDependecies.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DownloadDependecies.cmake)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS_DEBUG
