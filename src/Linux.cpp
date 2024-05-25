@@ -86,7 +86,7 @@ void Linux::Installer::UnpackArchive(std::string path_from, std::string path_to)
     }
 }
 
-void Linux::Installer::download(std::string url, std::string dir, bool Progress)
+void Linux::Installer::Download(std::string url, std::string dir, bool Progress)
 {
     try
     {
@@ -150,13 +150,13 @@ void Linux::Installer::download(std::string url, std::string dir, bool Progress)
     catch (std::exception &error)
     {
         std::string logText = "==> ❌ " + std::string(error.what());
-        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "download()", error.what());
+        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "Download()", error.what());
         std::cerr << logText << std::endl;
     }
 }
 
 /*The `makeDirectory` function is responsible for creating a directory (folder) in the file system.*/
-void Linux::Installer::makeDirectory(std::string dir)
+void Linux::Installer::MakeDirectory(std::string dir)
 {
     try
     {
@@ -189,42 +189,46 @@ void Linux::Installer::makeDirectory(std::string dir)
     }
     catch (std::exception &error)
     {
-        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "makeDirectory()", error.what());
+        std::string logText = "==> ❌ " + std::string(error.what());
+        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "MakeDirectory()", error.what());
+        std::cerr << logText << std::endl;
     }
 }
-void Linux::Installer::createSymlink(std::string nameSymlink, std::string filePath)
+void Linux::Installer::CreateSymlink(std::string nameSymlink, std::string filePath)
 {
     // char *UserFolder = getenv("HOME");
-    std::string symlinkPath = std::string(UserFolder) + "/Desktop/" + nameSymlink;
-    std::string command = "sudo ln -s " + filePath + " " + symlinkPath;
+    std::string symlinkPath = "~/Desktop/" + nameSymlink;
+    std::string command = "sudo ln " + filePath + " " + symlinkPath;
+    std::cout << command << std::endl;
     system(command.c_str());
 }
 
-void Linux::Installer::addToStartupSystem()
+void Linux::Installer::AddToStartupSystem()
 {
     std::string ServicePath = TempFolder + "/DeepForge-UpdateManager.service";
     std::string command = "sudo mv " + ServicePath + " /etc/systemd/system/DeepForge-UpdateManager.service && sudo chmod 644 /etc/systemd/system/DeepForge-UpdateManager.service && sudo systemctl enable /etc/systemd/system/DeepForge-UpdateManager.service";
-    download(SERVICE_URL, TempFolder, false);
+    Download(SERVICE_URL, TempFolder, false);
     system(command.c_str());
 }
 
-void Linux::Installer::installLibraries()
+void Linux::Installer::InstallLibraries()
 {
     std::string ShellScriptPath;
     std::string command;
-    download(SHELL_SCRIPT_URL, TempFolder, false);
+    Download(PYTHON_SCRIPT_URL, TempFolder, false);
     // name = (ShellScript_URL.substr(ShellScript_URL.find_last_of("/")));
-    ShellScriptPath = TempFolder + "/" + "InstallPackages.sh";
+    ShellScriptPath = TempFolder + "/" + "InstallPackages.py";
     command = "python3 " + ShellScriptPath;
     system(command.c_str());
 }
 
-void Linux::Installer::rebootSystem()
+void Linux::Installer::RebootSystem()
 {
     system("sudo shutdown -r now");
 }
 
-vvoid Linux::Installer::addPath()
+void Linux::Installer::AddPath()
 {
-    system("export PATH=\"$PATH:" + ApplicationFolder + '"');
+    std::string command = "export PATH=\"$PATH:" + ApplicationFolder + '"';
+    system(command.c_str());
 }

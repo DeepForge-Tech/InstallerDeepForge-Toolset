@@ -77,7 +77,7 @@ public:
                 system(command.c_str());
                 // Create temp folder
                 MakeDirectory(TempFolder);
-                MakeDirectory(LocaleDir);
+                MakeDirectory(LocaleFolder);
                 command = "sudo -s chmod +x " + OrganizationFolder;
                 system(command.c_str());
                 command = "sudo -s chmod +x " + OrganizationFolder + "/*";
@@ -87,7 +87,7 @@ public:
                 // mkdir(OrganizationFolder.c_str(),0777);
                 // mkdir(ApplicationFolder.c_str(),0777);
                 mkdir(TempFolder.c_str(), 0777);
-                mkdir(LocaleDir.c_str(), 0777);
+                mkdir(LocaleFolder.c_str(), 0777);
 #endif
                 DownloadDependencies();
                 database.open(&DatabasePath);

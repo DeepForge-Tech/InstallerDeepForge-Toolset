@@ -1,2 +1,0 @@
-background-#202020
-frontend-#a4c2b2

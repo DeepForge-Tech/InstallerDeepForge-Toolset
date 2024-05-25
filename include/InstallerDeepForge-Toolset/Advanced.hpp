@@ -97,7 +97,7 @@
 #define PATHMAN_AMD64_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/pathman-v0.5.2-linux-amd64"
 #define PATHMAN_ARM64_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/pathman-v0.5.2-linux-armv8"
 #define SERVICE_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/DeepForge-UpdateManager.service"
-#define SHELL_SCRIPT_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/InstallPackages.py"
+#define PYTHON_SCRIPT_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/InstallPackages.py"
 #define OS_NAME "Linux"
 
 #elif __APPLE__
@@ -195,7 +195,7 @@ std::string Architecture = "arm64";
 #endif
 std::string NameDistribution;
 std::string PackageManager;
-char *UserFolder = getenv("USER");
+char *UserFolder = getenv("HOME");
 const std::string DesktopPath = std::string(UserFolder) + "/Desktop";
 std::string OrganizationFolder = "/usr/bin/DeepForge";
 std::string ApplicationFolder = OrganizationFolder + "/DeepForge-Toolset";

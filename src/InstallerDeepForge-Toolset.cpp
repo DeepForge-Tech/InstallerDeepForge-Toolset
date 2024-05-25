@@ -186,25 +186,25 @@ void Application::InstallDeepForgeToolset(std::string channel)
         std::string command;
         std::string file_path;
         std::cout << InstallDelimiter << std::endl;
-        std::cout << translate["Installing"].asString() << " DeepForge Toolset..." << std::endl;
+        std::cout << translate["Installing"].asString() << " DeepForge-Toolset..." << std::endl;
         ApplicationURL = database.GetApplicationURL(NameVersionTable, channel, "Url", Architecture, DEEPFORGE_TOOLSET_VERSION);
         Download(ApplicationURL, TempFolder, true);
         name = (ApplicationURL.substr(ApplicationURL.find_last_of("/")));
         archivePath = TempFolder + "/" + name.replace(name.find("/"), 1, "");
         MakeDirectory(ApplicationFolder);
         UnpackArchive(archivePath, ApplicationFolder);
-        // #if defined(__linux__)
-        //         installLibraries();
-        // #elif __APPLE__
-        //         installLibraries();
-        // #endif
-        file_path = ApplicationFolder + "/DeepForgeToolset";
+        #if defined(__linux__)
+                InstallLibraries();
+        #elif __APPLE__
+                InstallLibraries();
+        #endif
+        file_path = ApplicationFolder + "/DeepForge-Toolset";
+        #if defined(_WIN32) || defined(__APPLE__)
         CreateSymlink("DeepForge-Toolset", file_path);
+        #endif
         std::filesystem::remove(archivePath);
-        std::cout << "==> ✅ DeepForge Toolset " << DEEPFORGE_TOOLSET_VERSION << " " << translate["Installed"].asString() << std::endl;
-// #if defined(_WIN32)
+        std::cout << "==> ✅ DeepForge-Toolset " << DEEPFORGE_TOOLSET_VERSION << " " << translate["Installed"].asString() << std::endl;
         AddPath();
-// #endif
         std::cout << InstallDelimiter << std::endl;
         if (Updating == true)
         {
@@ -232,41 +232,11 @@ void Application::ChangeUpdating()
         Updating = CheckAnswer(Answer);
     }
 }
-/**
- * The CommandManager function allows the user to select a version of the DeepForge Toolset and
- * installs it.
- */
+
 void Application::CommandManager()
 {
     try
     {
-        // for (int i = 1;i < EnumerateChannels.size() + 1;i++)
-        // {
-        //     std::cout << i << ". " << EnumerateChannels[i] << std::endl;
-        // }
-        // // std::cout << defaultChannel << ". " << AllChannels[defaultChannel] << std::endl;
-        // std::cout << translate["ChangeStability"].asString() << defaultChannel << "):";
-        // getline(std::cin, Answer);
-        // /* This code block is responsible for handling user input to select a version of the DeepForge
-        // Toolset to install. */
-        // if (Answer.empty())
-        // {
-        //     ChangeUpdating();
-        //     InstallDeepForgeToolset(EnumerateChannels[defaultChannel]);
-        // }
-        // else
-        // {
-        //     int TempAnswer = stoi(Answer);
-        //     if (EnumerateChannels.find(TempAnswer) != EnumerateChannels.end())
-        //     {
-        //         ChangeUpdating();
-        //         InstallDeepForgeToolset(EnumerateChannels[TempAnswer]);
-        //     }
-        //     else
-        //     {
-        //         CommandManager();
-        //     }
-        // }
         ChangeUpdating();
         InstallDeepForgeToolset(DEEPFORGE_TOOLSET_CHANNEL);
         std::cout << translate["Reboot"].asString();
