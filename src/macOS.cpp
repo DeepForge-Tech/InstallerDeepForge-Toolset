@@ -50,25 +50,30 @@ void macOS::Installer::UnpackArchive(std::string path_from, std::string path_to)
             std::string output_path = path_to + "/" + file_stat.m_filename;
             std::filesystem::path path(output_path);
             std::filesystem::create_directories(path.parent_path());
-
-            std::ofstream out(output_path, std::ios::binary);
-            if (!out)
+            if (endsWith(output_path, "/"))
             {
-                std::cerr << translate["LOG_ERROR_CREATE_FILE"].asCString() << output_path << std::endl;
-                continue;
+                MakeDirectory(output_path);
             }
-
-            void *fileData = mz_zip_reader_extract_to_heap(&zip_archive, file_stat.m_file_index, &file_stat.m_uncomp_size, 0); // You can adjust the flags parameter as needed
-            if (!fileData)
+            else
             {
-                std::cerr << translate["LOG_ERROR_EXTRACT_FILE"].asCString() << file_stat.m_filename << std::endl;
-                continue;
+                std::ofstream out(output_path, std::ios::binary);
+                if (!out)
+                {
+                    std::cerr << "Failed to create file: " << output_path << std::endl;
+                    continue;
+                }
+                size_t fileSize = file_stat.m_uncomp_size;
+                void *fileData = mz_zip_reader_extract_to_heap(&zip_archive, file_stat.m_file_index, &fileSize, 0);
+                if (!fileData)
+                {
+                    throw std::runtime_error("Failed to extract file: " + std::string(file_stat.m_filename));
+                }
+
+                out.write(static_cast<const char *>(fileData), fileSize);
+                mz_free(fileData);
+
+                out.close();
             }
-
-            out.write(static_cast<const char *>(fileData), file_stat.m_uncomp_size);
-            mz_free(fileData);
-
-            out.close();
         }
 
         mz_zip_reader_end(&zip_archive);
@@ -81,7 +86,7 @@ void macOS::Installer::UnpackArchive(std::string path_from, std::string path_to)
     }
 }
 
-void macOS::Installer::download(std::string url, std::string dir, bool Progress)
+void macOS::Installer::Download(std::string url, std::string dir, bool Progress)
 {
     try
     {
@@ -151,7 +156,7 @@ void macOS::Installer::download(std::string url, std::string dir, bool Progress)
 }
 
 /*The `makeDirectory` function is responsible for creating a directory (folder) in the file system.*/
-void macOS::Installer::makeDirectory(std::string dir)
+void macOS::Installer::MakeDirectory(std::string dir)
 {
     try
     {
@@ -189,7 +194,7 @@ void macOS::Installer::makeDirectory(std::string dir)
 }
 
 /* The `createSymlink` function is creating a symbolic link (symlink) in the `/Applications` directory. It takes two parameters: `nameSymlink` which is the name of the symlink, and `filePath` which is the path to the file or directory that the symlink will point to.*/
-void macOS::Installer::createSymlink(std::string nameSymlink, std::string filePath)
+void macOS::Installer::CreateSymlink(std::string nameSymlink, std::string filePath)
 {
     // char *UserFolder = getenv("USER");
     std::string symlinkPath = "/Applications/" + nameSymlink;
@@ -198,7 +203,7 @@ void macOS::Installer::createSymlink(std::string nameSymlink, std::string filePa
     // cout << symlinkPath << endl;
 }
 
-void macOS::Installer::addToStartupSystem()
+void macOS::Installer::AddToStartupSystem()
 {
     std::string checkCommand;
     std::string run_sh_command;
@@ -219,28 +224,28 @@ void macOS::Installer::addToStartupSystem()
     run_sh_command = "sudo bash " + scriptPath;
     if (result != 0)
     {
-        download(url,TempFolder,false);
-        download(url_sh,TempFolder,false);
+        Download(url,TempFolder,false);
+        Download(url_sh,TempFolder,false);
         system(run_sh_command.c_str());
     }
 }
 /* The `installLibraries()` function is responsible for downloading and executing a shell script that installs additional libraries or dependencies required by the DeepForge Toolset. */
-void macOS::Installer::installLibraries()
+void macOS::Installer::InstallLibraries()
 {
     std::string ShellScriptPath;
     std::string command;
-    download(SHELL_SCRIPT_URL, TempFolder, false);
+    Download(SHELL_SCRIPT_URL, TempFolder, false);
     ShellScriptPath = TempFolder + "/" + "InstallPackages.sh";
     command = "bash " + ShellScriptPath;
     system(command.c_str());
 }
 /* The `rebootSystem()` function is responsible for rebooting the system. It uses the `system()` function to execute the command `sudo shutdown -r now`, which instructs the system to restart immediately. */
-void macOS::Installer::rebootSystem()
+void macOS::Installer::RebootSystem()
 {
     system("sudo shutdown -r now");
 }
 
-void macOS::Installer::addPath()
+void macOS::Installer::AddPath()
 {
     std::string url;
     std::string name;
@@ -249,7 +254,7 @@ void macOS::Installer::addPath()
     std::string app_path;
 #if defined(_M_AMD64) || defined(__x86_64__)
     url = PATHMAN_AMD64_URL;
-    download(url, TempFolder, false);
+    Download(url, TempFolder, false);
 #elif __arm__ || __aarch64__ || _M_ARM64
     url = PATHMAN_ARM64_URL;
     download(url, TempFolder, false);

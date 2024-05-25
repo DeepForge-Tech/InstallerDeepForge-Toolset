@@ -153,7 +153,7 @@ void Application::InstallUpdateManager()
 #if defined(_WIN32)
             AddToStartupSystem(file_path);
 #else
-            addToStartupSystem();
+            AddToStartupSystem();
 #endif
             WriteInformation(DEEPFORGE_TOOLSET_VERSION);
         }

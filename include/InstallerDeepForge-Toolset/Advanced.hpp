@@ -182,7 +182,7 @@ std::string OrganizationFolder;
 std::string DesktopPath;
 std::string ApplicationFolder;
 std::string TempFolder;
-std::string LocaleDir;
+std::string LocaleFolder;
 std::string UpdateManagerFolder;
 std::string DatabasePath;
 std::string LogPath;
@@ -201,7 +201,7 @@ std::string OrganizationFolder = "/usr/bin/DeepForge";
 std::string ApplicationFolder = OrganizationFolder + "/DeepForge-Toolset";
 const std::string UpdateManagerFolder = OrganizationFolder + "/UpdateManager";
 std::string TempFolder = ApplicationFolder + "/Temp";
-std::string LocaleDir = ApplicationFolder + "/locale";
+std::string LocaleFolder = ApplicationFolder + "/locale";
 std::string DatabasePath = TempFolder + "/Versions.db";
 // const std::string NewUpdateManagerFolder = OrganizationFolder + "/UpdateManager";
 #elif _WIN32
@@ -387,7 +387,7 @@ bool CheckAnswer(std::string &answer)
 }
 
 bool CheckStringInFile(const std::string& filename, const std::string& target) {
-    std::fstream file(filename,std::ios::in || std::ios::out || std::ios::binary);
+    std::fstream file(filename,std::ios::in | std::ios::out | std::ios::binary);
     if (!file.is_open()) {
         std::cerr << "Failed to open file: " << filename << std::endl;
         return false;

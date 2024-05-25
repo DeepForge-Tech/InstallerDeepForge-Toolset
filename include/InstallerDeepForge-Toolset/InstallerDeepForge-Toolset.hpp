@@ -64,7 +64,7 @@ public:
                 system(command.c_str());
                 // Create temp folder
                 MakeDirectory(TempFolder);
-                MakeDirectory(LocaleDir);
+                MakeDirectory(LocaleFolder);
                 command = "sudo -s chmod +x " + OrganizationFolder;
                 system(command.c_str());
                 command = "sudo -s chmod +x " + OrganizationFolder + "/*";
