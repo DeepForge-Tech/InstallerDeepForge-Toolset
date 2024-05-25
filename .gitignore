@@ -33,7 +33,7 @@
 *.zip
 *.tar.gz
 CMakeFiles/
-*.cmake
+# *.cmake
 CMakeCache.txt
 /Makefile
 /.ninja_log
@@ -41,7 +41,7 @@ CMakeCache.txt
 /build.ninja
 build/
 *.ninja
-/tests/
+# /tests/
 .vscode/
 .idea/
 src/lib/
@@ -51,3 +51,5 @@ _deps/
 .ninja_log
 build.ninja
 .vs/
+*/cmake_install.cmake
+build_linux/

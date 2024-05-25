@@ -1,0 +1,3 @@
+[submodule "ConfigureTools"]
+	path = ConfigureTools
+	url = https://github.com/DeepForge-Tech/ConfigureTools.git

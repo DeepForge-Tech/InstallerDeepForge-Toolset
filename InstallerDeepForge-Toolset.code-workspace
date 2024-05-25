@@ -90,7 +90,18 @@
 			"typeindex": "cpp",
 			"xhash": "cpp",
 			"xtree": "cpp",
-			"future": "cpp"
+			"future": "cpp",
+			"regex": "cpp",
+			"unordered_set": "cpp",
+			"numeric": "cpp",
+			"random": "cpp",
+			"*.tcc": "cpp",
+			"codecvt": "cpp",
+			"cwctype": "cpp",
+			"memory_resource": "cpp",
+			"numbers": "cpp",
+			"semaphore": "cpp",
+			"cinttypes": "cpp"
 		}
 	}
 }
