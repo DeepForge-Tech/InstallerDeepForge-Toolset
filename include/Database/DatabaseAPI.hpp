@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <sqlite3/sqlite3.h>
-#include <map>
+#include <unordered_map>
 #include <filesystem>
 
 namespace DB
@@ -34,9 +34,9 @@ namespace DB
         {
             sqlite3_close(db);
         }
-        int CreateTable(const std::string &NameTable, std::map<std::string, std::string> Columns);
+        int CreateTable(const std::string &NameTable, std::unordered_map<std::string, std::string> Columns);
 
-        int InsertValuesToTable(const std::string &NameTable, std::map<std::string, std::string> Fields);
+        int InsertValuesToTable(const std::string &NameTable, std::unordered_map<std::string, std::string> Fields);
 
         bool ExistValueInTable(const std::string &NameTable,const std::string &NameColumn,const std::string &Value);
 
@@ -44,15 +44,15 @@ namespace DB
 
         std::string GetVersionFromDB(const std::string &NameTable,const std::string &Channel,const std::string &NameColumn,const std::string &Architecture);
 
-        std::map<std::string, std::string> GetAllVersionsFromDB(const std::string &NameTable,const std::string &Architecture);
+        std::unordered_map<std::string, std::string> GetAllVersionsFromDB(const std::string &NameTable,const std::string &Architecture);
 
         std::string GetLatestVersion(const std::string &NameTable,const std::string &Channel,const std::string &NameColumn,const std::string &Architecture);
 
         std::string GetApplicationURL(const std::string &NameTable,const std::string &Channel,const std::string &NameColumn,const std::string &Architecture,const std::string &Version);
 
-        std::map<std::string, std::string> GetAllValuesFromDB(const std::string &NameTable,const std::string &NameColumn);
+        std::unordered_map<std::string, std::string> GetAllValuesFromDB(const std::string &NameTable,const std::string &NameColumn);
 
-        std::map<std::string, std::string> GetDevPackFromDB(const std::string &NameTable,const std::string &NameColumn);
+        std::unordered_map<std::string, std::string> GetDevPackFromDB(const std::string &NameTable,const std::string &NameColumn);
 
         int InsertApplicationsToTable(const std::string &NameTable,const std::string &NameApp,const std::string &WindowsCommand,const std::string &macOSCommand,const std::string &LinuxCommand);
 

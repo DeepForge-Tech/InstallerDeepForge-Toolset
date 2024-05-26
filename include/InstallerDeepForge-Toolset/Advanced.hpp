@@ -32,7 +32,8 @@
 #include <iostream>
 #include <cstdio>
 #include <cstring>
-#include <map>
+// #include <map>
+#include <unordered_map>
 #include <filesystem>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -142,8 +143,8 @@ double LastSize;
 double LastTotalSize;
 double downloadSpeed;
 // map type
-std::map<int, std::string> EnumerateChannels;
-std::map<std::string, std::string> Channels;
+std::unordered_map<int, std::string> EnumerateChannels;
+std::unordered_map<std::string, std::string> Channels;
 
 /* The `replaceAll` function is a utility function that replaces all occurrences of a substring `from` with another substring `to` in a given string `str`. */
 std::string ReplaceAll(std::string str, const std::string &from, const std::string &to)
@@ -159,7 +160,7 @@ std::string ReplaceAll(std::string str, const std::string &from, const std::stri
 // string type
 std::string AllChannels[2] = {"stable", "beta"};
 const std::string TrueVarious[4] = {"yes", "y", "1","да"};
-std::string ProjectDir = std::filesystem::current_path().generic_string();
+std::string ProjectFolder = std::filesystem::current_path().generic_string();
 std::string haveString = "";
 std::string new_sentence;
 std::string LangReadySet;
@@ -230,11 +231,11 @@ void WriteInformation(std::string version)
 {
     try
     {
-        std::map<std::string, std::string> ApplicationColumns = {
+        std::unordered_map<std::string, std::string> ApplicationColumns = {
             {"Name", "TEXT"},
             {"Version", "TEXT"},
             {"NameTable", "TEXT"}};
-        std::map<std::string, std::string> ApplicationFields = {
+        std::unordered_map<std::string, std::string> ApplicationFields = {
             {"Name", "DeepForge-Toolset"},
             {"Version", version},
             {"NameTable", NameVersionTable}};
