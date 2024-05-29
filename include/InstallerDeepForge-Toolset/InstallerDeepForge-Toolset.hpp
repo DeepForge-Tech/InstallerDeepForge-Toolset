@@ -60,11 +60,8 @@ public:
                 MakeDirectory(LocaleFolder);
 #elif defined(__APPLE__)
                 std::string command;
-                command = "sudo -s chmod +x " + std::string(UserFolder) + "/Library/Containers/";
+                command = "sudo -s chmod 777  ~/Library/Containers/";
                 system(command.c_str());
-                // Create temp folder
-                MakeDirectory(TempFolder);
-                MakeDirectory(LocaleFolder);
                 command = "sudo -s chmod +x " + OrganizationFolder;
                 system(command.c_str());
                 command = "sudo -s chmod +x " + OrganizationFolder + "/*";
@@ -75,9 +72,6 @@ public:
                 std::string command;
                 command = "sudo -s chmod +x /usr/bin/";
                 system(command.c_str());
-                // Create temp folder
-                MakeDirectory(TempFolder);
-                MakeDirectory(LocaleFolder);
                 command = "sudo -s chmod +x " + OrganizationFolder;
                 system(command.c_str());
                 command = "sudo -s chmod +x " + OrganizationFolder + "/*";
