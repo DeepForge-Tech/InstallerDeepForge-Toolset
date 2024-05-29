@@ -60,23 +60,25 @@ public:
                 MakeDirectory(LocaleFolder);
 #elif defined(__APPLE__)
                 std::string command;
-                command = "sudo -s chmod 777  ~/Library/Containers/";
+                command = "sudo chmod +x  ~/Library/Containers/";
                 system(command.c_str());
-                command = "sudo -s chmod +x " + OrganizationFolder;
+                command = "sudo chmod +x " + OrganizationFolder;
                 system(command.c_str());
-                command = "sudo -s chmod +x " + OrganizationFolder + "/*";
+                command = "sudo chmod +x " + OrganizationFolder + "/*";
                 system(command.c_str());
-                command = "sudo -s chmod +x " + ApplicationFolder + "/*";
+                command = "sudo chmod +x " + ApplicationFolder + "/*";
                 system(command.c_str());
+                mkdir(TempFolder.c_str(), 0777);
+                mkdir(LocaleFolder.c_str(), 0777);
 #elif __linux__
                 std::string command;
-                command = "sudo -s chmod +x /usr/bin/";
+                command = "sudo chmod +x /usr/bin/";
                 system(command.c_str());
-                command = "sudo -s chmod +x " + OrganizationFolder;
+                command = "sudo chmod +x " + OrganizationFolder;
                 system(command.c_str());
-                command = "sudo -s chmod +x " + OrganizationFolder + "/*";
+                command = "sudo chmod +x " + OrganizationFolder + "/*";
                 system(command.c_str());
-                command = "sudo -s chmod +x " + ApplicationFolder + "/*";
+                command = "sudo chmod +x " + ApplicationFolder + "/*";
                 system(command.c_str());
                 // mkdir(OrganizationFolder.c_str(),0777);
                 // mkdir(ApplicationFolder.c_str(),0777);
@@ -84,7 +86,6 @@ public:
                 mkdir(LocaleFolder.c_str(), 0777);
 #endif
                 DownloadDependencies();
-                std::cout << "2" << std::endl;
                 database.open(&DatabasePath);
                 // std::future<void> UploadInformation_async = std::async(std::launch::async, UploadInformation);
                 // UploadInformation_async.wait();
