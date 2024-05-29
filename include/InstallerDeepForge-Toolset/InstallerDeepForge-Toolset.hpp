@@ -62,18 +62,24 @@ public:
                 std::string command;
                 command = "sudo chmod +x  ~/Library/Containers/";
                 system(command.c_str());
+                // Create temp folder
+                MakeDirectory(TempFolder);
+                MakeDirectory(LocaleFolder);
                 command = "sudo chmod +x " + OrganizationFolder;
                 system(command.c_str());
                 command = "sudo chmod +x " + OrganizationFolder + "/*";
                 system(command.c_str());
                 command = "sudo chmod +x " + ApplicationFolder + "/*";
                 system(command.c_str());
-                mkdir(TempFolder.c_str(), 0777);
-                mkdir(LocaleFolder.c_str(), 0777);
+                // mkdir(TempFolder.c_str(), 0777);
+                // mkdir(LocaleFolder.c_str(), 0777);
 #elif __linux__
                 std::string command;
                 command = "sudo chmod +x /usr/bin/";
                 system(command.c_str());
+                // Create temp folder
+                MakeDirectory(TempFolder);
+                MakeDirectory(LocaleFolder);
                 command = "sudo chmod +x " + OrganizationFolder;
                 system(command.c_str());
                 command = "sudo chmod +x " + OrganizationFolder + "/*";
