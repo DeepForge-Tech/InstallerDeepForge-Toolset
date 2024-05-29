@@ -55,6 +55,9 @@ public:
 #if defined(_WIN32)
                 // Set console code page to UTF-8 so console known how to interpret string data
                 SetConsoleOutputCP(CP_UTF8);
+                // Create temp folder
+                MakeDirectory(TempFolder);
+                MakeDirectory(LocaleFolder);
 #elif defined(__APPLE__)
                 std::string command;
                 command = "sudo -s chmod +x " + std::string(UserFolder) + "/Library/Containers/";
@@ -85,12 +88,9 @@ public:
                 // mkdir(ApplicationFolder.c_str(),0777);
                 mkdir(TempFolder.c_str(), 0777);
                 mkdir(LocaleFolder.c_str(), 0777);
-#else
-                // Create temp folder
-                MakeDirectory(TempFolder);
-                MakeDirectory(LocaleFolder);
 #endif
                 DownloadDependencies();
+                std::cout << "2" << std::endl;
                 database.open(&DatabasePath);
                 // std::future<void> UploadInformation_async = std::async(std::launch::async, UploadInformation);
                 // UploadInformation_async.wait();

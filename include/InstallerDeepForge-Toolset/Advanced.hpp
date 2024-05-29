@@ -82,7 +82,7 @@
 #define DEEPFORGE_TOOLSET_CHANNEL "stable"
 #define NameProgram "InstallerDeepForge-Toolset"
 #define __version__ "0.1"
-#define __channel__ "stable\\latest"
+#define __channel__ "stable"
 #define APPINSTALLER_DB_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/AppInstaller.db"
 #define DB_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
 #define Locale_RU_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/locale_ru.json"

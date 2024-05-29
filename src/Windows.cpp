@@ -118,7 +118,7 @@ void Windows::Installer::Download(std::string url, std::string dir, bool Progres
     catch (std::exception &error)
     {
         std::string logText = "==> ❌ " + std::string(error.what());
-        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "download()", error.what());
+        logger.sendError(NameProgram, Architecture, __channel__, OS_NAME, "Download()", error.what());
         std::cerr << logText << std::endl;
     }
 }
