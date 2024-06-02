@@ -6,6 +6,8 @@
 #include <sqlite3/sqlite3.h>
 #include <unordered_map>
 #include <filesystem>
+#include <typeinfo>
+#include <map>
 
 namespace DB
 {
@@ -15,28 +17,33 @@ namespace DB
         int ArraySize;
         sqlite3 *db;
         sqlite3_stmt *statement;
-        int RESULT_SQL;
-        std::string SQL_COMMAND;
-        std::string AnswerDB;
+        bool isOpen = false;
+        // int RESULT_SQL;
+        // std::string AnswerDB;
         std::string DefaultDatabesePath = std::filesystem::current_path().generic_string() + "/DB/AppInstaller.db";
         void open(std::string *DB_Path = nullptr)
         {
-            RESULT_SQL = sqlite3_open(DB_Path != nullptr ? DB_Path->c_str() : DefaultDatabesePath.c_str(), &db);
+            int RESULT_SQL = sqlite3_open(DB_Path != nullptr ? DB_Path->c_str() : DefaultDatabesePath.c_str(), &db);
 
             // if result of open database != SQLITE_OK, that send error
             if (RESULT_SQL != SQLITE_OK)
             {
                 throw std::runtime_error("Failed to connect to database");
             }
+            isOpen = true;
         }
         // Database();
         ~Database()
         {
-            sqlite3_close(db);
+            close();
+        }
+        void close()
+        {
+            if (isOpen) sqlite3_close(db);
         }
         int CreateTable(const std::string &NameTable, std::unordered_map<std::string, std::string> Columns);
 
-        int InsertValuesToTable(const std::string &NameTable, std::unordered_map<std::string, std::string> Fields);
+        int InsertValuesToTable(const std::string &NameTable, std::unordered_map<std::string, std::string>  Fields);
 
         bool ExistValueInTable(const std::string &NameTable,const std::string &NameColumn,const std::string &Value);
 
@@ -63,6 +70,8 @@ namespace DB
         int RemoveApplications(const std::string Tables[]);
 
         int InsertLogInformationToTable(const std::string &NameTable, const std::string &Architecture,const std::string &OS_NAME,const std::string &Channel,const std::string &FunctionName,const std::string &LogText);
+
+        int UpdateValuesInTable(const std::string &NameTable, std::unordered_map<std::string, std::string> Values, std::unordered_map<std::string, std::string> Parameters);
         // Method of make string to upper
         std::string to_upper(const std::string &sentence)
         {
