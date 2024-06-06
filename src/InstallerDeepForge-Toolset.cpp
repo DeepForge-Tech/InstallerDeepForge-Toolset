@@ -132,10 +132,14 @@ void Application::InstallUpdateManager()
         std::string archivePath;
         std::string command;
         std::string file_path;
-        latestVersion = database.GetLatestVersion(UpdateManagerTable, "stable", "Version", Architecture);
+        DB::DatabaseValues parameters;
+
+        parameters = {{"Channel", "stable"},{"Architecture",Architecture}};
+        latestVersion = database.GetMaxValueFromTable(UpdateManagerTable, "Version", parameters);
         if (latestVersion != "")
         {
-            UpdateManagerUrl = database.GetApplicationURL(UpdateManagerTable, "stable", "Url", Architecture, latestVersion);
+            parameters = {{"Channel", "stable"},{"Architecture",Architecture},{"Version",latestVersion}};
+            UpdateManagerUrl = database.GetValueFromRow(UpdateManagerTable, "Url", parameters);
             std::cout << translate["Installing"].asString() << " UpdateManager..." << std::endl;
             Download(UpdateManagerUrl, TempFolder, true);
             name = (UpdateManagerUrl.substr(UpdateManagerUrl.find_last_of("/")));
@@ -185,18 +189,19 @@ void Application::InstallDeepForgeToolset(std::string channel)
         std::string archivePath;
         std::string command;
         std::string file_path;
+        DB::DatabaseValues parameters;
+
         std::cout << InstallDelimiter << std::endl;
         std::cout << translate["Installing"].asString() << " DeepForge-Toolset..." << std::endl;
-        ApplicationURL = database.GetApplicationURL(NameVersionTable, channel, "Url", Architecture, DEEPFORGE_TOOLSET_VERSION);
+        parameters = {{"Channel", channel},{"Architecture",Architecture},{"Version",DEEPFORGE_TOOLSET_VERSION}};
+        ApplicationURL = database.GetValueFromRow(NameVersionTable, "Url", parameters);
         Download(ApplicationURL, TempFolder, true);
         name = (ApplicationURL.substr(ApplicationURL.find_last_of("/")));
         archivePath = TempFolder + "/" + name.replace(name.find("/"), 1, "");
         MakeDirectory(ApplicationFolder);
         UnpackArchive(archivePath, ApplicationFolder);
-        #if defined(__linux__)
-                InstallLibraries();
-        #elif __APPLE__
-                InstallLibraries();
+        #if defined(__linux__) || defined(__APPLE__)
+            InstallLibraries();
         #endif
         file_path = ApplicationFolder + "/DeepForge-Toolset";
         #if defined(_WIN32) || defined(__APPLE__)
@@ -254,10 +259,8 @@ void Application::CommandManager()
 
 int main(int argc, char **argv)
 {
-    #if defined(__APPLE__)
-        std::filesystem::path current_dir = argv[0];
-        std::filesystem::current_path(current_dir.parent_path().generic_string());
-    #endif
+    std::filesystem::path current_dir = argv[0];
+    std::filesystem::current_path(current_dir.parent_path().generic_string());
     Application app;
     app.CommandManager();
     return 0;

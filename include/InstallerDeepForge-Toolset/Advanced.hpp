@@ -84,7 +84,7 @@
 #define __version__ "0.1"
 #define __channel__ "stable"
 #define APPINSTALLER_DB_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/AppInstaller.db"
-#define DB_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/Versions.db"
+#define DB_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/DeepForge-Toolset_DeepForge-Toolset_Versions.db"
 #define Locale_RU_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/locale_ru.json"
 #define Locale_EN_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/locale_en.json"
 #define RELEASE_MODE 1
@@ -121,6 +121,7 @@
 #define PathmanURL_ARM64 "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/pathman-v0.5.2-windows-amd64.exe"
 
 #endif
+
 
 // Variables
 // int type
@@ -203,7 +204,7 @@ std::string ApplicationFolder = OrganizationFolder + "/DeepForge-Toolset";
 const std::string UpdateManagerFolder = OrganizationFolder + "/UpdateManager";
 std::string TempFolder = ApplicationFolder + "/Temp";
 std::string LocaleFolder = ApplicationFolder + "/locale";
-std::string DatabasePath = TempFolder + "/Versions.db";
+std::string DatabasePath = TempFolder + "/DeepForge-Toolset_Versions.db";
 // const std::string NewUpdateManagerFolder = OrganizationFolder + "/UpdateManager";
 #elif _WIN32
 
@@ -217,7 +218,7 @@ const std::string OrganizationFolder = "C:\\ProgramData\\DeepForge";
 const std::string DesktopPath = std::string(UserFolder) + "\\Desktop";
 std::string ApplicationFolder = "C:\\ProgramData\\DeepForge\\DeepForge-Toolset";
 std::string TempFolder = ApplicationFolder + "\\Temp";
-std::string DatabasePath = TempFolder + "\\Versions.db";
+std::string DatabasePath = TempFolder + "\\DeepForge-Toolset_Versions.db";
 std::string LocaleFolder = ApplicationFolder + "\\locale";
 const std::string UpdateManagerFolder = OrganizationFolder + "\\UpdateManager";
 #endif
@@ -231,17 +232,22 @@ void WriteInformation(std::string version)
 {
     try
     {
-        std::unordered_map<std::string, std::string> ApplicationColumns = {
-            {"Name", "TEXT"},
-            {"Version", "TEXT"},
-            {"NameTable", "TEXT"}};
-        std::unordered_map<std::string, std::string> ApplicationFields = {
-            {"Name", "DeepForge-Toolset"},
-            {"Version", version},
-            {"NameTable", NameVersionTable}};
+        DB::DatabaseValues ApplicationColumns;
+        DB::DatabaseValues ApplicationFields;
+        DB::DatabaseValues parameters;
         std::string pathFile = UpdateManagerFolder + "/AppInformation.db";
         DB::Database AppInformationDB;
         int result;
+
+        ApplicationColumns = {
+            {"Name", "TEXT"},
+            {"Version", "TEXT"},
+            {"NameTable", "TEXT"}};
+        ApplicationFields = {
+            {"Name", "DeepForge-Toolset"},
+            {"Version", version},
+            {"NameTable", NameVersionTable}
+        };
         /* The bellow code is checking if a file exists at the specified path. If the file does not exist, it creates a new file and writes an empty string to it. Then, it opens a database connection using the file as the database path. It checks if a table named "Applications" exists in the database. If the table does not exist, it creates the table with the specified columns. Finally, it inserts values into the "Applications" table. */
         if (std::filesystem::exists(pathFile) == false)
         {
@@ -252,16 +258,17 @@ void WriteInformation(std::string version)
         AppInformationDB.open(&pathFile);
         /* The bellow code is creating a table called "Applications" in the AppInformationDB database using the CreateTable method. It then inserts values into the "Applications" table using the InsertValuesToTable method. The boolean variable "exists" is used to store the result of the CreateTable method, indicating whether the table creation was successful or not. The integer variable "result" is used to store the number of rows affected by the InsertValuesToTable method. */
         AppInformationDB.CreateTable("Applications", ApplicationColumns);
-        bool existsValue = AppInformationDB.ExistValueInTable("Applications","Name", "DeepForge-Toolset");
+        bool existsValue = AppInformationDB.ExistRowInTable("Applications","Name", "DeepForge-Toolset");
         /* The code is checking if a table called "Applications" exists in the database. If the table does not exist (existsTable == -1), it inserts values into the table using the AppInformationDB.InsertValuesToTable() method. If the table does exist, it removes an application called "DeepForge-Toolset" from the table using the AppInformationDB.RemoveApplicationFromTable() method, and then inserts values into the table using the AppInformationDB.InsertValuesToTable() method. */
         if (!existsValue)
         {
-            result = AppInformationDB.InsertValuesToTable("Applications", ApplicationFields);
+            result = AppInformationDB.InsertRowToTable("Applications", ApplicationFields);
         }
         else
         {
-            AppInformationDB.RemoveApplicationFromTable("Applications", "DeepForge-Toolset");
-            result = AppInformationDB.InsertValuesToTable("Applications", ApplicationFields);
+            parameters = {{"Name","DeepForge-Toolset"}};
+            AppInformationDB.RemoveRowFromTable("Applications", parameters);
+            result = AppInformationDB.InsertRowToTable("Applications", ApplicationFields);
         }
     }
     catch (std::exception &error)

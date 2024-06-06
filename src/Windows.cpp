@@ -194,7 +194,7 @@ void Windows::Installer::AddToStartupSystem(std::string filePath)
 {
     filePath = filePath + ".exe";
     HKEY hKey;
-    const char *czStartName = "DeepForge-UpdateManager";
+    const char *czStartName = "UpdateManager";
     // const char* czExePath   = "C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\DeepForgeToolset.exe";
 
     LONG lnRes = RegOpenKeyEx(HKEY_CURRENT_USER,
