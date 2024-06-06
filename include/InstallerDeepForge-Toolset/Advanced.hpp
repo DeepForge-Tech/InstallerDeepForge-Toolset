@@ -84,7 +84,7 @@
 #define __version__ "0.1"
 #define __channel__ "stable"
 #define APPINSTALLER_DB_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/AppInstaller.db"
-#define DB_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/DeepForge-Toolset_DeepForge-Toolset_Versions.db"
+#define DB_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/DeepForge-Toolset_Versions.db"
 #define Locale_RU_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/locale_ru.json"
 #define Locale_EN_URL "https://github.com/DeepForge-Tech/DeepForge-Toolset/releases/download/InstallerUtils/locale_en.json"
 #define RELEASE_MODE 1
@@ -242,11 +242,14 @@ void WriteInformation(std::string version)
         ApplicationColumns = {
             {"Name", "TEXT"},
             {"Version", "TEXT"},
-            {"NameTable", "TEXT"}};
+            {"NameTable", "TEXT"},
+            {"DatabaseURL","TEXT"}
+        };
         ApplicationFields = {
             {"Name", "DeepForge-Toolset"},
             {"Version", version},
-            {"NameTable", NameVersionTable}
+            {"NameTable", NameVersionTable},
+            {"DatabaseURL",DB_URL}
         };
         /* The bellow code is checking if a file exists at the specified path. If the file does not exist, it creates a new file and writes an empty string to it. Then, it opens a database connection using the file as the database path. It checks if a table named "Applications" exists in the database. If the table does not exist, it creates the table with the specified columns. Finally, it inserts values into the "Applications" table. */
         if (std::filesystem::exists(pathFile) == false)
